@@ -1,0 +1,8 @@
+dependencies {
+    implementation lib.slf4j_api,
+                   lib.feign_core,
+                   lib.jackson_databind
+    testImplementation lib.testng,
+                       lib.slf4j_simple,
+                       lib.wiremock
+}

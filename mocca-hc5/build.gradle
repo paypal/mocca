@@ -1,0 +1,5 @@
+dependencies {
+    implementation  project(':mocca-client'),
+                    lib.feign_hc5
+    api             lib.hc5_client
+}

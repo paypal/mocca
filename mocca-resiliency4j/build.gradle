@@ -1,0 +1,13 @@
+dependencies {
+    implementation project(':mocca-client'),
+                   lib.feign_core,
+                   lib.resilience4j_feign
+
+    api lib.resilience4j_retry,
+        lib.resilience4j_circuitbreaker,
+        lib.resilience4j_ratelimiter,
+        lib.resilience4j_bulkhead
+
+    testImplementation lib.testng,
+                       lib.mockito_core
+}

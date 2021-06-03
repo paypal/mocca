@@ -1,0 +1,5 @@
+dependencies {
+    implementation  project(':mocca-client'),
+                    lib.feign_apache
+    api             lib.apache_client
+}

@@ -1,0 +1,12 @@
+rootProject.name = 'mocca'
+
+include 'mocca-client'
+include 'mocca-functional-tests'
+include 'mocca-apache'
+include 'mocca-google'
+include 'mocca-hc5'
+include 'mocca-http2'
+include 'mocca-jaxrs2'
+include 'mocca-okhttp'
+include 'mocca-micrometer'
+include 'mocca-resiliency4j'

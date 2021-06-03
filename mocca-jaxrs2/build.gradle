@@ -1,0 +1,7 @@
+sourceCompatibility = 1.8
+
+dependencies {
+    implementation  project(':mocca-client'),
+                    lib.feign_jaxrs2
+    api             lib.jaxrs2
+}

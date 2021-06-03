@@ -1,0 +1,4 @@
+type Mutation {
+    addAuthor(name: String) : Author
+    addBook(name: String, authorId : Int) :Book
+}
