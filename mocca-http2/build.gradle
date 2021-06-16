@@ -1,4 +1,7 @@
+apply plugin: 'jacoco'
+
 sourceCompatibility = 1.11
+targetCompatibility = 1.11
 
 dependencies {
     implementation  project(':mocca-client'),

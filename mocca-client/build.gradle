@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 dependencies {
     implementation lib.slf4j_api,
                    lib.feign_core,
