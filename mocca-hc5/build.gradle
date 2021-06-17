@@ -1,5 +1,3 @@
-apply plugin: 'jacoco'
-
 dependencies {
     implementation  project(':mocca-client'),
                     lib.feign_hc5

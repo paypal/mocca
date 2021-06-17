@@ -1,20 +1,5 @@
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.palantir:jacoco-coverage:0.4.0'
-    }
-}
-
-plugins {
-    id 'com.gradle.build-scan' version '3.6.2'
-}
-
 description = "Mocca is a GraphQL client for JVM languages with the goal of being easy to use, flexible and modular."
-
-apply plugin: 'com.palantir.jacoco-full-report'
 
 subprojects {
 
@@ -22,8 +7,6 @@ subprojects {
     version = '0.0.1-SNAPSHOT'
 
     apply plugin: 'pmd'
-    apply plugin: 'jacoco'
-    apply plugin: 'maven'
     apply plugin: 'java-library'
     apply plugin: 'signing'
 
@@ -36,11 +19,6 @@ subprojects {
         mavenCentral()
         gradlePluginPortal()
     }
-    
-    buildScan {
-        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-        termsOfServiceAgree = 'yes'
-    }
 
     compileJava {
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -48,7 +26,7 @@ subprojects {
     
     jar {
         manifest {
-            attributes 'Implementation-Version': version,
+            attributes 'Implementation-Version': archiveVersion,
                     'Implementation-Name': name,
                     'Implementation-Vendor': 'PayPal'
         }
@@ -62,68 +40,15 @@ subprojects {
         pmdMain.enabled = true
     }
 
-    tasks.withType(Pmd){
-        reports{
-            xml.enabled=true
-            html.enabled=true
+    tasks.withType(Pmd) {
+        reports {
+            xml.required = true
+            html.required = true
             xml.destination file("${buildDir}/reports/pmd/pmd_report.xml")
             html.destination file("${buildDir}/reports/pmd/pmd_report.html")
         }
     }
 
-    jacoco {
-        toolVersion = "0.8.4"
-    }
-
-    jacocoTestCoverageVerification {
-        dependsOn test
-
-        violationRules {
-            rule { element = 'PACKAGE'; limit { minimum = 0.50 }; includes = ['com.paypal.mocca.client.*'] }
-        }
-    }
-
-    jacocoTestReport {
-        dependsOn jacocoTestCoverageVerification
-        
-        def coverageProjects = subprojects
-        reports {
-            xml.enabled true
-            html.enabled true
-            csv.enabled false
-            xml.destination file("${buildDir}/jacoco/jaccoco_report.xml")
-            html.destination file("${buildDir}/jacoco/html")
-        }
-    }
-
-    build.finalizedBy(jacocoTestReport)
-
-}
-
-task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
-    def coverageProjects = subprojects.stream().filter({sb -> !(sb.name in [
-            // Projects without Java code
-            // none
-
-            // API projects without concrete classes, or relevant classes, to be tested
-            // none
-
-            // Test projects
-            'mocca-functional-tests',
-    ])}).collect()
-
-    additionalSourceDirs = files(coverageProjects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories = files(coverageProjects.sourceSets.main.allSource.srcDirs)
-    classDirectories =  files(coverageProjects.sourceSets.main.output)
-    executionData = files(coverageProjects.jacocoTestReport.executionData)
-    reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
-
-        html.destination file("${buildDir}/reports/jacoco/html")
-        xml.destination file("${buildDir}/reports/jacoco/coverage.xml")
-    }
 }
 
 // Dependencies version management
