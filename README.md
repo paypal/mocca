@@ -1,6 +1,10 @@
 [![Build Status](https://travis-ci.com/paypal/mocca.svg?branch=master)](https://travis-ci.com/paypal/mocca)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+<br><br>
+<div style="text-align:center"><img src ="docs/img/logo/mocca_logo_horizontal.png"/></div>
+<br>
+
 # Mocca
 
 Mocca is a GraphQL client for JVM languages with the goal of being easy to use, flexible and modular. With that in mind, Mocca was designed to offer:
