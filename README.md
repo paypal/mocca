@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/paypal/mocca.svg?branch=master)](https://travis-ci.com/paypal/mocca)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.paypal.mocca/mocca-client/badge.svg?style=flat)](http://search.maven.org/#search|ga|1|g:com.paypal.mocca)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <br><br>

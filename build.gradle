@@ -1,13 +1,18 @@
 
 description = "Mocca is a GraphQL client for JVM languages with the goal of being easy to use, flexible and modular."
 
+Set testModules = [
+    "mocca-functional-tests"
+]
+
 subprojects {
 
     group = 'com.paypal.mocca'
     version = '0.0.1-SNAPSHOT'
 
-    apply plugin: 'pmd'
     apply plugin: 'java-library'
+    apply plugin: 'pmd'
+    apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
     def javaVersion = JavaVersion.VERSION_1_8
@@ -49,6 +54,96 @@ subprojects {
         }
     }
 
+    def releaseDeployment = !testModules.contains(name) && !version.endsWith("SNAPSHOT") && System.getenv("SECRING_FILE") != null
+
+    // Publishing non test modules
+    if (!testModules.contains(name)) {
+
+        if (releaseDeployment) {
+            java {
+                withJavadocJar()
+                withSourcesJar()
+            }
+
+            project.ext['signing.keyId'] = "$System.env.GPG_KEYNAME"
+            project.ext['signing.password'] = "$System.env.GPG_PASSPHRASE"
+            project.ext['signing.secretKeyRingFile'] = "$System.env.SECRING_FILE"
+        }
+
+        ext {
+            ossrhUsername = System.getenv('SONATYPE_USER')
+            ossrhPassword = System.getenv('SONATYPE_PASSWORD')
+        }
+
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    pom {
+                        name = project.name
+                        description = project.description
+                        url = 'https://github.com/paypal/mocca'
+                        scm {
+                            connection = 'scm:git:git@github.com:paypal/mocca.git'
+                            developerConnection = 'scm:git:git@github.com:paypal/mocca.git'
+                            url = 'git@github.com:paypal/mocca.git'
+                        }
+                        licenses {
+                            license {
+                                name = 'MIT'
+                                url = 'https://opensource.org/licenses/MIT'
+                            }
+                        }
+                        developers {
+                            developer {
+                                id = 'fabiocarvalho777'
+                                name = 'Fabio Carvalho'
+                                email = 'fabiocarvalho777@gmail.com'
+                                organization = 'PayPal'
+                                organizationUrl = 'http://www.paypal.com'
+                            }
+                            developer {
+                                id = 'abhijith-prabhakar'
+                                name = 'Abhijith Prabhakar'
+                                email = 'abhi.predator@gmail.com'
+                                organization = 'PayPal'
+                                organizationUrl = 'http://www.paypal.com'
+                            }
+                            developer {
+                                id = 'crankydillo'
+                                name = 'Samuel Cox'
+                                email = 'crankydillo@gmail.com'
+                                organization = 'PayPal'
+                                organizationUrl = 'http://www.paypal.com'
+                            }
+                        }
+                    }
+                }
+            }
+            repositories {
+                maven {
+                    def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                    def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
+                }
+            }
+        }
+
+        if (releaseDeployment) {
+            signing {
+                sign publishing.publications.mavenJava
+            }
+
+            javadoc {
+                if(JavaVersion.current().isJava9Compatible()) {
+                    options.addBooleanOption('html5', true)
+                }
+            }
+        }
+    }
 }
 
 // Dependencies version management
