@@ -8,7 +8,7 @@ Set testModules = [
 subprojects {
 
     group = 'com.paypal.mocca'
-    version = '0.0.1-SNAPSHOT'
+    version = '0.0.1'
 
     apply plugin: 'java-library'
     apply plugin: 'pmd'
@@ -80,7 +80,7 @@ subprojects {
                 mavenJava(MavenPublication) {
                     pom {
                         name = project.name
-                        description = project.description
+                        description = 'Mocca is a GraphQL client for JVM languages with the goal of being easy to use, flexible and modular'
                         url = 'https://github.com/paypal/mocca'
                         scm {
                             connection = 'scm:git:git@github.com:paypal/mocca.git'
