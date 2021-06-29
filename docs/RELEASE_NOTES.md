@@ -4,13 +4,13 @@
 ## 0.0.2
 
 #### Release date
-TBD
+June 29th, 2021
 
 #### New features and enhancements
-* TBD
+1. Documentation enhancements
 
 #### Bug fixes
-* TBD
+1. Sonatype artifacts publishing bug fix
 
 ## 0.0.1
 
