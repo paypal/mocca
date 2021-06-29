@@ -1,6 +1,6 @@
 
 <br><br>
-<div style="text-align:center"><img src ="img/logo/mocca_logo_horizontal_lightbluebackground.png" style="background-color:#27a1f2; padding:40px;"/></div>
+<div style="text-align:center"><img src="img/logo/mocca_logo_horizontal_lightbluebackground.png" style="background-color:#27a1f2; padding:40px;"/></div>
 <br>
 
 # Mocca end user documentation (version 0.0.2)
