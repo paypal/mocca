@@ -78,6 +78,7 @@ subprojects {
         publishing {
             publications {
                 mavenJava(MavenPublication) {
+                    from components.java
                     pom {
                         name = project.name
                         description = 'Mocca is a GraphQL client for JVM languages with the goal of being easy to use, flexible and modular'

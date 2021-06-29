@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <br><br>
-<div style="text-align:center"><img src ="docs/img/logo/mocca_logo_horizontal.png"/></div>
+<div style="text-align:center"><img src="docs/img/logo/mocca_logo_horizontal.png"/></div>
 <br>
 
 # Mocca
@@ -25,6 +25,7 @@ Mocca offers support for:
 	1. Automatic selection set definition based on DTO response type
 	1. Annotation and String based custom input variables
 	1. Annotation and String based custom selection set
+1. Static and dynamic HTTP request headers
 1. Observability via Micrometer
 1. Resilience with via Resilience4J
 1. Flexible API allowing various pluggable HTTP clients
