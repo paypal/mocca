@@ -3,7 +3,7 @@
 <div style="text-align:center"><img src="img/logo/mocca_logo_horizontal_lightbluebackground.png" style="background-color:#27a1f2; padding:40px;"/></div>
 <br>
 
-# Mocca end user documentation (version 0.0.2)
+# Mocca end user documentation (version 0.0.3)
 
 ## Summary
 
@@ -51,12 +51,12 @@ This section shows a simple example of how to use Mocca for a quick start. For f
 
 ### 2.1 Add mocca-client dependency
 
-Add dependency `com.paypal.mocca:mocca-client:0.0.2` to your application, as shown below (examples for Maven and Gradle).
+Add dependency `com.paypal.mocca:mocca-client:0.0.3` to your application, as shown below (examples for Maven and Gradle).
 
 ``` Groovy
 // Adding Mocca in Gradle
 dependencies {
-    compile 'com.paypal.mocca:mocca-client:0.0.2'
+    compile 'com.paypal.mocca:mocca-client:0.0.3'
 }
 ```
 
@@ -65,7 +65,7 @@ dependencies {
 <dependency>
     <groupId>com.paypal.mocca</groupId>
     <artifactId>mocca-client</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency> 
 ```
 
@@ -116,12 +116,12 @@ For more information about how to use Mocca, and features like setting timeouts,
 
 ## 3 Client dependencies
 
-The main dependency needed to use Mocca is `com.paypal.mocca:mocca-client:0.0.2`. Below you can see two examples of how to add it to your application, depending on whether you use Gradle or Maven. Other Mocca dependencies may be necessary, depending on the application needs, and will be covered in other sections.
+The main dependency needed to use Mocca is `com.paypal.mocca:mocca-client:0.0.3`. Below you can see two examples of how to add it to your application, depending on whether you use Gradle or Maven. Other Mocca dependencies may be necessary, depending on the application needs, and will be covered in other sections.
 
 ``` Groovy
 // Adding Mocca in Gradle
 dependencies {
-    compile 'com.paypal.mocca:mocca-client:0.0.2'
+    compile 'com.paypal.mocca:mocca-client:0.0.3'
 }
 ```
 
@@ -130,7 +130,7 @@ dependencies {
 <dependency>
     <groupId>com.paypal.mocca</groupId>
     <artifactId>mocca-client</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency> 
 ```
 
@@ -480,12 +480,12 @@ All HTTP clients supported by Mocca are documented in the table below, along wit
 
 | HTTP client  | Dependency | Client class | Notes |
 | :-------------: | :-------------: | :-------------: | :-------------: |
-| **OkHttp client**  | `com.paypal.mocca:mocca-okhttp:0.0.2` | `com.paypal.mocca.client.MoccaOkHttpClient` | |
-| **Apache HTTP client 5**  | `com.paypal.mocca:mocca-hc5:0.0.2` | `com.paypal.mocca.client.MoccaApache5Client` | Apache HTTP client 5 |
-| **Apache HTTP client**  | `com.paypal.mocca:mocca-apache:0.0.2` | `com.paypal.mocca.client.MoccaApacheClient` | Original Apache HTTP client |
-| **Google HTTP client**  | `com.paypal.mocca:mocca-google:0.0.2` | `com.paypal.mocca.client.MoccaGoogleHttpClient` | |
-| **Java HTTP2 client**  | `com.paypal.mocca:mocca-http2:0.0.2` | `com.paypal.mocca.client.MoccaHttp2Client` | HTTP2 client provided by the JDK |
-| **JAX-RS 2 client**  | `com.paypal.mocca:mocca-jaxrs2:0.0.2` | `com.paypal.mocca.client.MoccaJaxrsClient` | |
+| **OkHttp client**  | `com.paypal.mocca:mocca-okhttp:0.0.3` | `com.paypal.mocca.client.MoccaOkHttpClient` | |
+| **Apache HTTP client 5**  | `com.paypal.mocca:mocca-hc5:0.0.3` | `com.paypal.mocca.client.MoccaApache5Client` | Apache HTTP client 5 |
+| **Apache HTTP client**  | `com.paypal.mocca:mocca-apache:0.0.3` | `com.paypal.mocca.client.MoccaApacheClient` | Original Apache HTTP client |
+| **Google HTTP client**  | `com.paypal.mocca:mocca-google:0.0.3` | `com.paypal.mocca.client.MoccaGoogleHttpClient` | |
+| **Java HTTP2 client**  | `com.paypal.mocca:mocca-http2:0.0.3` | `com.paypal.mocca.client.MoccaHttp2Client` | HTTP2 client provided by the JDK |
+| **JAX-RS 2 client**  | `com.paypal.mocca:mocca-jaxrs2:0.0.3` | `com.paypal.mocca.client.MoccaJaxrsClient` | |
 
 The table above includes only synchronous clients, and the code samples in this section are specific to synchronous clients. For information about supported asynchronous clients, and how to configure it, please read section **Asynchronous development**.
 
@@ -561,7 +561,7 @@ A few important notes:
 
 ### 6.5 Gathering metrics
 
-Mocca supports [Micrometer](https://micrometer.io/)-based metrics via the optional library `com.paypal.mocca:mocca-micrometer:0.0.2`. These metrics primarily revolve around HTTP interactions with the target GraphQL server. The metrics have identifiers that start with `mocca.`.
+Mocca supports [Micrometer](https://micrometer.io/)-based metrics via the optional library `com.paypal.mocca:mocca-micrometer:0.0.3`. These metrics primarily revolve around HTTP interactions with the target GraphQL server. The metrics have identifiers that start with `mocca.`.
 
 The example below shows how to enable metric gathering in Mocca using Micrometer:
 
@@ -581,7 +581,7 @@ BooksAppClient micrometerEnabledClient = MoccaClient.Builder
 
 ### 6.6 Configuring resilience
 
-Mocca supports [Resilience4j](https://github.com/resilience4j/resilience4j)-based resilience features via the optional library `com.paypal.mocca:mocca-resilience4j:0.0.2`.
+Mocca supports [Resilience4j](https://github.com/resilience4j/resilience4j)-based resilience features via the optional library `com.paypal.mocca:mocca-resilience4j:0.0.3`.
 
 The example below shows how to configure resilience features in a Mocca client using Resilience4j:
 
@@ -681,7 +681,7 @@ The table below shows all async HTTP clients supported by Mocca, followed by an 
 
 | HTTP client  | Dependency | Client class |
 | :-------------: | :-------------: | :-------------: |
-| **Apache HTTP client 5**  | `com.paypal.mocca:mocca-hc5:0.0.2` | `com.paypal.mocca.client.MoccaAsyncApache5Client` |
+| **Apache HTTP client 5**  | `com.paypal.mocca:mocca-hc5:0.0.3` | `com.paypal.mocca.client.MoccaAsyncApache5Client` |
 
 ``` java
 MoccaAsyncApache5Client asyncHttpClient = new MoccaAsyncApache5Client();
