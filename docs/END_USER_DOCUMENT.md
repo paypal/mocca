@@ -32,7 +32,7 @@ Mocca offers support for:
 
 1. GraphQL features
     1. GraphQL queries and mutations
-    1. Automatic variable definition based on DTO request type
+    1. Automatic variable definition
     1. Automatic selection set definition based on DTO response type
     1. Annotation and String based custom input variables
     1. Annotation and String based custom selection set
@@ -79,21 +79,22 @@ import com.paypal.mocca.client.MoccaClient;
 import com.paypal.mocca.client.annotation.Mutation;
 import com.paypal.mocca.client.annotation.Query;
 import com.paypal.mocca.client.annotation.SelectionSet;
+import com.paypal.mocca.client.annotation.Var;
 
 public interface BooksAppClient extends MoccaClient {
 
     @Query
     @SelectionSet("{id, name}")
-    List<Book> getBooks(String variables);
+    List<Book> getBooks(@Var("authorId") long authorId);
 
     @Query
-    Book getBook(long id);
+    Book getBook(@Var("id") long id);
 
     @Mutation
-    Author addAuthor(Author author);
+    Author addAuthor(@Var(value = "author", ignore = "books") Author author);
 
     @Mutation
-    Book addBook(Book book);
+    Book addBook(@Var("book") Book book);
 
 }
 ```
@@ -141,12 +142,12 @@ dependencies {
 In order to call a GraphQL service, in simple terms, it is usually necessary to have:
 
 1. Depending on the type of client used, an interface representing the operations (similar to a stub in a remote procedure call)
-1. Optionally, DTO classes representing the operation variables (the input arguments)
+1. Optionally, DTO or POJO classes representing the operation variables (the input arguments)
 1. DTO classes representing the response
 
 The classes mentioned above can usually be obtained by using a code generation tool, writing them from scratch, or by using a preexistent library (usually provided by the team who owns the service, but not necessarily).
 
-Mocca supports all three approaches. However, in order to determine which one is the most appropriate for each application, it is important first to understand the possible different situations when using a GraphQL client in a Java application. Some of them are listed below: 
+Mocca supports all three approaches. However, in order to determine which one is the most appropriate for each application, it is important first to understand the possible different situations when using a GraphQL client in a Java application. Some of them are listed below:
 
 1. **Same team, client and server Java**: The server application is owned by the same team who owns the client application, and both are written in Java.
 1. **Different teams, but client and server Java**: The server application is **not** owned by the same team who owns the client application, but there is a Java library available (often provided and maintained by the team who owns the server application) with the DTOs and auxiliary types used in the server GraphQL contract.
@@ -176,13 +177,15 @@ The most basic rules when writing a client API are listed below. Other rules, as
 
 1. The Java interface must extend `com.paypal.mocca.client.MoccaClient`
 1. The signature of each GraphQL operation method must:
-   1. Declare a list of parameters containing one parameter to represent the Variables section declared in the GraphQL schema of same operation. This parameter name is not relevant, but its type must be one of the following:
-      1. A `java.lang.String` where the application can specify a raw representation of each variable and its value (example: `"id: 107, name: \"Murphy\", breed: \"Maine Coon\", color: \"gray\""`).
-      1. A data transfer object (DTO)
+   1. Declare a list of parameters containing zero or more parameters to represent the variables section declared in the GraphQL schema of same operation. All parameters must be annotated with `com.paypal.mocca.client.annotation.Var`, used to name the variable, plus additional optional configuration. The parameter name is not relevant, the GraphQL variable name is defined in the annotation., but its type must be one of the following:
+      1. Any primitive type, or primitive wrapper
+      1. `java.lang.String`
+      1. A POJO following Java beans conventions
+      1. A `java.util.List` whose type can be any of the types mentioned earlier (except primitives)
    1. Declare a return type (it cannot be `void`) analog to the type declared in the GraphQL schema of same operation. This return type must be one of the following:
-      1. A primitive
+      1. Any primitive type, or primitive wrapper
       1. A DTO
-      1. A `java.util.List` containing a DTO
+      1. A `java.util.List` whose type can be a DTO or a primitive wrapper
 1. Each GraphQL operation method must be annotated with a `Query` or `Mutation` annotation (from package `com.paypal.mocca.client.annotation`) depending on whether the operation is a GraphQL query or mutation respectively.
 1. The method name should be the same as the GraphQL operation name. If a different name is desired for the Java method, then the GraphQL operation name must be set using the `name` attribute in the `Query` or `Mutation` annotation.
 
@@ -193,20 +196,21 @@ You can see below an example of a simple client API.
 import com.paypal.mocca.client.MoccaClient;
 import com.paypal.mocca.client.annotation.Mutation;
 import com.paypal.mocca.client.annotation.Query;
+import com.paypal.mocca.client.annotation.Var;
 
 public interface BooksAppClient extends MoccaClient {
 
     @Query
-    List<Book> getBooks(String variables);
+    List<Book> getBooks(@Var("authorId") long authorId);
 
     @Query
-    Book getBook(long id);
+    Book getBook(@Var("id") long id);
 
     @Mutation
-    Author addAuthor(Author author);
+    Author addAuthor(@Var(value = "author", ignore = "books") Author author);
 
     @Mutation
-    Book addBook(Book book);
+    Book addBook(@Var("book") Book book);
 
 }
 ```
@@ -217,31 +221,33 @@ According to GraphQL specification, *"A GraphQL query can be parameterized with 
 
 Mocca offers different ways to define the GraphQL variables. They are listed below and explained in details in the next subsections.
 
-1. Using data transfer objects
-1. Using a String
+1. Using one or more parameters, each representing a GraphQL variable
+1. Using a single String containing all GraphQL variables
 
-#### 4.4.1 Using data transfer objects
+#### 4.4.1 Setting GraphQL variables dynamically
 
-One of the most convenient ways to dynamically define GraphQL operation variables in Mocca is by using data transfer objects (DTO). DTO classes can be written manually for the client application, provided by a library, or generated using a code generation tool.
+One of the most convenient ways to dynamically define GraphQL operation variables in Mocca is by specifying each variable as a method parameter.
 
-Its usage is very simple, just define the request DTO type as an argument in the GraphQL operation method (annotated with `com.paypal.mocca.client.annotation.Query` or `com.paypal.mocca.client.annotation.Mutation`), as seen below:
+Its usage is very simple, just annotate each parameter in the GraphQL operation method (annotated with `com.paypal.mocca.client.annotation.Query` or `com.paypal.mocca.client.annotation.Mutation`) with `com.paypal.mocca.client.annotation.Var`, as seen below:
 
 
 ``` java
-/**
- * Adds an author and returns its id
- */
 @Mutation
-int addAuthor(Author author);
+Author addAuthor(@Var("name") String name, @Var("books") List<Book> books);
 ```
 
-In the example above, `Author` is the DTO class and, when this method gets called, Mocca automatically sets the GraphQL message payload using the values provided by the DTO object.
+The name of the variable must always be set in the `Var` annotation, except if `raw` is set to true, as explained in the next subsection. The parameter name is not relevant (as the GraphQL variable name is defined in the annotation), but its type must be one of the following:
 
-It is important to mention that the DTO class must be a Java bean, and that is how Mocca figures out which values to use when writing the GraphQL variables.
+1. Any primitive type, or primitive wrapper
+1. `java.lang.String`
+1. A POJO following Java beans conventions
+1. A `java.util.List` whose type can be any of the types mentioned earlier (except primitives)
 
-If any DTO object property is `null` (returned from its getter method), then it is not included in the GraphQL variables. Also, if any field is a complex type (anything other than String, number or boolean), then it is processed as a Java bean as well, and its properties are written in GraphQL within curly brackets.
+Additional optional configuration may also be provided, and are explained in next subsections.
 
-#### 4.4.2 Using a String
+If any POJO property is `null` (returned from its getter method), then it is not included in the GraphQL variables. Also, if any field is another POJO, then it is processed as a Java bean as well, and its properties are written in GraphQL within curly brackets.
+
+#### 4.4.2 Setting GraphQL variables statically
 
 If it is preferable to define the GraphQL operation variables statically, a String object can be passed as argument in the GraphQL operation method, as seen in the API below:
 
@@ -251,31 +257,31 @@ If it is preferable to define the GraphQL operation variables statically, a Stri
  * Adds an author and returns its id
  */
 @Mutation
-int addAuthor(String author);
+Author addAuthor(@Var(raw = true) String variables);
 ```
 
-And this is how an application could use this operation:
+Below it is shown how an application would use this operation. Notice `raw` property must be set to true, and there is no need to wrap the value with parenthesis.
 
 ``` java
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
     .build(BooksAppClient.class);
 
-int authorId = client.addAuthor("name: \"Carlos Drummond\", nationality: \"Brazilian\"");
+Author author = client.addAuthor("name: \"Carlos Drummond de Andrade\", books: [{title: \"Alguma poesia\"}, {title: \"A rosa do povo\"}]");
 ```
 
 The GraphQL variables passed as argument could also refer to complex types, by making usage of curly braces.
 
 #### 4.4.3 Defining no variables
 
-If the GraphQL operation requires no variables, then its method in the API must declare a String argument, which the application should call passing a blank String. See the example below.
+If the GraphQL operation requires no variables, then its method in the API can simply have no parameters neither. See the example below.
 
 ``` java
 /**
  * Returns a book recommendation for the logged in user
  */
 @Query
-Book getBookRecommendation(String variables);
+Book getBookRecommendation();
 ```
 
 And this is how an application could use this operation:
@@ -285,23 +291,23 @@ BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
     .build(BooksAppClient.class);
 
-Book recommendedBook = client.getBookRecommendation("");
+Book recommendedBook = client.getBookRecommendation();
 ```
 
 In this case Mocca produces a GraphQL query without any variables.
 
-#### 4.4.4 Configuring variables
+#### 4.4.4 Ignoring POJO fields
 
-When using a DTO to define GraphQL variables, sometimes the DTO object is populated with certain properties that the application would like to be ignored by Mocca when serializing the GraphQL variables.
+When using POJOs to define GraphQL variables, sometimes the POJO is populated with certain properties that the application would like to be ignored by Mocca when serializing the GraphQL variables.
 
-In order to do so, Mocca offers an annotation called `Variable`, which can be used as follows during API definition:
+That can be configured as follows during API definition:
 
 ``` java
 /**
  * Adds an author and returns its id
  */
 @Mutation
-int addAuthor(@Variable(ignore = "books") Author author);
+int addAuthor(@Var(value = "author", ignore = "books") Author author);
 ```
 
 In the example above, when calling `addAuthor`, Mocca will not include the list of books as variable in the payload of the GraphQL message.
@@ -410,7 +416,7 @@ Code generation for a GraphQL service in Java can be done for both server side a
 
 For Client side code generation, all these generators generate Request/Response classes and model classes. With Mocca's innovative programming model request and response classes are not required. Service side code generation is out of scope for Mocca.
 
-However, generated DTO classes (sometimes referred as "model classes") can still be used with Mocca client. An example of using code generator for generating model classes is provided on [mocca-functional-tests](../mocca-functional-tests/build.gradle) build script. Mocca example uses [kobylynskyi graphql codegen](https://github.com/kobylynskyi/graphql-java-codegen) as it allows flexible configuration and extension.
+However, generated DTO classes (sometimes referred as "model classes", or also POJOs) can still be used with Mocca client. An example of using code generator for generating model classes is provided on [mocca-functional-tests](../mocca-functional-tests/build.gradle) build script. Mocca example uses [kobylynskyi graphql codegen](https://github.com/kobylynskyi/graphql-java-codegen) as it allows flexible configuration and extension.
 
 Below you can see a code block where code generation is configured using kobylynskyi and Gradle.
 

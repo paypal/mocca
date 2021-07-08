@@ -41,7 +41,7 @@ public class MoccaClientBuilderTest {
             MoccaClient.Builder.sync(serverUrl)
                 .readTimeout(readTimeout)
                 .build(SampleClient.class)
-                .getOneSample("foo: \"boo\", bar: \"far\"")
+                .getOneSample("boo", "far")
                 .getFoo();
         } catch (final RetryableException re) {
             throw (Exception)re.getCause();
@@ -98,7 +98,7 @@ public class MoccaClientBuilderTest {
             MoccaClient.Builder.async("http://localhost:8080")
                     .client(executorHttpClient)
                     .build(AsyncSampleClient.class)
-                    .getOneSample("foo: \"boo\", bar: \"far\"")
+                    .getOneSample("boo" ,"far")
                     .get();
         } catch (final ExecutionException ee) {
             assertTrue(badExecService.wasUsed());

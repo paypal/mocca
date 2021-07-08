@@ -1,13 +1,7 @@
 package com.paypal.mocca.client;
 
-import com.paypal.mocca.client.annotation.Mutation;
-import com.paypal.mocca.client.annotation.Query;
-import com.paypal.mocca.client.annotation.RequestHeader;
-import com.paypal.mocca.client.annotation.RequestHeaderParam;
-import feign.DeclarativeContract;
-import feign.MethodMetadata;
-import feign.Request;
-import feign.Util;
+import com.paypal.mocca.client.annotation.*;
+import feign.*;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -22,23 +16,55 @@ import java.util.Map;
  *
  * @author crankydillo@gmail.com
  */
-class MoccaFeignContract extends DeclarativeContract {
+class MoccaFeignContract extends AlwaysEncodeBodyContract {
 
     MoccaFeignContract() {
-        super.registerClassAnnotation(RequestHeader.class, this::registerHeaderClassAnnotation);
-        super.registerMethodAnnotation(Query.class, (annotation, metadata) -> registerAnnotations(metadata));
-        super.registerMethodAnnotation(Mutation.class, (annotation, metadata) -> registerAnnotations(metadata));
-        super.registerMethodAnnotation(RequestHeader.class, this::registerHeaderMethodAnnotation);
-        super.registerParameterAnnotation(RequestHeaderParam.class, this::registerParamAnnotations);
+
+        // Mocca annotations support
+        super.registerMethodAnnotation(Query.class, (annotation, metadata) -> registerJsonMediaTypes(metadata));
+        super.registerMethodAnnotation(Mutation.class, (annotation, metadata) -> registerJsonMediaTypes(metadata));
+        super.registerParameterAnnotation(Var.class, this::registerVarParam);
+
+        // HTTP headers support
+        super.registerClassAnnotation(RequestHeader.class, this::registerHeaderClass);
+        super.registerMethodAnnotation(RequestHeader.class, this::registerHeaderMethod);
+        super.registerParameterAnnotation(RequestHeaderParam.class, this::registerHeaderParam);
     }
 
     //TODO: Need to add unit tests for since contract has logic now
     //TODO: JSON values are not supported yet.  Need to add encoding feature.
-    private void registerAnnotations(MethodMetadata metadata) {
+
+    /**
+     * Registering content-type and accept HTTP headers,
+     * set to JSON, as always required for GraphQL request and response payloads
+     *
+     * @param metadata method metadata
+     */
+    private void registerJsonMediaTypes(MethodMetadata metadata) {
         metadata.template()
                 .method(Request.HttpMethod.POST)
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json");
+    }
+
+    /**
+     * Registering Mocca Var annotated parameter
+     *
+     * @param varAnnotation Var annotation
+     * @param metadata method metadata
+     */
+    private void registerVarParam(Var varAnnotation, MethodMetadata metadata, int paramIndex) {
+        final String variableName = varAnnotation.value();
+        if (varAnnotation.raw()) {
+            Util.checkState((variableName == null || variableName.trim().equals("")) && (varAnnotation.ignore() == null ||  (varAnnotation.ignore().length == 1 && varAnnotation.ignore()[0].trim().equals(""))),
+                    "Mocca @Var `value` and `ignore` properties set at %s.%s parameter %d must not be set if raw is set to true",
+                    metadata.method().getDeclaringClass().getName(), metadata.method().getName(), paramIndex);
+        } else {
+            Util.checkState(variableName != null && !variableName.trim().isEmpty(),
+                    "Mocca @Var `value` set at %s.%s parameter %d cannot be null nor blank, unless if raw is set to true",
+                    metadata.method().getDeclaringClass().getName(), metadata.method().getName(), paramIndex);
+        }
+        nameParam(metadata, variableName, paramIndex);
     }
 
     /**
@@ -48,7 +74,7 @@ class MoccaFeignContract extends DeclarativeContract {
      * @param header RequestHeader annotation
      * @param metadata Method metadata
      */
-    private void registerHeaderClassAnnotation(RequestHeader header, MethodMetadata metadata) {
+    private void registerHeaderClass(RequestHeader header, MethodMetadata metadata) {
         final String[] headersOnType = header.value();
         Util.checkState(headersOnType.length > 0, "RequestHeader annotation was empty on type %s.",
                 metadata.configKey());
@@ -66,7 +92,7 @@ class MoccaFeignContract extends DeclarativeContract {
      * @param header RequestHeader annotation
      * @param metadata Method metadata
      */
-    private void registerHeaderMethodAnnotation(RequestHeader header, MethodMetadata metadata) {
+    private void registerHeaderMethod(RequestHeader header, MethodMetadata metadata) {
         final String[] headersOnMethod = header.value();
         Util.checkState(headersOnMethod.length > 0, "RequestHeader annotation was empty on method %s.",
                 metadata.configKey());
@@ -80,8 +106,7 @@ class MoccaFeignContract extends DeclarativeContract {
      * @param headerParam RequestHeaderParam annotation
      * @param metadata Method metadata
      */
-    private void registerParamAnnotations(RequestHeaderParam headerParam, MethodMetadata metadata, int paramIndex) {
-
+    private void registerHeaderParam(RequestHeaderParam headerParam, MethodMetadata metadata, int paramIndex) {
         final String annotationName = headerParam.value();
         final Parameter parameter = metadata.method().getParameters()[paramIndex];
         final String name;
@@ -126,4 +151,5 @@ class MoccaFeignContract extends DeclarativeContract {
                     }
                 });
     }
+
 }

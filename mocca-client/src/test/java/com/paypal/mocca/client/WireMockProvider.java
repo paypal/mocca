@@ -78,15 +78,17 @@ class WireMockProvider {
     }
 
     private static void configureQueryStubs() {
-
-        final String EXPECTED_GOOD_REQUEST = "{\"query\":\"query{getOneSample(bar: \\\"far\\\", foo: \\\"boo\\\") {bar foo}}\"}";
+        final String EXPECTED_GOOD_REQUEST = "{\"query\":\"query{getOneSample(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String GOOD_RESULT = "{\"data\": {\"getOneSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
 
-        final String EXPECTED_CUSTOM_SELECT_REQUEST = "{\"query\":\"query{getOneSampleCustomSelectionSet(bar: \\\"far\\\", foo: \\\"boo\\\") {foo}}\"}";
+        final String EXPECTED_DTO_REQUEST = "{\"query\":\"query{getOneSample(sampleRequest: {bar: \\\"zaz\\\", foo: \\\"boom\\\"}) {bar foo}}\"}";
+        final String DTO_RESULT = "{\"data\": {\"getOneSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
+
+        final String EXPECTED_CUSTOM_SELECT_REQUEST = "{\"query\":\"query{getOneSampleCustomSelectionSet(foo: \\\"boo\\\", bar: \\\"far\\\") {foo}}\"}";
         final String CUSTOM_SELECT_RESULT = "{\"data\": {\"getOneSampleCustomSelectionSet\": {\"foo\": \"boo\"}}}";
 
-        final String EXPECTED_GOOD_IGNORE_FOO_REQUEST = "{\"query\":\"query{getOneSampleWithIgnore(bar: \\\"far\\\") {bar foo}}\"}";
-        final String GOOD_RESULT_NULL_FOO = "{\"data\": {\"getOneSampleWithIgnore\": {\"foo\": null, \"bar\": \"far\"}}}";
+        final String EXPECTED_IGNORE_FOO_REQUEST = "{\"query\":\"query{getOneSampleWithIgnore(sampleRequest: {bar: \\\"far\\\"}) {bar foo}}\"}";
+        final String IGNORE_FOO_RESULT = "{\"data\": {\"getOneSampleWithIgnore\": {\"foo\": null, \"bar\": \"far\"}}}";
 
         final String EXPECTED_NO_DATA_REQUEST = "{\"query\":\"query{getOneSample(foo: \\\"moo\\\", bar: \\\"czar\\\") {bar foo}}\"}";
         final String NO_DATA_RESULT = "{\"data\": {\"getOneSample\": null}}";
@@ -106,21 +108,22 @@ class WireMockProvider {
         final String ERROR_LIST_RESULT = "{\"errors\": [{\"message\": \"Internal Server Error(s) while executing query\"}],\"data\": {\"getSamplesList\": null}}";
 
         addGraphQlStub(EXPECTED_GOOD_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_DTO_REQUEST, DTO_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_CUSTOM_SELECT_REQUEST, CUSTOM_SELECT_RESULT, DEFAULT_HEADERS);
-        addGraphQlStub(EXPECTED_GOOD_IGNORE_FOO_REQUEST, GOOD_RESULT_NULL_FOO, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_IGNORE_FOO_REQUEST, IGNORE_FOO_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_GOOD_LIST_REQUEST, GOOD_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_LIST_REQUEST, NO_DATA_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_PARAM_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_REQUEST, ERROR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_LIST_REQUEST, ERROR_LIST_RESULT, DEFAULT_HEADERS);
-
-
     }
 
     private static void configureMutationStubs() {
         final String EXPECTED_GOOD_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String GOOD_RESULT = "{\"data\": {\"addSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
+
+        final String EXPECTED_DTO_REQUEST = "{\"query\":\"mutation{addSample(sampleRequest: {bar: \\\"czar 100%\\\", foo: \\\"moo\\\"}) {}}\"}";
 
         final String EXPECTED_NO_DATA_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"moo\\\", bar: \\\"czar 100%\\\") {bar foo}}\"}";
         final String EXPECTED_NO_DATA_NO_SELECTION_SET_REQUEST = "{\"query\":\"mutation{addSample(bar: \\\"czar 100%\\\", foo: \\\"moo\\\") {}}\"}";
@@ -142,6 +145,7 @@ class WireMockProvider {
         final String NULL_PARAMETER_RESULT = "{\"data\": {\"addSample\": {\"foo\": \"zoo\",\"bar\": \"\"}}}";
 
         addGraphQlStub(EXPECTED_GOOD_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_DTO_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_NO_SELECTION_SET_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_GOOD_LIST_REQUEST, GOOD_LIST_RESULT, DEFAULT_HEADERS);
@@ -190,7 +194,7 @@ class WireMockProvider {
     private static void addDynamicHeadersStub() {
         Map<String, String> headerAndDTOMap = new HashMap<>(DEFAULT_HEADERS);
         headerAndDTOMap.put("sampleheader", "testvalue");
-        addHeaderGraphQLStub("getOneSampleWithHeaderAndDTO", headerAndDTOMap);
+        addHeaderGraphQLDtoStub("getOneSampleWithHeaderAndDTO", headerAndDTOMap);
     }
 
     private static void addHeaderAndDTOStub() {
@@ -199,8 +203,14 @@ class WireMockProvider {
         addHeaderGraphQLStub("getOneSampleWithDynamicHeader", singleHeaderMap);
     }
 
+    private static void addHeaderGraphQLDtoStub(String operationName, Map<String, String> headersMap) {
+        final String SINGLE_HEADER_EXPECTED_GOOD_REQUEST = "{\"query\":\"query{" + operationName + "(sampleRequest: {bar: \\\"far\\\", foo: \\\"boo\\\"}) {bar foo}}\"}";
+        final String SINGLE_HEADER_GOOD_RESULT = "{\"data\": {\"" + operationName + "\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
+        addGraphQlStub(SINGLE_HEADER_EXPECTED_GOOD_REQUEST, SINGLE_HEADER_GOOD_RESULT, headersMap);
+    }
+
     private static void addHeaderGraphQLStub(String operationName, Map<String, String> headersMap) {
-        final String SINGLE_HEADER_EXPECTED_GOOD_REQUEST = "{\"query\":\"query{" + operationName + "(bar: \\\"far\\\", foo: \\\"boo\\\") {bar foo}}\"}";
+        final String SINGLE_HEADER_EXPECTED_GOOD_REQUEST = "{\"query\":\"query{" + operationName + "(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String SINGLE_HEADER_GOOD_RESULT = "{\"data\": {\"" + operationName + "\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
         addGraphQlStub(SINGLE_HEADER_EXPECTED_GOOD_REQUEST, SINGLE_HEADER_GOOD_RESULT, headersMap);
     }

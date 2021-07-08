@@ -37,11 +37,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
      */
     @Test
     public void testBasicQuerySync() {
-        // FIXME Passing a blank String, as seen below, is a workaround.
-        //  It should be allowed to not pass any parameters when the query does not allow any variables.
-        //  However, that is not supported at the moment because Feign does not call the registered encoder
-        //  if the request method does not have any parameter
-        List<Book> books = client.books("");
+        List<Book> books = client.books();
         runBasicQueryAndAssertions(client);
     }
 
@@ -65,11 +61,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
     }
 
     private void runBasicQueryAndAssertions(final BooksAppClient bookClient) {
-        // FIXME Passing a blank String, as seen below, is a workaround.
-        //  It should be allowed to not pass any parameters when the query does not allow any variables.
-        //  However, that is not supported at the moment because Feign does not call the registered encoder
-        //  if the request method does not have any parameter
-        List<Book> books = bookClient.books("");
+        List<Book> books = bookClient.books();
 
         checkResults(books);
     }
@@ -86,11 +78,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
                 .client(executorClient)
                 .build(AsyncBooksAppClient.class);
 
-        // FIXME Passing a blank String, as seen below, is a workaround.
-        //  It should be allowed to not pass any parameters when the query does not allow any variables.
-        //  However, that is not supported at the moment because Feign does not call the registered encoder
-        //  if the request method does not have any parameter
-        List<Book> books = asyncClient.books("").get();
+        List<Book> books = asyncClient.books().get();
 
         checkResults(books);
     }
@@ -113,11 +101,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
                 .client(asyncHttpClient)
                 .build(AsyncBooksAppClient.class);
 
-        // FIXME Passing a blank String, as seen below, is a workaround.
-        //  It should be allowed to not pass any parameters when the query does not allow any variables.
-        //  However, that is not supported at the moment because Feign does not call the registered encoder
-        //  if the request method does not have any parameter
-        List<Book> books = asyncClient.books("").get();
+        List<Book> books = asyncClient.books().get();
 
         checkResults(books);
     }
@@ -135,7 +119,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
                         .build()
                 ).build(BooksAppClient.class);
 
-        final Supplier<List<Book>> getBooks = () -> client.books("");
+        final Supplier<List<Book>> getBooks = () -> client.books();
 
         checkResults(getBooks.get());
 

@@ -1,10 +1,14 @@
 package com.paypal.mocca.client;
 
+import com.paypal.mocca.client.annotation.Query;
+import com.paypal.mocca.client.annotation.RequestHeaderParam;
+import com.paypal.mocca.client.annotation.Var;
 import com.paypal.mocca.client.sample.AsyncSampleClient;
 import com.paypal.mocca.client.sample.SampleClient;
 import com.paypal.mocca.client.sample.SampleRequestDTO;
 import com.paypal.mocca.client.sample.SampleResponseDTO;
 import feign.codec.DecodeException;
+import feign.codec.EncodeException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -36,8 +40,8 @@ public class MoccaClientQueryTest {
     }
 
     @Test
-    public void queryTest() {
-        String queryVariables = "bar: \"far\", foo: \"boo\"";
+    public void queryRawTest() {
+        String queryVariables = "foo: \"boo\", bar: \"far\"";
         SampleResponseDTO result = client.getOneSample(queryVariables);
         assertNotNull(result);
         assertEquals(result.getFoo(), "boo");
@@ -45,8 +49,16 @@ public class MoccaClientQueryTest {
     }
 
     @Test
+    public void queryVariableTest() {
+        SampleResponseDTO result = client.getOneSample("boo", "far");
+        assertNotNull(result);
+        assertEquals(result.getFoo(), "boo");
+        assertEquals(result.getBar(), "far");
+    }
+
+    @Test
     public void queryDtoTest() {
-        SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boo", "far");
+        SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boom", "zaz");
         SampleResponseDTO result = client.getOneSample(sampleRequestDTO);
         assertNotNull(result);
         assertEquals(result.getFoo(), "boo");
@@ -64,18 +76,13 @@ public class MoccaClientQueryTest {
 
     @Test
     public void queryNoDataTest() {
-        String queryVariables = "foo: \"moo\", bar: \"czar\"";
-        SampleResponseDTO result = client.getOneSample(queryVariables);
+        SampleResponseDTO result = client.getOneSample("moo", "czar");
         assertNull(result);
     }
 
     @Test
     public void queryNoParamsTest() {
-        // FIXME Passing a blank String, as seen below, is a workaround.
-        //  It should be allowed to not pass any parameters when the query does not allow any variables.
-        //  However, that is not supported at the moment because Feign does not call the registered encoder
-        //  if the request method does not have any parameter
-        SampleResponseDTO result = client.getOneSample("");
+        SampleResponseDTO result = client.getOneSample();
         assertNotNull(result);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");
@@ -83,14 +90,12 @@ public class MoccaClientQueryTest {
 
     @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
     public void queryErrorTest() {
-        String queryVariables = "foo: \"zoo\", bar: \"car\"";
-        client.getOneSample(queryVariables);
+        client.getOneSample("zoo", "car");
     }
 
     @Test
     public void queryListTest() {
-        String queryVariables = "foo: \"boo\", bar: \"far\"";
-        List<SampleResponseDTO> sampleResponseDTOS = client.getSamplesList(queryVariables);
+        List<SampleResponseDTO> sampleResponseDTOS = client.getSamplesList("boo", "far");
         assertNotNull(sampleResponseDTOS);
         assertEquals(sampleResponseDTOS.size(), 2);
         assertEquals(sampleResponseDTOS.get(0).getFoo(), "boo1");
@@ -101,22 +106,19 @@ public class MoccaClientQueryTest {
 
     @Test
     public void queryListNoDataTest() {
-        String queryVariables = "foo: \"moo\", bar: \"czar\"";
-        List<SampleResponseDTO> sampleResponseDTOS = client.getSamplesList(queryVariables);
+        List<SampleResponseDTO> sampleResponseDTOS = client.getSamplesList("moo", "czar");
         assertNotNull(sampleResponseDTOS);
         assertEquals(sampleResponseDTOS.size(), 0);
     }
 
     @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
     public void queryListErrorTest() {
-        String queryVariables = "foo: \"zoo\", bar: \"car\"";
-        client.getSamplesList(queryVariables);
+        client.getSamplesList("zoo", "car");
     }
 
     @Test
     public void queryCustomSelectionSet() {
-        String queryVariables = "bar: \"far\", foo: \"boo\"";
-        SampleResponseDTO result = client.getOneSampleCustomSelectionSet(queryVariables);
+        SampleResponseDTO result = client.getOneSampleCustomSelectionSet("boo", "far");
         assertNotNull(result);
         assertEquals(result.getFoo(), "boo");
         assertNull(result.getBar());
@@ -124,10 +126,9 @@ public class MoccaClientQueryTest {
 
     @Test
     public void queryAsyncTest() throws Exception {
-        final String queryVariables = "bar: \"far\", foo: \"boo\"";
         final AsyncSampleClient asyncClient =
                 MoccaClient.Builder.async(serverBaseUrl).connectionTimeout(100).build(AsyncSampleClient.class);
-        final SampleResponseDTO result = asyncClient.getOneSample(queryVariables).get(5, TimeUnit.SECONDS);
+        final SampleResponseDTO result = asyncClient.getOneSample("boo", "far").get(5, TimeUnit.SECONDS);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");
     }
@@ -142,17 +143,16 @@ public class MoccaClientQueryTest {
 
     @DataProvider(name = "method-supplier")
     public Object[][] methodSupplier() {
-        String queryVariables = "bar: \"far\", foo: \"boo\"";
         SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boo", "far");
         Supplier<SampleResponseDTO> headerAndDTO = () -> client.getOneSampleWithHeaderAndDTO("testvalue", sampleRequestDTO);
-        Supplier<SampleResponseDTO> singleHeader = () -> client.getOneSampleWithSingleHeader(queryVariables);
-        Supplier<SampleResponseDTO> singleHeaderMultipleVal = () -> client.getOneSampleWithSingleHeaderMultipleValues(queryVariables);
-        Supplier<SampleResponseDTO> multipleHeaders = () -> client.getOneSampleWithMultipleHeaders(queryVariables);
-        Supplier<SampleResponseDTO> dynamicHeaders = () -> client.getOneSampleWithDynamicHeader("testvalue", queryVariables);
-        Supplier<SampleResponseDTO> overrideHeaders = () -> client.getOneSampleWithOverrideClassHeader(queryVariables);
+        Supplier<SampleResponseDTO> singleHeader = () -> client.getOneSampleWithSingleHeader("boo", "far");
+        Supplier<SampleResponseDTO> singleHeaderMultipleVal = () -> client.getOneSampleWithSingleHeaderMultipleValues("boo", "far");
+        Supplier<SampleResponseDTO> multipleHeaders = () -> client.getOneSampleWithMultipleHeaders("boo", "far");
+        Supplier<SampleResponseDTO> dynamicHeaders = () -> client.getOneSampleWithDynamicHeader("testvalue", "boo", "far");
+        Supplier<SampleResponseDTO> overrideHeaders = () -> client.getOneSampleWithOverrideClassHeader("boo", "far");
         Supplier<SampleResponseDTO> multipleDynamicHeader = () -> client.getOneSampleWithMultipleDynamicHeaders(
-                "testvalue1", "testvalue2", queryVariables);
-        Supplier<SampleResponseDTO> staticAndDynamicHeader = () -> client.getOneSampleWithStaticAndDynamicHeaders("bar", queryVariables);
+                "testvalue1", "testvalue2", "boo", "far");
+        Supplier<SampleResponseDTO> staticAndDynamicHeader = () -> client.getOneSampleWithStaticAndDynamicHeaders("bar", "boo", "far");
         return new Object[][]{
                 {singleHeader},
                 {singleHeaderMultipleVal},
@@ -164,4 +164,22 @@ public class MoccaClientQueryTest {
                 {staticAndDynamicHeader}
         };
     }
+
+    @Test(expectedExceptions = EncodeException.class, expectedExceptionsMessageRegExp = "Invalid GraphQL operation method noMoccaAnnotations, make sure all its parameters are annotated with one Mocca annotation")
+    public void noMoccaAnnotationsTest() {
+        InvalidClient invalidClient = MoccaClient.Builder.sync("localhost").build(InvalidClient.class);
+        invalidClient.noMoccaAnnotations("boo", "far");
+    }
+
+    @Test(expectedExceptions = EncodeException.class, expectedExceptionsMessageRegExp = "Invalid GraphQL operation method moreThanOneMoccaAnnotation, make sure all its parameters are annotated with one Mocca annotation")
+    public void moreThanOneMoccaAnnotationTest() {
+        InvalidClient invalidClient = MoccaClient.Builder.sync("localhost").build(InvalidClient.class);
+        invalidClient.moreThanOneMoccaAnnotation("boo", "far");
+    }
+
+    private interface InvalidClient extends MoccaClient {
+        @Query void noMoccaAnnotations(String par1, String par2);
+        @Query void moreThanOneMoccaAnnotation(@Var("par1") String par1, @Var("pat1") @RequestHeaderParam("headername") String par2);
+    }
+
 }
