@@ -112,7 +112,7 @@ Book book = client.getBook(123);
 
 ### 2.4 Exploring other Mocca features
 
-For more information about how to use Mocca, and features like setting timeouts, using specific HTTP clients, asynchronous programming, and others, please read the other sections in this document.
+For more information about how to use Mocca, using specific HTTP clients, asynchronous programming, and others, please read the other sections in this document.
 
 ## 3 Client dependencies
 
@@ -447,20 +447,6 @@ The method to create the builder also takes the server base URL as parameter. Th
 
 The actual client instance is then created by calling the `build` method, which takes as parameter the client API interface, whose definition was already explained earlier in this document.
 
-### 6.2 Setting connection and read timeouts
-
-Optionally, connection and read timeouts can be customized, as shown in the example below:
-
-``` java
-BooksAppClient client = MoccaClient.Builder
-    .sync("http://localhost:8080/booksapp")
-    .connectionTimeout(1000)
-    .readTimeout(1000)
-    .build(BooksAppClient.class);
-```
-
-Both parameters are defined in milliseconds and, if not set explicitly, the default values are 10 seconds for connection timeout and 60 seconds for read timeout. Also, if prefered, they can be set using `java.time.Duration` instead of `long`.
-
 ### 6.3 Choosing the HTTP client
 
 Mocca uses behind the scenes an HTTP client to make the GraphQL calls. By default, JDK `java.net.HttpURLConnection` is used as HTTP client, and no additional dependency is required to use it.
@@ -470,8 +456,6 @@ However, if preferred, a custom HTTP client can be specified by adding an extra 
 ``` java
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
-    .connectionTimeout(1000)
-    .readTimeout(1000)
     .client(new MoccaOkHttpClient())
     .build(BooksAppClient.class);
 ```
@@ -494,8 +478,6 @@ All Mocca classes mentioned in the table above work as a wrapper containing a de
 1. Mocca client builder could be used to do so, providing a common API regardless of the type of HTTP client used.
 1. A custom instance of the HTTP client could be provided as a constructor parameter to the Mocca HTTP client wrapper.
 
-Just for illustration purposes, in the example below read timeout is configured by setting it directly at the HTTP client, while connection timeout is set using Mocca builder API.
-
 ``` java
 okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
     .readTimeout(2, TimeUnit.SECONDS)
@@ -503,7 +485,6 @@ okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
 
 BooksAppClient client = MoccaClient.Builder
     .sync("localhost:8080/booksapp")
-    .connectionTimeout(2000)
     .client(new MoccaOkHttpClient(okHttpClient))
     .build(BooksAppClient.class);
 ```
@@ -706,8 +687,6 @@ MoccaAsyncApache5Client asyncHttpClient = new MoccaAsyncApache5Client(apacheAsyn
 
 BooksAppClient asyncClient = MoccaClient.Builder
     .async("http://localhost:8080/booksapp")
-    .connectionTimeout(1000)
-    .readTimeout(1000)
     .client(asyncHttpClient)
     .build(AsyncBooksAppClient.class);
 ```
@@ -741,7 +720,6 @@ MoccaExecutorHttpClient<OkHttpClient> executorClient = new MoccaExecutorHttpClie
 
 AsyncBooksAppClient asyncClient = MoccaClient.Builder
         .async("localhost:8080/booksapp")
-        .connectionTimeout(1000)
         .client(executorClient)
         .build(AsyncBooksAppClient.class);
 ```

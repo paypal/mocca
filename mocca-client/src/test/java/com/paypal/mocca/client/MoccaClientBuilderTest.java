@@ -100,11 +100,6 @@ public class MoccaClientBuilderTest {
         }
     }
 
-    //@Test
-    void connectTimeoutTest() throws Exception {
-        // TBD:(
-    }
-
     @Test
     public void capabilitiesRegistration() {
         class MyCap extends MoccaCapability {

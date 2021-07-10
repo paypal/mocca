@@ -195,8 +195,6 @@ public interface MoccaClient {
              *     <li>A custom instance of the HTTP client could be provided as a constructor parameter to the Mocca HTTP client wrapper.</li>
              * </ol>
              * <br>
-             * Just for illustration purposes, in the example below read timeout is configured by setting it directly at the HTTP client, while connection timeout is set using Mocca builder API.
-             * <br>
              * <pre><code>
              * okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
              *     .build();
