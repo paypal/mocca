@@ -37,6 +37,10 @@ import java.util.Set;
  *     <li>The method name should be the same as the GraphQL operation name. If a different name is desired for the Java method, then the GraphQL operation name must be set using the {@code name} attribute in {@link com.paypal.mocca.client.annotation.Query} or {@link com.paypal.mocca.client.annotation.Mutation}.</li>
  * </ol>
  * <br>
+ * Ultimately, Mocca will make HTTP requests to a GraphQL service.  You can control things like HTTP timeouts by
+ * leveraging the functionality of the {@link MoccaHttpClient} implementations, which ultimately you can supply via
+ * {@link MoccaClient.Builder}.
+ * <br>
  * You can see below an example of a simple client API.
  * <pre><code>
  * import com.paypal.mocca.client.MoccaClient;
