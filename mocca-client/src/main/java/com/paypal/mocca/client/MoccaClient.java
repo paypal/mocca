@@ -3,17 +3,13 @@ package com.paypal.mocca.client;
 import feign.AsyncClient;
 import feign.AsyncFeign;
 import feign.Feign;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Applications are supposed to create an interface,
- * extending this one, to define their GraphQL client API.
- * Each GraphQL operation can be defined using Mocca
- * annotations under {@link com.paypal.mocca.client.annotation}.
+ * Applications are supposed to create an interface, extending this one, to define their GraphQL client API. Each
+ * GraphQL operation can be defined using Mocca annotations under {@link com.paypal.mocca.client.annotation}.
  * <br>
  * <br>
  * The most basic rules when writing a client API can be see below:
@@ -83,14 +79,13 @@ public interface MoccaClient {
      */
     class Builder {
 
-        private static final Logger logger = LoggerFactory.getLogger(Builder.class);
-
-        private Builder() {}
+        private Builder() {
+        }
 
         /**
-         * Provides a builder to create a Mocca sync client.
-         * If an HTTP client is not set in the builder, a {@link MoccaDefaultHttpClient} will be used.
-         * See {@link Builder.SyncBuilder#client(MoccaHttpClient)} for further information.
+         * Provides a builder to create a Mocca sync client. If an HTTP client is not set in the builder, a {@link
+         * MoccaDefaultHttpClient} will be used. See {@link Builder.SyncBuilder#client(MoccaHttpClient)} for further
+         * information.
          * <br>
          * See an example below of how to configure a sync Mocca client using OkHttp as HTTP client.
          * <br>
@@ -101,7 +96,8 @@ public interface MoccaClient {
          *     .build(BooksAppClient.class);
          * </code></pre>
          *
-         * @param serverBaseUrl GraphQL server base URL (e.g. https://your.graphql.server/context). Do not end the URI path with graphql, that is added automatically by Mocca.
+         * @param serverBaseUrl GraphQL server base URL (e.g. https://your.graphql.server/context). Do not end the URI
+         *                      path with graphql, that is added automatically by Mocca.
          * @return a {@link Builder.SyncBuilder}.
          */
         public static Builder.SyncBuilder sync(final String serverBaseUrl) {
@@ -109,11 +105,10 @@ public interface MoccaClient {
         }
 
         /**
-         * Provides a builder to create a Mocca asynchronous client.
-         * If an HTTP client is not set in the builder, a {@link MoccaDefaultHttpClient} will be used,
-         * executed by a cached thread pool executor service.
-         * See {@link Builder.AsyncBuilder#client(MoccaAsyncHttpClient)} and
-         * {@link MoccaExecutorHttpClient} for further information.
+         * Provides a builder to create a Mocca asynchronous client. If an HTTP client is not set in the builder, a
+         * {@link MoccaDefaultHttpClient} will be used, executed by a cached thread pool executor service. See {@link
+         * Builder.AsyncBuilder#client(MoccaAsyncHttpClient)} and {@link MoccaExecutorHttpClient} for further
+         * information.
          * <br>
          * See an example below of how to configure an async Mocca client using Apache HTTP client 5 as HTTP client.
          * <br>
@@ -126,7 +121,8 @@ public interface MoccaClient {
          *     .build(BooksAppClient.class);
          * </code></pre>
          *
-         * @param serverBaseUrl GraphQL server base URL (e.g. https://your.graphql.server/context). Do not end the URI path with graphql, that is added automatically by Mocca.
+         * @param serverBaseUrl GraphQL server base URL (e.g. https://your.graphql.server/context). Do not end the URI
+         *                      path with graphql, that is added automatically by Mocca.
          * @return a {@link Builder.AsyncBuilder}.
          */
         public static Builder.AsyncBuilder async(final String serverBaseUrl) {
@@ -158,9 +154,11 @@ public interface MoccaClient {
              * Sets a custom {@link MoccaHttpClient} to be used for GraphQL requests.
              * <br>
              * <br>
-             * Mocca uses behind the scenes an HTTP client to make the GraphQL calls. By default, JDK {@link java.net.HttpURLConnection} is used as HTTP client, and no additional dependency is required to use it.
+             * Mocca uses behind the scenes an HTTP client to make the GraphQL calls. By default, JDK {@link
+             * java.net.HttpURLConnection} is used as HTTP client, and no additional dependency is required to use it.
              * <br>
-             * However, if preferred, a custom HTTP client can be specified by adding an extra Mocca dependency and setting the HTTP client when creating the Mocca client builder (using method client), as seen below:
+             * However, if preferred, a custom HTTP client can be specified by adding an extra Mocca dependency and
+             * setting the HTTP client when creating the Mocca client builder (using method client), as seen below:
              * <br>
              * <pre><code>
              * BooksAppClient client = MoccaClient.Builder
@@ -169,7 +167,8 @@ public interface MoccaClient {
              *     .build(BooksAppClient.class);
              * </code></pre>
              * <br>
-             * All HTTP clients supported by Mocca are documented in the table below, along with the library to be added as dependency to the application, and the client class to be used in the Mocca builder.
+             * All HTTP clients supported by Mocca are documented in the table below, along with the library to be added
+             * as dependency to the application, and the client class to be used in the Mocca builder.
              * <br>
              * <br>
              * <table border="1">
@@ -407,8 +406,8 @@ public interface MoccaClient {
             protected abstract <C extends MoccaClient> C build(final Class<C> apiType);
 
             /**
-             * Adds a new {@link MoccaCapability} to be configured in this client builder.
-             * An example of Mocca capability would be Micrometer support, as seen in the example below.
+             * Adds a new {@link MoccaCapability} to be configured in this client builder. An example of Mocca
+             * capability would be Micrometer support, as seen in the example below.
              * <br>
              * <pre><code>
              * io.micrometer.core.instrument.simple.SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
