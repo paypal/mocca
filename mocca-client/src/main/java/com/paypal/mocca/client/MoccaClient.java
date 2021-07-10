@@ -3,15 +3,11 @@ package com.paypal.mocca.client;
 import feign.AsyncClient;
 import feign.AsyncFeign;
 import feign.Feign;
-import feign.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 /**
  * Applications are supposed to create an interface,
@@ -81,8 +77,6 @@ public interface MoccaClient {
      * <pre><code>
      * BooksAppClient client = MoccaClient.Builder
      *     .sync("http://localhost:8080/booksapp")
-     *     .connectionTimeout(1000)
-     *     .readTimeout(1000)
      *     .client(new MoccaOkHttpClient())
      *     .build(BooksAppClient.class);
      * </code></pre>
@@ -103,8 +97,6 @@ public interface MoccaClient {
          * <pre><code>
          * BooksAppClient client = MoccaClient.Builder
          *     .sync("http://localhost:8080/booksapp")
-         *     .connectionTimeout(1000)
-         *     .readTimeout(1000)
          *     .client(new MoccaOkHttpClient())
          *     .build(BooksAppClient.class);
          * </code></pre>
@@ -130,8 +122,6 @@ public interface MoccaClient {
          *
          * BooksAppClient asyncClient = MoccaClient.Builder
          *     .async("http://localhost:8080/booksapp")
-         *     .connectionTimeout(1000)
-         *     .readTimeout(1000)
          *     .client(asyncHttpClient)
          *     .build(BooksAppClient.class);
          * </code></pre>
@@ -151,8 +141,6 @@ public interface MoccaClient {
          * <pre><code>
          * BooksAppClient client = MoccaClient.Builder
          *     .sync("http://localhost:8080/booksapp")
-         *     .connectionTimeout(1000)
-         *     .readTimeout(1000)
          *     .client(new MoccaOkHttpClient())
          *     .build(BooksAppClient.class);
          * </code></pre>
@@ -177,8 +165,6 @@ public interface MoccaClient {
              * <pre><code>
              * BooksAppClient client = MoccaClient.Builder
              *     .sync("http://localhost:8080/booksapp")
-             *     .connectionTimeout(1000)
-             *     .readTimeout(1000)
              *     .client(new MoccaOkHttpClient())
              *     .build(BooksAppClient.class);
              * </code></pre>
@@ -210,12 +196,10 @@ public interface MoccaClient {
              * <br>
              * <pre><code>
              * okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
-             *     .readTimeout(2, TimeUnit.SECONDS)
              *     .build();
              *
              * BooksAppClient client = MoccaClient.Builder
              *     .sync("localhost:8080/booksapp")
-             *     .connectionTimeout(2000)
              *     .client(new MoccaOkHttpClient(okHttpClient))
              *     .build(BooksAppClient.class);
              * </code></pre>
@@ -256,7 +240,7 @@ public interface MoccaClient {
                 for (final MoccaCapability c : capabilities) {
                     builder = builder.addCapability(c.getFeignCapability());
                 }
-                return builder.options(requestOptions.get()).target(apiType, graphQLUrlString);
+                return builder.target(apiType, graphQLUrlString);
             }
         }
 
@@ -270,8 +254,6 @@ public interface MoccaClient {
          *
          * BooksAppClient asyncClient = MoccaClient.Builder
          *     .async("http://localhost:8080/booksapp")
-         *     .connectionTimeout(1000)
-         *     .readTimeout(1000)
          *     .client(asyncHttpClient)
          *     .build(BooksAppClient.class);
          * </code></pre>
@@ -329,8 +311,6 @@ public interface MoccaClient {
              *
              * BooksAppClient asyncClient = MoccaClient.Builder
              *     .async("http://localhost:8080/booksapp")
-             *     .connectionTimeout(1000)
-             *     .readTimeout(1000)
              *     .client(asyncHttpClient)
              *     .build(BooksAppClient.class);
              * </code></pre>
@@ -351,7 +331,6 @@ public interface MoccaClient {
              * <br>
              * <pre><code>
              * okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
-             *     .readTimeout(1, TimeUnit.SECONDS)
              *     .build();
              *
              * ExecutorService executorService = Executors.newCachedThreadPool();
@@ -360,7 +339,6 @@ public interface MoccaClient {
              *
              * AsyncBooksAppClient asyncClient = MoccaClient.Builder
              *         .async("localhost:8080/booksapp")
-             *         .connectionTimeout(1000)
              *         .client(executorClient)
              *         .build(AsyncBooksAppClient.class);
              * </code></pre>
@@ -399,7 +377,7 @@ public interface MoccaClient {
                     if (asyncClient != null) {
                         builder = builder.client(asyncClient);
                     }
-                    return builder.options(requestOptions.get()).target(apiType, serverUrl);
+                    return builder.target(apiType, serverUrl);
                 }
             }
         }
@@ -408,9 +386,6 @@ public interface MoccaClient {
 
             protected final String graphQLUrlString;
             protected final Set<MoccaCapability> capabilities = new HashSet<>();
-            private long connectionTimeoutMs;
-            private long readTimeoutMs;
-            protected final Supplier<Request.Options> requestOptions;
 
             public BaseBuilder(final String serverBaseUrl) {
                 // Setting GraphQL URL String
@@ -420,75 +395,16 @@ public interface MoccaClient {
                 } else {
                     graphQLUrlString = serverBaseUrl + "/graphql";
                 }
-
-                // Setting Feign request options
-                requestOptions = () -> {
-                    final boolean FOLLOW_REDIRECTS = false; // configurable?
-                    return new Request.Options(
-                            connectionTimeoutMs, TimeUnit.MILLISECONDS,
-                            readTimeoutMs, TimeUnit.MILLISECONDS,
-                            FOLLOW_REDIRECTS);
-                };
             }
 
             /**
              * Creates a Mocca client instance of the supplied {@code apiType} interface.
              *
              * @param apiType the client API class, which should extends {@link MoccaClient}
-             * @param <C> the client API type, which should extends {@link MoccaClient}
+             * @param <C>     the client API type, which should extends {@link MoccaClient}
              * @return the Mocca client instance, implementing the provided client API
              */
             protected abstract <C extends MoccaClient> C build(final Class<C> apiType);
-
-            /**
-             * Sets the maximum amount of time to wait for a connection to be established with the GraphQL
-             * server. Must be positive.
-             *
-             * @param timeout the client connection timeout
-             * @return this builder
-             */
-            public B connectionTimeout(final Duration timeout) {
-                return connectionTimeout(Arguments.requireNonNull(timeout).toMillis());
-            }
-
-            /**
-             * Sets the maximum amount of time to wait for the next packet of data to be sent from the
-             * GraphQL server. Must be positive.
-             *
-             * @param timeout the client read timeout
-             * @return this builder
-             */
-            public B readTimeout(final Duration timeout) {
-                return readTimeout(Arguments.requireNonNull(timeout).toMillis());
-            }
-
-            /**
-             * Sets the maximum amount of time in milliseconds to wait for a connection to be established with the GraphQL
-             * server. Must be positive.
-             *
-             * @param timeoutMs the client connection timeout in milliseconds
-             * @return this builder
-             */
-            @SuppressWarnings("unchecked")
-            public B connectionTimeout(final long timeoutMs) {
-                this.connectionTimeoutMs = Arguments.require(timeoutMs, timeoutMs > 0,
-                    "Connection timeout must be positive.");
-                return (B) this;
-            }
-
-            /**
-             * Sets the maximum amount of time in milliseconds to wait for the next packet of data to be sent from the
-             * GraphQL server.  Must be positive.
-             *
-             * @param timeoutMs the client read timeout in milliseconds
-             * @return this builder
-             */
-            @SuppressWarnings("unchecked")
-            public B readTimeout(final long timeoutMs) {
-                this.readTimeoutMs = Arguments.require(timeoutMs, timeoutMs > 0,
-                    "Read timeout must be positive.");
-                return (B) this;
-            }
 
             /**
              * Adds a new {@link MoccaCapability} to be configured in this client builder.
@@ -516,6 +432,7 @@ public interface MoccaClient {
 
             /**
              * Removes all {@link MoccaCapability} configured in this client builder.
+             *
              * @return this builder
              */
             @SuppressWarnings("unchecked")

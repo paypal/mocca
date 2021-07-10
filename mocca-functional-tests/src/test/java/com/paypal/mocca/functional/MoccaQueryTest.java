@@ -81,8 +81,6 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
 
         AsyncBooksAppClient asyncClient = MoccaClient.Builder
                 .async(getBaseUri().toString())
-                .connectionTimeout(1000)
-                .readTimeout(1000)
                 .client(executorClient)
                 .build(AsyncBooksAppClient.class);
 
@@ -108,8 +106,6 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
 
         AsyncBooksAppClient asyncClient = MoccaClient.Builder
                 .async(getBaseUri().toString())
-                .connectionTimeout(1000)
-                .readTimeout(1000)
                 .client(asyncHttpClient)
                 .build(AsyncBooksAppClient.class);
 
