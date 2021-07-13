@@ -126,7 +126,7 @@ public class MoccaClientQueryTest {
     public void queryAsyncTest() throws Exception {
         final String queryVariables = "bar: \"far\", foo: \"boo\"";
         final AsyncSampleClient asyncClient =
-                MoccaClient.Builder.async(serverBaseUrl).connectionTimeout(100).build(AsyncSampleClient.class);
+                MoccaClient.Builder.async(serverBaseUrl).build(AsyncSampleClient.class);
         final SampleResponseDTO result = asyncClient.getOneSample(queryVariables).get(5, TimeUnit.SECONDS);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");
