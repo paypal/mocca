@@ -3,21 +3,13 @@ package com.paypal.mocca.client;
 import feign.AsyncClient;
 import feign.AsyncFeign;
 import feign.Feign;
-import feign.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 /**
- * Applications are supposed to create an interface,
- * extending this one, to define their GraphQL client API.
- * Each GraphQL operation can be defined using Mocca
- * annotations under {@link com.paypal.mocca.client.annotation}.
+ * Applications are supposed to create an interface, extending this one, to define their GraphQL client API. Each
+ * GraphQL operation can be defined using Mocca annotations under {@link com.paypal.mocca.client.annotation}.
  * <br>
  * <br>
  * The most basic rules when writing a client API can be see below:
@@ -44,6 +36,10 @@ import java.util.function.Supplier;
  *     <li>Each GraphQL operation method must be annotated with {@link com.paypal.mocca.client.annotation.Query} or {@link com.paypal.mocca.client.annotation.Mutation} annotation depending whether the operation is a GraphQL query or mutation respectively.</li>
  *     <li>The method name should be the same as the GraphQL operation name. If a different name is desired for the Java method, then the GraphQL operation name must be set using the {@code name} attribute in {@link com.paypal.mocca.client.annotation.Query} or {@link com.paypal.mocca.client.annotation.Mutation}.</li>
  * </ol>
+ * <br>
+ * Ultimately, Mocca will make HTTP requests to a GraphQL service.  You can control things like HTTP timeouts by
+ * leveraging the functionality of the {@link MoccaHttpClient} implementations, which ultimately you can supply via
+ * {@link MoccaClient.Builder}.
  * <br>
  * You can see below an example of a simple client API.
  * <pre><code>
@@ -81,35 +77,31 @@ public interface MoccaClient {
      * <pre><code>
      * BooksAppClient client = MoccaClient.Builder
      *     .sync("http://localhost:8080/booksapp")
-     *     .connectionTimeout(1000)
-     *     .readTimeout(1000)
      *     .client(new MoccaOkHttpClient())
      *     .build(BooksAppClient.class);
      * </code></pre>
      */
     class Builder {
 
-        private static final Logger logger = LoggerFactory.getLogger(Builder.class);
-
-        private Builder() {}
+        private Builder() {
+        }
 
         /**
-         * Provides a builder to create a Mocca sync client.
-         * If an HTTP client is not set in the builder, a {@link MoccaDefaultHttpClient} will be used.
-         * See {@link Builder.SyncBuilder#client(MoccaHttpClient)} for further information.
+         * Provides a builder to create a Mocca sync client. If an HTTP client is not set in the builder, a {@link
+         * MoccaDefaultHttpClient} will be used. See {@link Builder.SyncBuilder#client(MoccaHttpClient)} for further
+         * information.
          * <br>
          * See an example below of how to configure a sync Mocca client using OkHttp as HTTP client.
          * <br>
          * <pre><code>
          * BooksAppClient client = MoccaClient.Builder
          *     .sync("http://localhost:8080/booksapp")
-         *     .connectionTimeout(1000)
-         *     .readTimeout(1000)
          *     .client(new MoccaOkHttpClient())
          *     .build(BooksAppClient.class);
          * </code></pre>
          *
-         * @param serverBaseUrl GraphQL server base URL (e.g. https://your.graphql.server/context). Do not end the URI path with graphql, that is added automatically by Mocca.
+         * @param serverBaseUrl GraphQL server base URL (e.g. https://your.graphql.server/context). Do not end the URI
+         *                      path with graphql, that is added automatically by Mocca.
          * @return a {@link Builder.SyncBuilder}.
          */
         public static Builder.SyncBuilder sync(final String serverBaseUrl) {
@@ -117,11 +109,10 @@ public interface MoccaClient {
         }
 
         /**
-         * Provides a builder to create a Mocca asynchronous client.
-         * If an HTTP client is not set in the builder, a {@link MoccaDefaultHttpClient} will be used,
-         * executed by a cached thread pool executor service.
-         * See {@link Builder.AsyncBuilder#client(MoccaAsyncHttpClient)} and
-         * {@link MoccaExecutorHttpClient} for further information.
+         * Provides a builder to create a Mocca asynchronous client. If an HTTP client is not set in the builder, a
+         * {@link MoccaDefaultHttpClient} will be used, executed by a cached thread pool executor service. See {@link
+         * Builder.AsyncBuilder#client(MoccaAsyncHttpClient)} and {@link MoccaExecutorHttpClient} for further
+         * information.
          * <br>
          * See an example below of how to configure an async Mocca client using Apache HTTP client 5 as HTTP client.
          * <br>
@@ -130,13 +121,12 @@ public interface MoccaClient {
          *
          * BooksAppClient asyncClient = MoccaClient.Builder
          *     .async("http://localhost:8080/booksapp")
-         *     .connectionTimeout(1000)
-         *     .readTimeout(1000)
          *     .client(asyncHttpClient)
          *     .build(BooksAppClient.class);
          * </code></pre>
          *
-         * @param serverBaseUrl GraphQL server base URL (e.g. https://your.graphql.server/context). Do not end the URI path with graphql, that is added automatically by Mocca.
+         * @param serverBaseUrl GraphQL server base URL (e.g. https://your.graphql.server/context). Do not end the URI
+         *                      path with graphql, that is added automatically by Mocca.
          * @return a {@link Builder.AsyncBuilder}.
          */
         public static Builder.AsyncBuilder async(final String serverBaseUrl) {
@@ -151,8 +141,6 @@ public interface MoccaClient {
          * <pre><code>
          * BooksAppClient client = MoccaClient.Builder
          *     .sync("http://localhost:8080/booksapp")
-         *     .connectionTimeout(1000)
-         *     .readTimeout(1000)
          *     .client(new MoccaOkHttpClient())
          *     .build(BooksAppClient.class);
          * </code></pre>
@@ -170,20 +158,21 @@ public interface MoccaClient {
              * Sets a custom {@link MoccaHttpClient} to be used for GraphQL requests.
              * <br>
              * <br>
-             * Mocca uses behind the scenes an HTTP client to make the GraphQL calls. By default, JDK {@link java.net.HttpURLConnection} is used as HTTP client, and no additional dependency is required to use it.
+             * Mocca uses behind the scenes an HTTP client to make the GraphQL calls. By default, JDK {@link
+             * java.net.HttpURLConnection} is used as HTTP client, and no additional dependency is required to use it.
              * <br>
-             * However, if preferred, a custom HTTP client can be specified by adding an extra Mocca dependency and setting the HTTP client when creating the Mocca client builder (using method client), as seen below:
+             * However, if preferred, a custom HTTP client can be specified by adding an extra Mocca dependency and
+             * setting the HTTP client when creating the Mocca client builder (using method client), as seen below:
              * <br>
              * <pre><code>
              * BooksAppClient client = MoccaClient.Builder
              *     .sync("http://localhost:8080/booksapp")
-             *     .connectionTimeout(1000)
-             *     .readTimeout(1000)
              *     .client(new MoccaOkHttpClient())
              *     .build(BooksAppClient.class);
              * </code></pre>
              * <br>
-             * All HTTP clients supported by Mocca are documented in the table below, along with the library to be added as dependency to the application, and the client class to be used in the Mocca builder.
+             * All HTTP clients supported by Mocca are documented in the table below, along with the library to be added
+             * as dependency to the application, and the client class to be used in the Mocca builder.
              * <br>
              * <br>
              * <table border="1">
@@ -206,16 +195,12 @@ public interface MoccaClient {
              *     <li>A custom instance of the HTTP client could be provided as a constructor parameter to the Mocca HTTP client wrapper.</li>
              * </ol>
              * <br>
-             * Just for illustration purposes, in the example below read timeout is configured by setting it directly at the HTTP client, while connection timeout is set using Mocca builder API.
-             * <br>
              * <pre><code>
              * okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
-             *     .readTimeout(2, TimeUnit.SECONDS)
              *     .build();
              *
              * BooksAppClient client = MoccaClient.Builder
              *     .sync("localhost:8080/booksapp")
-             *     .connectionTimeout(2000)
              *     .client(new MoccaOkHttpClient(okHttpClient))
              *     .build(BooksAppClient.class);
              * </code></pre>
@@ -256,7 +241,7 @@ public interface MoccaClient {
                 for (final MoccaCapability c : capabilities) {
                     builder = builder.addCapability(c.getFeignCapability());
                 }
-                return builder.options(requestOptions.get()).target(apiType, graphQLUrlString);
+                return builder.target(apiType, graphQLUrlString);
             }
         }
 
@@ -270,8 +255,6 @@ public interface MoccaClient {
          *
          * BooksAppClient asyncClient = MoccaClient.Builder
          *     .async("http://localhost:8080/booksapp")
-         *     .connectionTimeout(1000)
-         *     .readTimeout(1000)
          *     .client(asyncHttpClient)
          *     .build(BooksAppClient.class);
          * </code></pre>
@@ -329,8 +312,6 @@ public interface MoccaClient {
              *
              * BooksAppClient asyncClient = MoccaClient.Builder
              *     .async("http://localhost:8080/booksapp")
-             *     .connectionTimeout(1000)
-             *     .readTimeout(1000)
              *     .client(asyncHttpClient)
              *     .build(BooksAppClient.class);
              * </code></pre>
@@ -351,7 +332,6 @@ public interface MoccaClient {
              * <br>
              * <pre><code>
              * okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
-             *     .readTimeout(1, TimeUnit.SECONDS)
              *     .build();
              *
              * ExecutorService executorService = Executors.newCachedThreadPool();
@@ -360,7 +340,6 @@ public interface MoccaClient {
              *
              * AsyncBooksAppClient asyncClient = MoccaClient.Builder
              *         .async("localhost:8080/booksapp")
-             *         .connectionTimeout(1000)
              *         .client(executorClient)
              *         .build(AsyncBooksAppClient.class);
              * </code></pre>
@@ -399,7 +378,7 @@ public interface MoccaClient {
                     if (asyncClient != null) {
                         builder = builder.client(asyncClient);
                     }
-                    return builder.options(requestOptions.get()).target(apiType, serverUrl);
+                    return builder.target(apiType, serverUrl);
                 }
             }
         }
@@ -408,9 +387,6 @@ public interface MoccaClient {
 
             protected final String graphQLUrlString;
             protected final Set<MoccaCapability> capabilities = new HashSet<>();
-            private long connectionTimeoutMs;
-            private long readTimeoutMs;
-            protected final Supplier<Request.Options> requestOptions;
 
             public BaseBuilder(final String serverBaseUrl) {
                 // Setting GraphQL URL String
@@ -420,79 +396,20 @@ public interface MoccaClient {
                 } else {
                     graphQLUrlString = serverBaseUrl + "/graphql";
                 }
-
-                // Setting Feign request options
-                requestOptions = () -> {
-                    final boolean FOLLOW_REDIRECTS = false; // configurable?
-                    return new Request.Options(
-                            connectionTimeoutMs, TimeUnit.MILLISECONDS,
-                            readTimeoutMs, TimeUnit.MILLISECONDS,
-                            FOLLOW_REDIRECTS);
-                };
             }
 
             /**
              * Creates a Mocca client instance of the supplied {@code apiType} interface.
              *
              * @param apiType the client API class, which should extends {@link MoccaClient}
-             * @param <C> the client API type, which should extends {@link MoccaClient}
+             * @param <C>     the client API type, which should extends {@link MoccaClient}
              * @return the Mocca client instance, implementing the provided client API
              */
             protected abstract <C extends MoccaClient> C build(final Class<C> apiType);
 
             /**
-             * Sets the maximum amount of time to wait for a connection to be established with the GraphQL
-             * server. Must be positive.
-             *
-             * @param timeout the client connection timeout
-             * @return this builder
-             */
-            public B connectionTimeout(final Duration timeout) {
-                return connectionTimeout(Arguments.requireNonNull(timeout).toMillis());
-            }
-
-            /**
-             * Sets the maximum amount of time to wait for the next packet of data to be sent from the
-             * GraphQL server. Must be positive.
-             *
-             * @param timeout the client read timeout
-             * @return this builder
-             */
-            public B readTimeout(final Duration timeout) {
-                return readTimeout(Arguments.requireNonNull(timeout).toMillis());
-            }
-
-            /**
-             * Sets the maximum amount of time in milliseconds to wait for a connection to be established with the GraphQL
-             * server. Must be positive.
-             *
-             * @param timeoutMs the client connection timeout in milliseconds
-             * @return this builder
-             */
-            @SuppressWarnings("unchecked")
-            public B connectionTimeout(final long timeoutMs) {
-                this.connectionTimeoutMs = Arguments.require(timeoutMs, timeoutMs > 0,
-                    "Connection timeout must be positive.");
-                return (B) this;
-            }
-
-            /**
-             * Sets the maximum amount of time in milliseconds to wait for the next packet of data to be sent from the
-             * GraphQL server.  Must be positive.
-             *
-             * @param timeoutMs the client read timeout in milliseconds
-             * @return this builder
-             */
-            @SuppressWarnings("unchecked")
-            public B readTimeout(final long timeoutMs) {
-                this.readTimeoutMs = Arguments.require(timeoutMs, timeoutMs > 0,
-                    "Read timeout must be positive.");
-                return (B) this;
-            }
-
-            /**
-             * Adds a new {@link MoccaCapability} to be configured in this client builder.
-             * An example of Mocca capability would be Micrometer support, as seen in the example below.
+             * Adds a new {@link MoccaCapability} to be configured in this client builder. An example of Mocca
+             * capability would be Micrometer support, as seen in the example below.
              * <br>
              * <pre><code>
              * io.micrometer.core.instrument.simple.SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
@@ -516,6 +433,7 @@ public interface MoccaClient {
 
             /**
              * Removes all {@link MoccaCapability} configured in this client builder.
+             *
              * @return this builder
              */
             @SuppressWarnings("unchecked")

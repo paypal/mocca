@@ -32,7 +32,6 @@ public abstract class AbstractFunctionalTests extends JerseyTestNg.ContainerPerC
 
         client = MoccaClient.Builder
                 .sync(getBaseUri().toString())
-                .connectionTimeout(1000)
                 .client(new MoccaOkHttpClient(okHttpClient))
                 .build(BooksAppClient.class);
     }
