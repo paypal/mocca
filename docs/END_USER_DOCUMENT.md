@@ -71,7 +71,7 @@ dependencies {
 
 ### 2.2 Create a client API
 
-Create a new Java interface, extend `JavaClient`, and add Mocca annotated methods to it representing all necessary GraphQL queries and mutations (according to server API), as seen in the example below.
+Create a new Java interface, extend `MoccaClient`, and add Mocca annotated methods to it representing all necessary GraphQL queries and mutations (according to server API), as seen in the example below.
 
 ``` java
 
