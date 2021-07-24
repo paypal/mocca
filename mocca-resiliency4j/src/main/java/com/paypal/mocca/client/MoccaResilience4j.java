@@ -7,6 +7,9 @@ import io.github.resilience4j.feign.Resilience4jFeign;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.retry.Retry;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 /**
  * Mocca supports Resilience4j-based resilience.
  * <br>
@@ -126,5 +129,43 @@ public final class MoccaResilience4j extends MoccaResiliency {
             this.feignBuilder = feignBuilder.withBulkhead(bulkhead);
             return this;
         }
+
+        /**
+         *
+         * @param fallBack the fallback object to be set to in this builder
+         * @return
+         */
+        public Builder fallback(final Object fallBack) {
+            this.feignBuilder = feignBuilder.withFallback(fallBack);
+            return this;
+        }
+
+        public Builder fallback(final Object fallBack, Predicate<Exception> filter) {
+            this.feignBuilder = feignBuilder.withFallback(fallBack, filter);
+            return this;
+        }
+
+        public Builder fallback(final Object fallBack, Class<? extends Exception> filter) {
+            this.feignBuilder = feignBuilder.withFallback(fallBack, filter);
+            return this;
+        }
+
+        public Builder fallbackFactory(Function<Exception, ?> fallBackFactory ) {
+            this.feignBuilder = feignBuilder.withFallbackFactory(fallBackFactory);
+            return this;
+        }
+
+        public Builder fallbackFactory(Function<Exception, ?> fallbackFactory,
+                                       Class<? extends Exception> filter) {
+            this.feignBuilder = feignBuilder.withFallbackFactory(fallbackFactory, filter);
+            return this;
+        }
+
+        public Builder fallbackFactory(Function<Exception, ?> fallbackFactory,
+                                       Predicate<Exception> filter) {
+            this.feignBuilder = feignBuilder.withFallbackFactory(fallbackFactory, filter);
+            return this;
+        }
+
     }
 }
