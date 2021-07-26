@@ -1,54 +1,21 @@
 package com.paypal.mocca.client;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.paypal.mocca.client.sample.AsyncSampleClient;
 import com.paypal.mocca.client.sample.SampleClient;
 import feign.Feign;
-import feign.RetryableException;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class MoccaClientBuilderTest {
-
-    @Test(expectedExceptions = SocketTimeoutException.class)
-    void readTimeoutTest() throws Exception {
-        final WireMockServer server = new WireMockServer(options().dynamicPort());
-
-        final int readTimeout = 10;
-
-        server.stubFor(post(urlEqualTo("/read/graphql")).willReturn(
-            aResponse()
-                .withHeader("Content-Type","application/json;charset=UTF-8")
-                .withBody("{ \"data\": {}}")
-                .withChunkedDribbleDelay(5, 5 * readTimeout)));
-
-        server.start();
-        final String serverUrl = "http://localhost:" + server.port() + "/read";
-
-        try {
-            MoccaClient.Builder.sync(serverUrl)
-                .readTimeout(readTimeout)
-                .build(SampleClient.class)
-                .getOneSample("boo", "far")
-                .getFoo();
-        } catch (final RetryableException re) {
-            throw (Exception)re.getCause();
-        } finally {
-            server.stop();
-        }
-    }
 
     @Test
     void customExecutorServiceTest() throws Exception {
@@ -131,11 +98,6 @@ public class MoccaClientBuilderTest {
         } catch (final UnsupportedOperationException e) {
             assertEquals(e, err, "An expected error indicates custom `Feign.Builder` used.");
         }
-    }
-
-    //@Test
-    void connectTimeoutTest() throws Exception {
-        // TBD:(
     }
 
     @Test
