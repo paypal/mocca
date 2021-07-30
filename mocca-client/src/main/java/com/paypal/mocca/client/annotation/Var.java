@@ -64,6 +64,8 @@ public @interface Var {
      * In order to do so, specify here an array containing all fields to be ignored in the POJO object.
      * The name of a property in an inner POJO can be specified using the outer field name followed by dot.
      * If the request type is not a POJO, or if {@link #raw()} is set to true, then {@code ignore} will have no effect.
+     * If the property set to be ignored doesn't exist, then it has no effect, the POJO is serialized normally as
+     * if that ignore value had been set.
      *
      * @return an array containing all fields to be ignored in a POJO variable
      */
@@ -85,7 +87,6 @@ public @interface Var {
      *
      * @return whether all GraphQL variables should be set using one String parameter
      */
-    // TODO This feature is not implemented yet
     boolean raw() default false;
 
 }
