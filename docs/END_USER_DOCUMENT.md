@@ -71,7 +71,7 @@ dependencies {
 
 ### 2.2 Create a client API
 
-Create a new Java interface, extend `JavaClient`, and add Mocca annotated methods to it representing all necessary GraphQL queries and mutations (according to server API), as seen in the example below.
+Create a new Java interface, extend `MoccaClient`, and add Mocca annotated methods to it representing all necessary GraphQL queries and mutations (according to server API), as seen in the example below.
 
 ``` java
 
@@ -113,7 +113,7 @@ Book book = client.getBook(123);
 
 ### 2.4 Exploring other Mocca features
 
-For more information about how to use Mocca, and features like setting timeouts, using specific HTTP clients, asynchronous programming, and others, please read the other sections in this document.
+For more information about how to use Mocca, using specific HTTP clients, asynchronous programming, and others, please read the other sections in this document.
 
 ## 3 Client dependencies
 
@@ -453,21 +453,7 @@ The method to create the builder also takes the server base URL as parameter. Th
 
 The actual client instance is then created by calling the `build` method, which takes as parameter the client API interface, whose definition was already explained earlier in this document.
 
-### 6.2 Setting connection and read timeouts
-
-Optionally, connection and read timeouts can be customized, as shown in the example below:
-
-``` java
-BooksAppClient client = MoccaClient.Builder
-    .sync("http://localhost:8080/booksapp")
-    .connectionTimeout(1000)
-    .readTimeout(1000)
-    .build(BooksAppClient.class);
-```
-
-Both parameters are defined in milliseconds and, if not set explicitly, the default values are 10 seconds for connection timeout and 60 seconds for read timeout. Also, if prefered, they can be set using `java.time.Duration` instead of `long`.
-
-### 6.3 Choosing the HTTP client
+### 6.2 Choosing the HTTP client
 
 Mocca uses behind the scenes an HTTP client to make the GraphQL calls. By default, JDK `java.net.HttpURLConnection` is used as HTTP client, and no additional dependency is required to use it.
 
@@ -476,8 +462,6 @@ However, if preferred, a custom HTTP client can be specified by adding an extra 
 ``` java
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
-    .connectionTimeout(1000)
-    .readTimeout(1000)
     .client(new MoccaOkHttpClient())
     .build(BooksAppClient.class);
 ```
@@ -500,8 +484,6 @@ All Mocca classes mentioned in the table above work as a wrapper containing a de
 1. Mocca client builder could be used to do so, providing a common API regardless of the type of HTTP client used.
 1. A custom instance of the HTTP client could be provided as a constructor parameter to the Mocca HTTP client wrapper.
 
-Just for illustration purposes, in the example below read timeout is configured by setting it directly at the HTTP client, while connection timeout is set using Mocca builder API.
-
 ``` java
 okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
     .readTimeout(2, TimeUnit.SECONDS)
@@ -509,12 +491,11 @@ okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
 
 BooksAppClient client = MoccaClient.Builder
     .sync("localhost:8080/booksapp")
-    .connectionTimeout(2000)
     .client(new MoccaOkHttpClient(okHttpClient))
     .build(BooksAppClient.class);
 ```
 
-### 6.4 Setting HTTP headers
+### 6.3 Setting HTTP headers
 
 HTTP headers can be set in Mocca at client API or method level using `com.paypal.mocca.client.annotation.RequestHeader` annotation. When `@RequestHeader` annotation is added at client API level, the header will be included across all requests made through that client. The example below shows a header added at client API level.
 
@@ -565,7 +546,7 @@ A few important notes:
 1. If the same header is set at client API and method level, the one set at the method takes precedence
 1. If the same header is defined at the same method multiple times, all specified values will be set at the header value using comma as separator
 
-### 6.5 Gathering metrics
+### 6.4 Gathering metrics
 
 Mocca supports [Micrometer](https://micrometer.io/)-based metrics via the optional library `com.paypal.mocca:mocca-micrometer:0.0.3`. These metrics primarily revolve around HTTP interactions with the target GraphQL server. The metrics have identifiers that start with `mocca.`.
 
@@ -585,7 +566,7 @@ BooksAppClient micrometerEnabledClient = MoccaClient.Builder
     .build(BooksAppClient.class);
 ```
 
-### 6.6 Configuring resilience
+### 6.5 Configuring resilience
 
 Mocca supports [Resilience4j](https://github.com/resilience4j/resilience4j)-based resilience features via the optional library `com.paypal.mocca:mocca-resilience4j:0.0.3`.
 
@@ -619,7 +600,7 @@ A few important notes:
    1. Bulkhead
 1. The order of registering each resilience feature in `MoccaResilience4j` matters. More details at the next subsection.
 
-#### 6.6.1 Resilience features execution order
+#### 6.5.1 Resilience features execution order
 
 It is very important to state that the order in which resilience features are registered dictates the execution order.
 
@@ -712,8 +693,6 @@ MoccaAsyncApache5Client asyncHttpClient = new MoccaAsyncApache5Client(apacheAsyn
 
 BooksAppClient asyncClient = MoccaClient.Builder
     .async("http://localhost:8080/booksapp")
-    .connectionTimeout(1000)
-    .readTimeout(1000)
     .client(asyncHttpClient)
     .build(AsyncBooksAppClient.class);
 ```
@@ -747,7 +726,6 @@ MoccaExecutorHttpClient<OkHttpClient> executorClient = new MoccaExecutorHttpClie
 
 AsyncBooksAppClient asyncClient = MoccaClient.Builder
         .async("localhost:8080/booksapp")
-        .connectionTimeout(1000)
         .client(executorClient)
         .build(AsyncBooksAppClient.class);
 ```
