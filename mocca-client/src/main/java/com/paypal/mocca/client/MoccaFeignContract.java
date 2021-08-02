@@ -56,7 +56,7 @@ class MoccaFeignContract extends AlwaysEncodeBodyContract {
     private void registerVarParam(Var varAnnotation, MethodMetadata metadata, int paramIndex) {
         final String variableName = varAnnotation.value();
         if (varAnnotation.raw()) {
-            Util.checkState((variableName == null || variableName.trim().equals("")) && (varAnnotation.ignore() == null ||  (varAnnotation.ignore().length == 1 && varAnnotation.ignore()[0].trim().equals(""))),
+            Util.checkState((variableName == null || variableName.trim().equals("")) && (varAnnotation.ignore() == null ||  varAnnotation.ignore().length == 0),
                     "Mocca @Var `value` and `ignore` properties set at %s.%s parameter %d must not be set if raw is set to true",
                     metadata.method().getDeclaringClass().getName(), metadata.method().getName(), paramIndex);
         } else {

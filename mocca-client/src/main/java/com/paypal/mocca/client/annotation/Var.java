@@ -69,7 +69,7 @@ public @interface Var {
      *
      * @return an array containing all fields to be ignored in a POJO variable
      */
-    String[] ignore() default "";
+    String[] ignore() default {};
 
     /**
      * It might be useful in certain cases to specify the whole GraphQL variables section as a String,
