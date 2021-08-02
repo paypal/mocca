@@ -59,10 +59,12 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestHeader {
+
     /**
      * Array of headers in key:value format
      *
      * @return array of headers
      */
-    String[] value();
+    String[] value() default {};
+
 }

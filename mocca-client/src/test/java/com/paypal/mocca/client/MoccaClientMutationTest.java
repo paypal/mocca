@@ -30,8 +30,7 @@ public class MoccaClientMutationTest {
 
     @Test
     public void mutationTest() {
-        String mutationVariables = "foo: \"boo\", bar: \"far\"";
-        SampleResponseDTO result = client.addSample(mutationVariables);
+        SampleResponseDTO result = client.addSample("boo", "far");
         assertNotNull(result);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");
@@ -45,21 +44,18 @@ public class MoccaClientMutationTest {
 
     @Test
     public void mutationNoDataTest() {
-        String mutationVariables = "foo: \"moo\", bar: \"czar 100%\"";
-        SampleResponseDTO result = client.addSample(mutationVariables);
+        SampleResponseDTO result = client.addSample("moo", "czar 100%");
         assertNull(result);
     }
 
     @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
     public void mutationErrorTest() {
-        String mutationVariables = "foo: \"zoo\", bar: \"car\"";
-        client.addSample(mutationVariables);
+        client.addSample("zoo", "car");
     }
 
     @Test
     public void mutationListTest() {
-        String mutationVariables = "foo: \"boo\", bar: \"far\"";
-        List<SampleResponseDTO> sampleReponseDTOS = client.addSampleReturnList(mutationVariables);
+        List<SampleResponseDTO> sampleReponseDTOS = client.addSampleReturnList("boo", "far");
         assertNotNull(sampleReponseDTOS);
         assertEquals(sampleReponseDTOS.size(), 2);
         assertEquals(sampleReponseDTOS.get(0).getFoo(), "boo1");
@@ -70,8 +66,7 @@ public class MoccaClientMutationTest {
 
     @Test
     public void mutationListNoDataTest() {
-        String mutationVariables = "foo: \"moo\", bar: \"czar\"";
-        List<SampleResponseDTO> sampleReponseDTOS = client.addSampleReturnList(mutationVariables);
+        List<SampleResponseDTO> sampleReponseDTOS = client.addSampleReturnList("moo", "czar");
         assertNotNull(sampleReponseDTOS);
         assertEquals(sampleReponseDTOS.size(), 0);
     }

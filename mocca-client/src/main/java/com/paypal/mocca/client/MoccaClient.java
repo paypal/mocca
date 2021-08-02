@@ -47,21 +47,22 @@ import java.util.Set;
  * import com.paypal.mocca.client.annotation.Mutation;
  * import com.paypal.mocca.client.annotation.Query;
  * import com.paypal.mocca.client.annotation.SelectionSet;
+ * import com.paypal.mocca.client.annotation.Var;
  *
  * public interface BooksAppClient extends MoccaClient {
  *
  *     &#064;Query
  *     &#064;SelectionSet("{id, name}")
- *     List&#60;Book&#62; getBooks(String variables);
+ *     List&#60;Book&#62; getBooks(&#064;Var("authorId") long authorId);
  *
  *     &#064;Query
- *     Book getBook(long id);
+ *     Book getBook(&#064;Var("id") long id);
  *
  *     &#064;Mutation
- *     Author addAuthor(Author author);
+ *     Author addAuthor(&#064;Var(value = "author", ignore = "books") Author author);
  *
  *     &#064;Mutation
- *     Book addBook(Book book);
+ *     Book addBook(&#064;Var("book") Book book);
  *
  * }</code></pre>
  *

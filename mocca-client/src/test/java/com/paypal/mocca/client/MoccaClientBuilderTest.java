@@ -65,7 +65,7 @@ public class MoccaClientBuilderTest {
             MoccaClient.Builder.async("http://localhost:8080")
                     .client(executorHttpClient)
                     .build(AsyncSampleClient.class)
-                    .getOneSample("foo: \"boo\", bar: \"far\"")
+                    .getOneSample("boo" ,"far")
                     .get();
         } catch (final ExecutionException ee) {
             assertTrue(badExecService.wasUsed());
