@@ -2,7 +2,7 @@ package com.paypal.mocca.client;
 
 import com.paypal.mocca.client.MoccaUtils.OperationType;
 import com.paypal.mocca.client.annotation.SelectionSet;
-import com.paypal.mocca.client.annotation.Variable;
+import com.paypal.mocca.client.annotation.Var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,19 +32,35 @@ class MoccaSerializer {
     MoccaSerializer() {
     }
 
+    /**
+     * The GraphQL operation variable, represented by its value,
+     * type and annotation, containing metadata useful for the
+     * encoder to write the message payload
+     */
+    static class Variable {
+        private Object value;
+        private Type type;
+        private Var metadata;
+
+        Variable(Object value, Type type, Var metadata) {
+            this.value = value;
+            this.type = type;
+            this.metadata = metadata;
+        }
+    }
+
     /*
-     * Serialize the given payload object and, using additional configuration parameters, returns a byte array containing the GraphQL HTTP request payload
+     * Serialize the given list of variables, using additional configuration parameters, and returns a byte array containing the GraphQL HTTP request payload
      *
-     * @param object this can be a request DTO object or a String (if requestType is String.class) containing the operation variables
-     * @param requestType the type of the object used to define the operation variables
+     * @param variables list of GraphQL operation variable set in the operation method
      * @param responseType the return type set in the GraphQL operation method, useful when defining the request selection set
      * @param operationName the name of the GraphQL operation
      * @param operationType the type of the GraphQL operation
-     * @param variable the variable annotation defined by the user in the GraphQL operation (this can be null)
+     * @param selectionSet the annotation used to specify the GraphQL selection set for this request
      * @return a byte array containing the GraphQL HTTP request payload
      * @throws IOException if any IO error happens when serializing the object
      */
-    byte[] serialize(final Object object, final Type requestType, final Type responseType, final String operationName, final OperationType operationType, final SelectionSet selectionSet, final Variable variable) throws IOException {
+    byte[] serialize(final List<Variable> variables, final Type responseType, final String operationName, final OperationType operationType, final SelectionSet selectionSet) throws IOException {
         ByteArrayOutputStream requestPayload = new ByteArrayOutputStream();
 
         // Adding beginning of payload all the way to input parameters
@@ -53,7 +70,7 @@ class MoccaSerializer {
         write(requestPayload, operationName);
 
         // Adding operation variables using object and its type
-        writeRequestVariables(requestPayload, object, requestType, variable);
+        writeRequestVariables(requestPayload, variables);
 
         if (selectionSet != null && (selectionSet.value().equals(SelectionSet.UNDEFINED) || selectionSet.value().trim().isEmpty())) {
             throw new MoccaException("A com.paypal.mocca.client.annotation.SelectionSet annotation with an undefined value is present at the method related to operation "
@@ -91,61 +108,137 @@ class MoccaSerializer {
 
     /*
      * Writes the variables section of the request payload according to the given parameters.
-     * This method supports two modes of operation. If the given request type is String.class,
-     * then object (which should be a String) is written as-is into the variables section of the request operation.
-     * Now, if the given request type is NOT String.class, then object is assumed to be a DTO object (based on the given type)
+     * This method supports writing variables in two modes of operation. If it is a String, primitive or primitive wrapper,
+     * then it is written as-is into the variables section of the request operation.
+     * Now, if the variable type is a POJO, or a list of POJOs, then object is assumed to be a Java bean
      * and its properties (following Java beans standard) are automatically set as the operation variables in the GraphQL request.
-     * If the DTO object has other DTOs as properties, their properties are also set as variables.
+     * If the POJO object has other POJOs as properties, their properties are also set as variables.
      *
      * @param requestPayload the output stream object used to write the request payload, based on the other parameters
-     * @param object this can be a request DTO object or a String (if requestType is String.class) containing the operation variables
-     * @param requestType the type of the object used to define the operation variables
-     * @param variable an optional possibly containing the variable annotation defined by the user in the GraphQL operation (this can be null)
+     * @param variables list of GraphQL operation variable set in the operation method
      * @throws IOException if any IO error happens when writing the request variables
      */
-    private void writeRequestVariables(final ByteArrayOutputStream requestPayload, final Object object, final Type requestType, Variable variable) throws IOException {
-        if (object == null || object instanceof String && ((String) object).trim().isEmpty()) {
-            logger.debug("Request DTO object is null, so no input parameter will be written to the GraphQL operation");
+    private void writeRequestVariables(final ByteArrayOutputStream requestPayload, final List<Variable> variables) throws IOException {
+        if (variables.isEmpty()) {
+            logger.debug("Variables list is empty, so no input parameter will be written to the GraphQL operation");
             return;
         }
 
         write(requestPayload, "(");
 
-        if (requestType.equals(String.class)) {
-            String requestVariables = ((String) object).replaceAll("\"", "\\\\\"");
-            write(requestPayload, requestVariables);
+        boolean rawVariables = variables.size() == 1 && variables.get(0).metadata.raw();
+        if (rawVariables) {
+            final String rawVariablesValue = ((String) variables.get(0).value).replaceAll("\"", "\\\\\"");
+            write(requestPayload, rawVariablesValue);
         } else {
-            List<String> ignoreFields = variable != null ? Arrays.asList(variable.ignore()) : Collections.emptyList();
-            writeRequestDto(requestPayload, object, requestType, ignoreFields);
-        }
+            List<String> variableStrings = new ArrayList<>(variables.size());
 
+            for (Variable variable : variables) {
+                if (variable.metadata.raw()) {
+                    // FIXME Class and method names are not available here. They should be added to the exception message though.
+                    throw new MoccaException("Only one GraphQL operation method parameter can have `raw` set to true under annotation " + Var.class.getName());
+                }
+
+                String variableString;
+                if (isComplexType(variable.type)) {
+                    List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
+                    ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
+                    writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), variable.type, variable.value, ignoreFields);
+                    variableString = requestDtoOutputStream.toString();
+                } else {
+                    variableString = writeRequestVariable(variable.metadata.value(), variable.value, variable.type);
+                }
+                variableStrings.add(variableString);
+            }
+
+            write(requestPayload, String.join(", ", variableStrings));
+        }
         write(requestPayload, ")");
     }
 
     /*
-     * Writes to the given output stream the variables section of the request payload using a given DTO object
-     * and its properties (following Java beans standard). If the DTO object has other DTOs as properties,
+     * Checks if the type is complex, which is anything different
+     * than a primitive, a primitive wrapper, or String
+     *
+     * @param type the type to be evaluated
+     * @return whether the type is complex
+     */
+    private static boolean isComplexType(Type type) {
+        return !(
+                type == Character.class ||
+                type == String.class ||
+                type == Integer.class ||
+                type == Long.class ||
+                type == Float.class ||
+                type == Double.class ||
+                type == Boolean.class ||
+                type.getTypeName().equals("char") ||
+                type.getTypeName().equals("int") ||
+                type.getTypeName().equals("long") ||
+                type.getTypeName().equals("float") ||
+                type.getTypeName().equals("double") ||
+                type.getTypeName().equals("boolean")
+        );
+    }
+
+    /*
+     * Returns a String containing the specification of a GraphQL variable name and its value,
+     * as it is supposed to be written in the request payload
+     */
+    private String writeRequestVariable(String name, Object value, Type type) {
+        return type == String.class || type == Character.class || type.getTypeName().equals("char") ?
+                name + ": \\\"" + value.toString() + "\\\"" :
+                name + ": " + value.toString();
+    }
+
+    /*
+     * Writes to the given output stream a GraphQL variable using the given POJO
+     * and its properties (following Java beans standard). If the POJO has other POJOs as properties,
+     * their properties are also set as variables.
+     *
+     * @param outputStream the stream the GraphQL variable should be written into
+     * @param valueName the name of the value to be written (which can be a GraphQL variable, or a field inside a complex type)
+     * @param valueType the type of the value used to be written as part of the GraphQL variables
+     * @param value the value to be written as part of the GraphQL variables
+     * @param ignoreFields the names of properties present in the given value, but to be skipped when writing the GraphQL operation variables
+     *        (names of properties in inner POJOs are specified using the outer field name followed by dot)
+     */
+    private void writeRequestPojo(final ByteArrayOutputStream outputStream, final String valueName, final Type valueType, final Object value, final List<String> ignoreFields) {
+        try {
+            write(outputStream, valueName);
+            write(outputStream, ": {");
+            writeRequestPojo(outputStream, valueType, value, ignoreFields);
+            write(outputStream, "}");
+        } catch (Exception e) {
+            throw new MoccaException("An error happened when writing request variable object of type " + valueType, e);
+        }
+    }
+
+    /*
+     * Writes to the given output stream a GraphQL variable using the given POJO
+     * and its properties (following Java beans standard). If the POJO has other POJOs as properties,
      * their properties are also set as variables (notice in this case this method is called recursively).
      *
-     * @param requestPayload the output stream object used to write the request payload, based on the other parameters
-     * @param object the request DTO object containing the operation variables
-     * @param requestType the type of the object used to define the operation variables
-     * @param ignoreFields name of properties present in the given object, but to be skipped when writing the GraphQL operation variables
-     *        (names of properties in inner DTOs are specified using the outer field name followed by dot)
+     * @param outputStream the stream the GraphQL variable should be written into
+     * @param valueType the type of the value used to be written as part of the GraphQL variables
+     * @param value the value to be written as part of the GraphQL variables
+     * @param ignoreFields the names of properties present in the given value, but to be skipped when writing the GraphQL operation variables
+     *        (names of properties in inner POJOs are specified using the outer field name followed by dot)
      */
-    // TODO Add a parameter here (to be exposed in the Variable annotation as user configuration)
-    //  to limit how deep in the request DTO this process should go (to avoid cycles).
+    // TODO Should there be a parameter here (to be exposed in the Var annotation as user configuration)
+    //  to limit how deep in the request POJO this process should go (to avoid cycles)?
     //  If not set by the user, a default number should be set (10 for example).
-    private void writeRequestDto(final ByteArrayOutputStream requestPayload, final Object object, final Type requestType, final List<String> ignoreFields) {
+    //  What esle could be done to avoid cycle?
+    private void writeRequestPojo(final ByteArrayOutputStream outputStream, final Type valueType, final Object value, final List<String> ignoreFields) {
         try {
-            final BeanInfo info = Introspector.getBeanInfo(MoccaUtils.erase(requestType));
+            final BeanInfo info = Introspector.getBeanInfo(MoccaUtils.erase(valueType));
             final PropertyDescriptor[] pds = info.getPropertyDescriptors();
             final List<String> variables = Arrays.stream(pds)
                     .filter(pd -> !pd.getName().equals("class"))
                     .filter(pd -> !ignoreFields.contains(pd.getName()))
                     .map(pd -> {
                         try {
-                            return new Tuple<>(pd.getName(), pd.getReadMethod().invoke(object));
+                            return new Tuple<>(pd.getName(), pd.getReadMethod().invoke(value));
                         } catch (IllegalAccessException | InvocationTargetException e) {
                             logger.warn("Request DTO property " + pd.getName() + " could not be accessed", e);
                             return new Tuple<>(pd.getName(), null);
@@ -166,17 +259,16 @@ class MoccaSerializer {
                                     .filter(f -> f.startsWith(prefix))
                                     .map(f -> f.substring(prefix.length()))
                                     .collect(Collectors.toList());
-
-                            writeRequestDto(complexVariable, v, v.getClass(), specificIgnoreFields);
+                            writeRequestPojo(complexVariable, v.getClass(), v, specificIgnoreFields);
                             e.value = "{" + complexVariable.toString() + "}";
                         }
                     })
                     .map(e -> e.key + ": " + e.value)
                     .collect(Collectors.toList());
 
-            write(requestPayload, String.join(", ", variables));
+            write(outputStream, String.join(", ", variables));
         } catch (Exception e) {
-            throw new MoccaException("An error happened when writing request DTO object of type " + requestType, e);
+            throw new MoccaException("An error happened when writing request DTO object of type " + valueType, e);
         }
     }
 
@@ -228,13 +320,12 @@ class MoccaSerializer {
                     .map(pd -> new Tuple<Class<?>>(pd.getName(), pd.getReadMethod().getReturnType()))
                     .map(e -> {
                         Class<?> c = e.value;
-                        if (c == String.class || c == Integer.class || c == Float.class || c == Boolean.class
-                                || c.getName().equals("int") || c.getName().equals("float") || c.getName().equals("boolean")) {
-                            return e.key;
-                        } else {
+                        if (isComplexType(c)) {
                             ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
                             writeSelectionSet(complexVariable, c);
                             return e.key + complexVariable.toString();
+                        } else {
+                            return e.key;
                         }
                     })
                     .collect(Collectors.toList());

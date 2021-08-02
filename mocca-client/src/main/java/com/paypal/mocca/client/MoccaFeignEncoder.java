@@ -1,11 +1,12 @@
 package com.paypal.mocca.client;
 
+import com.paypal.mocca.client.MoccaSerializer.Variable;
 import com.paypal.mocca.client.MoccaUtils.OperationType;
 import com.paypal.mocca.client.annotation.Mutation;
 import com.paypal.mocca.client.annotation.Query;
-import com.paypal.mocca.client.annotation.RequestHeaderParam;
 import com.paypal.mocca.client.annotation.SelectionSet;
-import com.paypal.mocca.client.annotation.Variable;
+import com.paypal.mocca.client.annotation.Var;
+import com.paypal.mocca.client.annotation.RequestHeaderParam;
 import feign.RequestTemplate;
 import feign.Response;
 import feign.codec.EncodeException;
@@ -17,7 +18,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mocca Feign encoder, responsible for serializing the request payload
@@ -31,14 +33,19 @@ class MoccaFeignEncoder implements Encoder {
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
 
+        if (bodyType != Object[].class) {
+            throw new MoccaException("Unexpected body object type: " + bodyType.getTypeName());
+        }
+        Object[] parameters = (Object[]) object;
+
         try {
             final Type responseType = template.methodMetadata().returnType();
             final String operationName = getOperationName(template);
             final OperationType operationType = getOperationType(template);
             final SelectionSet selectionSet = getSelectionSet(template);
-            final Optional<Variable> variable = getVariable(template);
+            final List<Variable> variables = getVariables(parameters, template);
 
-            final byte[] data = moccaSerializer.serialize(object, bodyType, responseType, operationName, operationType, selectionSet, variable.orElse(null));
+            final byte[] data = moccaSerializer.serialize(variables, responseType, operationName, operationType, selectionSet);
             template.body(data, Charset.defaultCharset());
 
         } catch (IOException e) {
@@ -94,10 +101,10 @@ class MoccaFeignEncoder implements Encoder {
         Query query = method.getAnnotation(Query.class);
         Mutation mutation = method.getAnnotation(Mutation.class);
         if (query == null && mutation == null) {
-            throw new IllegalStateException("The operation method " + method.getName() + " is not annotated with " + Query.class.getName() + " nor " + Mutation.class);
+            throw new MoccaException("The operation method " + method.getName() + " is not annotated with " + Query.class.getName() + " nor " + Mutation.class.getName());
         }
         if (query != null && mutation != null) {
-            throw new IllegalStateException("The operation method " + method.getName() + " is not annotated with both " + Query.class.getName() + " and " + Mutation.class);
+            throw new MoccaException("The operation method " + method.getName() + " is not annotated with both " + Query.class.getName() + " and " + Mutation.class.getName());
         }
         return query != null ? query : mutation;
     }
@@ -114,33 +121,38 @@ class MoccaFeignEncoder implements Encoder {
     }
 
     /**
-     * Returns an optional containing the operation variable annotation
-     * associated with a Feign request template object.
-     * If the request method doesn't have a variable annotation,
-     * an empty optional is returned.
+     * Returns a list containing the operation variables associated with a Feign request template object.
+     * Operation variables are the operation method parameters annotated with {@link com.paypal.mocca.client.annotation.Var}.
+     * If the request method doesn't have operation variables, an empty list is returned.
+     * The list is ordered according to {@code parameters} order.
      *
+     * @param parameters GraphQL operation method parameter values
      * @param requestTemplate the Feign request template object
-     * @return an optional containing the operation variable annotation
+     * @return a list containing the operation variables
      * associated with a Feign request template object
      */
-    static Optional<Variable> getVariable(RequestTemplate requestTemplate) {
-        Method method = requestTemplate.methodMetadata().method();
-        Parameter[] parameters = method.getParameters();
-        if (parameters.length == 0) {
-            return Optional.empty();
-        }
-        int varCount = 0;
-        int varIndex = 0;
+    private static List<Variable> getVariables(Object[] parameters, RequestTemplate requestTemplate) {
+        Parameter[] parametersMetadata = requestTemplate.methodMetadata().method().getParameters();
+        List<Variable> variables = new ArrayList<>(parameters.length);
         for (int i = 0; i < parameters.length; i++) {
-            if (parameters[i].getAnnotation(RequestHeaderParam.class) == null) {
-                varCount++;
-                varIndex = i;
+            Parameter parameterMetadata = parametersMetadata[i];
+            Var varAnnotation = parameterMetadata.getAnnotation(Var.class);
+            // FIXME It would be better if this check happened at client definition time, instead of request time
+            if (varAnnotation == null) {
+                if (parameterMetadata.getAnnotation(RequestHeaderParam.class) == null) {
+                    final String method = requestTemplate.methodMetadata().method().getName();
+                    throw new MoccaException("Invalid GraphQL operation method " + method + ", make sure all its parameters are annotated with one Mocca annotation");
+                }
+            } else {
+                if (parameterMetadata.getAnnotation(RequestHeaderParam.class) != null) {
+                    final String method = requestTemplate.methodMetadata().method().getName();
+                    throw new MoccaException("Invalid GraphQL operation method " + method + ", make sure all its parameters are annotated with one Mocca annotation");
+                }
+                Variable variable = new Variable(parameters[i], parameterMetadata.getType(), varAnnotation);
+                variables.add(variable);
             }
         }
-        if (varCount > 1) {
-            throw new IllegalStateException("The operation method " + method.getName() + " has more than one parameter " +
-                    "not annotated with RequestHeaderParam annotation");
-        }
-        return Optional.ofNullable(parameters[varIndex].getAnnotation(Variable.class));
+        return variables;
     }
+
 }

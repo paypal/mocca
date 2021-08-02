@@ -21,16 +21,14 @@ public class MoccaMutationTest extends AbstractFunctionalTests {
     public void testBasicMutations() throws Exception {
 
         //Add Author first
-        Author authorRequestDto = Author.builder().setName("mocca").build();
-        Author author = client.addAuthor(authorRequestDto);
+        Author author = client.addAuthor("mocca");
 
         assertNotNull(author);
         assertNotNull(author.getId());
         assertEquals(author.getName(), "mocca");
 
         //Add Book 
-        String bookMutationVariables = "name: \"moccaBook\", authorId : " + author.getId();
-        Book book = client.addBook(bookMutationVariables);
+        Book book = client.addBook("moccaBook", author.getId());
         assertNotNull(book);
         assertNotNull(book.getId());
         assertEquals(book.getAuthorId(), author.getId());

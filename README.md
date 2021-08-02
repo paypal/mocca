@@ -22,7 +22,7 @@ Mocca offers support for:
 
 1. GraphQL features
 	1. GraphQL queries and mutations
-	1. Automatic variable definition based on DTO request type
+	1. Automatic variable definition
 	1. Automatic selection set definition based on DTO response type
 	1. Annotation and String based custom input variables
 	1. Annotation and String based custom selection set
