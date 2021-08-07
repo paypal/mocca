@@ -133,8 +133,9 @@ public final class MoccaResilience4j extends MoccaResiliency {
 
         /**
          * Adds a Fallback to the decorator chain
+         *
          * @param fallBack the fallback object to be set to in this builder
-         * @return
+         * @return this builder
          */
         public Builder fallback(final Object fallBack) {
             this.feignBuilder = feignBuilder.withFallback(fallBack);
@@ -143,9 +144,10 @@ public final class MoccaResilience4j extends MoccaResiliency {
 
         /**
          * Adds a Fallback to the decorator chain using the exception filter predicate
+         *
          * @param fallBack the fallback object to be set to in this builder
          * @param filter Predicate for the exception filter
-         * @return
+         * @return this builder
          */
         public Builder fallback(final Object fallBack, Predicate<Exception> filter) {
             this.feignBuilder = feignBuilder.withFallback(fallBack, filter);
@@ -154,9 +156,10 @@ public final class MoccaResilience4j extends MoccaResiliency {
 
         /**
          * Adds a Fallback to the decorator chain using the exception filter class
+         *
          * @param fallBack the fallback object to be set to in this builder
          * @param filter Class for the exception filter
-         * @return
+         * @return this builder
          */
         public Builder fallback(final Object fallBack, Class<? extends Exception> filter) {
             this.feignBuilder = feignBuilder.withFallback(fallBack, filter);
@@ -165,8 +168,9 @@ public final class MoccaResilience4j extends MoccaResiliency {
 
         /**
          * Adds a Fallback factory to the decorator chain
+         *
          * @param fallBackFactory the fallback factory function to be set in this builder
-         * @return
+         * @return this builder
          */
         public Builder fallbackFactory(Function<Exception, ?> fallBackFactory ) {
             this.feignBuilder = feignBuilder.withFallbackFactory(fallBackFactory);
@@ -175,9 +179,10 @@ public final class MoccaResilience4j extends MoccaResiliency {
 
         /**
          * Adds a Fallback factory to the decorator chain using the exception filter class
+         *
          * @param fallbackFactory the fallback factory function to be set in this builder
          * @param filter Class for the exception filter
-         * @return
+         * @return this builder
          */
         public Builder fallbackFactory(Function<Exception, ?> fallbackFactory,
                                        Class<? extends Exception> filter) {
@@ -187,9 +192,10 @@ public final class MoccaResilience4j extends MoccaResiliency {
 
         /**
          * Adds a Fallback factory to the decorator chain using the exception filter predicate
+         *
          * @param fallbackFactory the fallback factory function to be set in this builder
          * @param filter Predicate for the exception filter
-         * @return
+         * @return this builder
          */
         public Builder fallbackFactory(Function<Exception, ?> fallbackFactory,
                                        Predicate<Exception> filter) {
