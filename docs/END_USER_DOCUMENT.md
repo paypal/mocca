@@ -606,28 +606,13 @@ As an example, in the sample code below, `rateLimiter` in `moccaResilience1` wil
 MoccaResilience4j moccaResilience1 = new MoccaResilience4j.Builder()
     .rateLimiter(rateLimiter)
     .circuitBreaker(circuitBreaker)
-    .build();
-
-MoccaResilience4j moccaResilience2 = new MoccaResilience4j.Builder()
-    .circuitBreaker(circuitBreaker)
-    .rateLimiter(rateLimiter)
-    .build();
-```
-
-#### 6.5.2 Adding fallback to your client
-
-``` java
-MoccaResilience4j moccaResilience1 = new MoccaResilience4j.Builder()
-    .rateLimiter(rateLimiter)
-    .circuitBreaker(circuitBreaker)
     .fallback(fallback)
     .build();
 
-// Using Fallback factory
 MoccaResilience4j moccaResilience2 = new MoccaResilience4j.Builder()
-    .rateLimiter(rateLimiter)
     .circuitBreaker(circuitBreaker)
-    .fallbackFactory(fallbackFactory)
+    .rateLimiter(rateLimiter)
+    .fallback(fallback)
     .build();
 ```
 

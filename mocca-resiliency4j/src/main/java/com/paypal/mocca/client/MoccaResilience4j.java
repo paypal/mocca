@@ -146,7 +146,7 @@ public final class MoccaResilience4j extends MoccaResiliency {
          * Adds a Fallback to the decorator chain using the exception filter predicate
          *
          * @param fallBack the fallback object to be set to in this builder
-         * @param filter Predicate for the exception filter
+         * @param filter predicate for the exception filter
          * @return this builder
          */
         public Builder fallback(final Object fallBack, Predicate<Exception> filter) {
@@ -158,7 +158,7 @@ public final class MoccaResilience4j extends MoccaResiliency {
          * Adds a Fallback to the decorator chain using the exception filter class
          *
          * @param fallBack the fallback object to be set to in this builder
-         * @param filter Class for the exception filter
+         * @param filter class for the exception filter
          * @return this builder
          */
         public Builder fallback(final Object fallBack, Class<? extends Exception> filter) {
@@ -181,7 +181,7 @@ public final class MoccaResilience4j extends MoccaResiliency {
          * Adds a Fallback factory to the decorator chain using the exception filter class
          *
          * @param fallbackFactory the fallback factory function to be set in this builder
-         * @param filter Class for the exception filter
+         * @param filter class for the exception filter
          * @return this builder
          */
         public Builder fallbackFactory(Function<Exception, ?> fallbackFactory,
@@ -194,7 +194,7 @@ public final class MoccaResilience4j extends MoccaResiliency {
          * Adds a Fallback factory to the decorator chain using the exception filter predicate
          *
          * @param fallbackFactory the fallback factory function to be set in this builder
-         * @param filter Predicate for the exception filter
+         * @param filter predicate for the exception filter
          * @return this builder
          */
         public Builder fallbackFactory(Function<Exception, ?> fallbackFactory,
