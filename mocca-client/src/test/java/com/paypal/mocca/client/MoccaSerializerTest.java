@@ -5,6 +5,7 @@ import com.paypal.mocca.client.annotation.Var;
 import com.paypal.mocca.client.sample.ComplexSampleType;
 import com.paypal.mocca.client.sample.SampleRequestDTO;
 import com.paypal.mocca.client.sample.SampleResponseDTO;
+import com.paypal.mocca.client.sample.SuperComplexSampleType;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
@@ -139,6 +141,119 @@ public class MoccaSerializerTest {
 
         requestTest(variables, ComplexSampleType.class,"getABeer", MoccaUtils.OperationType.Query,
                 selectionSet, "{\n  \"query\" : \"query{getABeer(sampleRequest: {bar: \\\"bar\\\", foo: \\\"foo\\\"}) {booleanVar complexField stringVar}}\"\n}");
+    }
+
+    @Test
+    public void complexWithStringListRequestTest() throws IOException {
+        SuperComplexSampleType.SuperComplexField superComplexField =
+                new SuperComplexSampleType.SuperComplexField(77, "sevenseven", false,
+                        Arrays.asList(new String[] {"cat", "dog", "monkey"}), null, null);
+        List<SuperComplexSampleType.SuperComplexField> listOfComplexSampleTypes = new ArrayList<>();
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
+                superComplexField, listOfComplexSampleTypes, null);
+
+        List<MoccaSerializer.Variable> variables = Collections.singletonList(
+                new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class, newVar("sampleRequest")));
+
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
+                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, complexListVar: [], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+    }
+
+    @Test
+    public void simpleWithListStringRequestTest() throws IOException {
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
+                null, null, Arrays.asList(new String[] {"cat", "dog", "monkey"}));
+        List<MoccaSerializer.Variable> variables = Collections.singletonList(
+                new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class, newVar("sampleRequest")));
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
+                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, intVar: 7, stringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+    }
+
+    @Test
+    public void complexIgnoreListStringRequestTest() throws IOException {
+        SuperComplexSampleType.SuperComplexField superComplexField =
+                new SuperComplexSampleType.SuperComplexField(77, "sevenseven", false,
+                        Arrays.asList(new String[] {"cat", "dog", "monkey"}), null, null);
+        List<SuperComplexSampleType.SuperComplexField> listOfComplexSampleTypes = new ArrayList<>();
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
+                superComplexField, listOfComplexSampleTypes, null);
+
+        List<MoccaSerializer.Variable> variables = Collections.singletonList(
+                new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
+                        newVar("sampleRequest", "complexField.innerStringListVar")));
+
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
+                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerIntVar: 77, innerStringVar: \\\"sevenseven\\\"}, complexListVar: [], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+    }
+
+    @Test
+    public void complexListObjectIgnoreSubfieldRequestTest() throws IOException {
+        SuperComplexSampleType.SuperComplexField superComplexField1 =
+                new SuperComplexSampleType.SuperComplexField(77, "sevenseven", false,
+                        Arrays.asList(new String[] {"cat", "dog", "monkey"}), null, null);
+        SuperComplexSampleType.SuperComplexField superComplexField2 =
+                new SuperComplexSampleType.SuperComplexField(99, "numbernine", false,
+                        Arrays.asList(new String[] {"bat", "frog", "money"}), null, null);
+        List<SuperComplexSampleType.SuperComplexField> listOfComplexSampleTypes = new ArrayList<>();
+        listOfComplexSampleTypes.add(superComplexField1);
+        listOfComplexSampleTypes.add(superComplexField2);
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
+                null, listOfComplexSampleTypes, null);
+
+        List<MoccaSerializer.Variable> variables = Collections.singletonList(
+                new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
+                        newVar("sampleRequest", "complexListVar.innerStringListVar")));
+
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
+                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexListVar: [{innerBooleanVar: false, innerIntVar: 77, innerStringVar: \\\"sevenseven\\\"}, {innerBooleanVar: false, innerIntVar: 99, innerStringVar: \\\"numbernine\\\"}], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+    }
+
+    @Test
+    public void complexSubObjectWithSubIgnoreRequestTest() throws IOException {
+        SuperComplexSampleType.SuperComplexField superComplexField1 =
+                new SuperComplexSampleType.SuperComplexField(77, "sevenseven", false,
+                        Arrays.asList(new String[] {"cat", "dog", "monkey"}), null, null);
+        SuperComplexSampleType.SuperComplexField superComplexField2 =
+                new SuperComplexSampleType.SuperComplexField(99, "numbernine", false,
+                        Arrays.asList(new String[] {"bat", "frog", "money"}), null, null);
+        superComplexField1.setInnerComplexVar(superComplexField2);
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
+                superComplexField1, null , null);
+
+        List<MoccaSerializer.Variable> variables = Collections.singletonList(
+                new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
+                        newVar("sampleRequest", "complexField.innerComplexVar.innerBooleanVar")));
+
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
+                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerComplexVar: {innerIntVar: 99, innerStringListVar: [\\\"bat\\\", \\\"frog\\\", \\\"money\\\"], innerStringVar: \\\"numbernine\\\"}, innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+    }
+
+    @Test
+    public void complexSubObjectListWithSubIgnoreRequestTest() throws IOException {
+        SuperComplexSampleType.SuperComplexField superComplexField1 =
+                new SuperComplexSampleType.SuperComplexField(77, "sevenseven", false,
+                        Arrays.asList(new String[] {"cat", "dog", "monkey"}), null, null);
+        SuperComplexSampleType.SuperComplexField superComplexField2 =
+                new SuperComplexSampleType.SuperComplexField(99, "numbernine", false,
+                        Arrays.asList(new String[] {"bat", "frog", "money"}), null, null);
+        SuperComplexSampleType.SuperComplexField superComplexField3 =
+                new SuperComplexSampleType.SuperComplexField(666, "devilsnumber", true,
+                        Arrays.asList(new String[] {"rat", "warthog", "nothing"}), null, null);
+
+        List<SuperComplexSampleType.SuperComplexField> listOfComplexSampleTypes = new ArrayList<>();
+        listOfComplexSampleTypes.add(superComplexField2);
+        listOfComplexSampleTypes.add(superComplexField3);
+        superComplexField1.setInnerComplexListVar(listOfComplexSampleTypes);
+
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
+                superComplexField1, null , null);
+
+        List<MoccaSerializer.Variable> variables = Collections.singletonList(
+                new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
+                        newVar("sampleRequest", "complexField.innerComplexListVar.innerStringVar")));
+
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
+                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerComplexListVar: [{innerBooleanVar: false, innerIntVar: 99, innerStringListVar: [\\\"bat\\\", \\\"frog\\\", \\\"money\\\"]}, {innerBooleanVar: true, innerIntVar: 666, innerStringListVar: [\\\"rat\\\", \\\"warthog\\\", \\\"nothing\\\"]}], innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
     }
 
     private void requestTest(List<MoccaSerializer.Variable> variables, Type responseType, String operationName, MoccaUtils.OperationType operationType, SelectionSet selectionSet, String expectedRequest) throws IOException {
