@@ -265,7 +265,6 @@ class MoccaSerializer {
             return String.valueOf(v);
         } else if (v instanceof List) {
             List<?> listElement = (List)v;
-            //List<String> currentIgnoreFields = getNextIgnoreFields(key + ".", ignoreFields);
             List<String> stringElements = listElement.stream().map(le -> {
                 return objectToString(le, key, ignoreFields);
             }).collect(Collectors.toList());
