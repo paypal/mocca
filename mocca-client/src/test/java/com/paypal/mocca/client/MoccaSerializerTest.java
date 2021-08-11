@@ -155,8 +155,8 @@ public class MoccaSerializerTest {
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class, newVar("sampleRequest")));
 
-        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
-                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, complexListVar: [], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Query,
+                null,  "{\n  \"query\" : \"query{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, complexListVar: [], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
     }
 
     @Test
@@ -165,8 +165,8 @@ public class MoccaSerializerTest {
                 null, null, Arrays.asList(new String[] {"cat", "dog", "monkey"}));
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class, newVar("sampleRequest")));
-        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
-                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, intVar: 7, stringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Query,
+                null,  "{\n  \"query\" : \"query{getOneComplexSample(sampleRequest: {booleanVar: true, intVar: 7, stringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
     }
 
     @Test
@@ -182,8 +182,8 @@ public class MoccaSerializerTest {
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
                         newVar("sampleRequest", "complexField.innerStringListVar")));
 
-        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
-                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerIntVar: 77, innerStringVar: \\\"sevenseven\\\"}, complexListVar: [], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Query,
+                null,  "{\n  \"query\" : \"query{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerIntVar: 77, innerStringVar: \\\"sevenseven\\\"}, complexListVar: [], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
     }
 
     @Test
@@ -204,8 +204,8 @@ public class MoccaSerializerTest {
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
                         newVar("sampleRequest", "complexListVar.innerStringListVar")));
 
-        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
-                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexListVar: [{innerBooleanVar: false, innerIntVar: 77, innerStringVar: \\\"sevenseven\\\"}, {innerBooleanVar: false, innerIntVar: 99, innerStringVar: \\\"numbernine\\\"}], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Query,
+                null,  "{\n  \"query\" : \"query{getOneComplexSample(sampleRequest: {booleanVar: true, complexListVar: [{innerBooleanVar: false, innerIntVar: 77, innerStringVar: \\\"sevenseven\\\"}, {innerBooleanVar: false, innerIntVar: 99, innerStringVar: \\\"numbernine\\\"}], intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
     }
 
     @Test
@@ -224,8 +224,8 @@ public class MoccaSerializerTest {
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
                         newVar("sampleRequest", "complexField.innerComplexVar.innerBooleanVar")));
 
-        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
-                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerComplexVar: {innerIntVar: 99, innerStringListVar: [\\\"bat\\\", \\\"frog\\\", \\\"money\\\"], innerStringVar: \\\"numbernine\\\"}, innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Query,
+                null,  "{\n  \"query\" : \"query{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerComplexVar: {innerIntVar: 99, innerStringListVar: [\\\"bat\\\", \\\"frog\\\", \\\"money\\\"], innerStringVar: \\\"numbernine\\\"}, innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
     }
 
     @Test
@@ -252,8 +252,8 @@ public class MoccaSerializerTest {
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
                         newVar("sampleRequest", "complexField.innerComplexListVar.innerStringVar")));
 
-        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Mutation,
-                null,  "{\n  \"query\" : \"mutation{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerComplexListVar: [{innerBooleanVar: false, innerIntVar: 99, innerStringListVar: [\\\"bat\\\", \\\"frog\\\", \\\"money\\\"]}, {innerBooleanVar: true, innerIntVar: 666, innerStringListVar: [\\\"rat\\\", \\\"warthog\\\", \\\"nothing\\\"]}], innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
+        requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", MoccaUtils.OperationType.Query,
+                null,  "{\n  \"query\" : \"query{getOneComplexSample(sampleRequest: {booleanVar: true, complexField: {innerBooleanVar: false, innerComplexListVar: [{innerBooleanVar: false, innerIntVar: 99, innerStringListVar: [\\\"bat\\\", \\\"frog\\\", \\\"money\\\"]}, {innerBooleanVar: true, innerIntVar: 666, innerStringListVar: [\\\"rat\\\", \\\"warthog\\\", \\\"nothing\\\"]}], innerIntVar: 77, innerStringListVar: [\\\"cat\\\", \\\"dog\\\", \\\"monkey\\\"], innerStringVar: \\\"sevenseven\\\"}, intVar: 7, stringVar: \\\"seven\\\"}) {bar foo}}\"\n}");
     }
 
     private void requestTest(List<MoccaSerializer.Variable> variables, Type responseType, String operationName, MoccaUtils.OperationType operationType, SelectionSet selectionSet, String expectedRequest) throws IOException {

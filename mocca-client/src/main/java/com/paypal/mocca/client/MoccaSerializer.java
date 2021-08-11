@@ -265,9 +265,9 @@ class MoccaSerializer {
             return String.valueOf(v);
         } else if (v instanceof List) {
             List<?> listElement = (List)v;
-            List<String> stringElements = listElement.stream().map(le -> {
-                return objectToString(le, key, ignoreFields);
-            }).collect(Collectors.toList());
+            List<String> stringElements = listElement.stream().
+                    map(le -> objectToString(le, key, ignoreFields)).
+                    collect(Collectors.toList());
             return "[" + String.join(", ", stringElements) + "]";
         } else {
             ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
