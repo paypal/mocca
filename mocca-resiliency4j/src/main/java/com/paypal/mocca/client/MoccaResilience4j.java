@@ -7,6 +7,9 @@ import io.github.resilience4j.feign.Resilience4jFeign;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.retry.Retry;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 /**
  * Mocca supports Resilience4j-based resilience.
  * <br>
@@ -33,11 +36,12 @@ import io.github.resilience4j.retry.Retry;
  * A few important notes:
  * <ol>
  *     <li>Mocca Resilience4j feature is only supported by clients created with {@link com.paypal.mocca.client.MoccaClient.Builder.SyncBuilder#sync(String)} (as seen in the example above). Clients created with {@link com.paypal.mocca.client.MoccaClient.Builder.AsyncBuilder#async(String)} don't support Resilience4j at the moment.</li>
- *     <li>Although the example above only shows the setting of a circuit breaker, the following additional Resilience4j features are supported. Notice Fallbacks are not supported at the moment.
+ *     <li>Although the example above only shows the setting of a circuit breaker, the following additional Resilience4j features are supported.
  *         <ol>
  *             <li>Retry</li>
  *             <li>Rate limiting</li>
  *             <li>Bulkhead</li>
+ *             <li>Fallback</li>
  *         </ol>
  *     </li>
  *     <li>The order of registering each resilience feature in {@link MoccaResilience4j} matters. More details at the next subsection.</li>
@@ -60,7 +64,7 @@ import io.github.resilience4j.retry.Retry;
  * </code></pre>
  * Notice the instantiation and configuration of {@code rateLimiter} and {@code circuitBreaker} were omitted for brevity.
  *
- * @author crankydillo@gmail.com
+ * @author crankydillo@gmail.com amansingh21197@gmail.com
  */
 public final class MoccaResilience4j extends MoccaResiliency {
 
@@ -126,5 +130,78 @@ public final class MoccaResilience4j extends MoccaResiliency {
             this.feignBuilder = feignBuilder.withBulkhead(bulkhead);
             return this;
         }
+
+        /**
+         * Adds a Fallback to the decorator chain
+         *
+         * @param fallBack the fallback object to be set to in this builder
+         * @return this builder
+         */
+        public Builder fallback(final Object fallBack) {
+            this.feignBuilder = feignBuilder.withFallback(fallBack);
+            return this;
+        }
+
+        /**
+         * Adds a Fallback to the decorator chain using the exception filter predicate
+         *
+         * @param fallBack the fallback object to be set to in this builder
+         * @param filter predicate for the exception filter
+         * @return this builder
+         */
+        public Builder fallback(final Object fallBack, Predicate<Exception> filter) {
+            this.feignBuilder = feignBuilder.withFallback(fallBack, filter);
+            return this;
+        }
+
+        /**
+         * Adds a Fallback to the decorator chain using the exception filter class
+         *
+         * @param fallBack the fallback object to be set to in this builder
+         * @param filter class for the exception filter
+         * @return this builder
+         */
+        public Builder fallback(final Object fallBack, Class<? extends Exception> filter) {
+            this.feignBuilder = feignBuilder.withFallback(fallBack, filter);
+            return this;
+        }
+
+        /**
+         * Adds a Fallback factory to the decorator chain
+         *
+         * @param fallBackFactory the fallback factory function to be set in this builder
+         * @return this builder
+         */
+        public Builder fallbackFactory(Function<Exception, ?> fallBackFactory ) {
+            this.feignBuilder = feignBuilder.withFallbackFactory(fallBackFactory);
+            return this;
+        }
+
+        /**
+         * Adds a Fallback factory to the decorator chain using the exception filter class
+         *
+         * @param fallbackFactory the fallback factory function to be set in this builder
+         * @param filter class for the exception filter
+         * @return this builder
+         */
+        public Builder fallbackFactory(Function<Exception, ?> fallbackFactory,
+                                       Class<? extends Exception> filter) {
+            this.feignBuilder = feignBuilder.withFallbackFactory(fallbackFactory, filter);
+            return this;
+        }
+
+        /**
+         * Adds a Fallback factory to the decorator chain using the exception filter predicate
+         *
+         * @param fallbackFactory the fallback factory function to be set in this builder
+         * @param filter predicate for the exception filter
+         * @return this builder
+         */
+        public Builder fallbackFactory(Function<Exception, ?> fallbackFactory,
+                                       Predicate<Exception> filter) {
+            this.feignBuilder = feignBuilder.withFallbackFactory(fallbackFactory, filter);
+            return this;
+        }
+
     }
 }
