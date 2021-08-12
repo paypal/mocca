@@ -9,6 +9,8 @@ import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.function.Function;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -52,5 +54,19 @@ public class MoccaResilience4jTest {
         final RateLimiter rl = RateLimiter.ofDefaults("defaults");
         new MoccaResilience4j.Builder(decoratedBuilder).rateLimiter(rl);
         verify(decoratedBuilder).withRateLimiter(rl);
+    }
+
+    @Test
+    void fallBackTest() {
+        final Object fallback = Mockito.any();
+        new MoccaResilience4j.Builder(decoratedBuilder).fallback(fallback);
+        verify(decoratedBuilder).withFallback(fallback);
+    }
+
+    @Test
+    void fallBackFactoryTest() {
+        final Function<Exception, ?> fallbackFactory = Mockito.any();
+        new MoccaResilience4j.Builder(decoratedBuilder).fallbackFactory(fallbackFactory);
+        verify(decoratedBuilder).withFallbackFactory(fallbackFactory);
     }
 }

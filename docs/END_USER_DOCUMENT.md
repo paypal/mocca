@@ -594,10 +594,12 @@ Notice that a Mocca builder is used to create a `MoccaResilience4j` object conta
 
 A few important notes:
 1. Mocca Resilience4j feature is only supported by clients created with the `sync` builder (as seen in the example above). Clients created with Mocca `async` builder don't support Resilience4j at the moment.
-1. Although the example above only shows the setting of a circuit breaker, the following additional Resilience4j features are supported. Notice Fallbacks are not supported at the moment.
+1. Although the example above only shows the setting of a circuit breaker, the following additional Resilience4j features are supported.
    1. Retry
-   1. Rate limiting
-   1. Bulkhead
+   2. Rate limiting
+   3. Bulkhead
+   4. Fallback
+   
 1. The order of registering each resilience feature in `MoccaResilience4j` matters. More details at the next subsection.
 
 #### 6.5.1 Resilience features execution order
@@ -610,11 +612,13 @@ As an example, in the sample code below, `rateLimiter` in `moccaResilience1` wil
 MoccaResilience4j moccaResilience1 = new MoccaResilience4j.Builder()
     .rateLimiter(rateLimiter)
     .circuitBreaker(circuitBreaker)
+    .fallback(fallback)
     .build();
 
 MoccaResilience4j moccaResilience2 = new MoccaResilience4j.Builder()
     .circuitBreaker(circuitBreaker)
     .rateLimiter(rateLimiter)
+    .fallback(fallback)
     .build();
 ```
 
