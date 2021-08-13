@@ -310,7 +310,24 @@ That can be configured as follows during API definition:
 int addAuthor(@Var(value = "author", ignore = "books") Author author);
 ```
 
-In the example above, when calling `addAuthor`, Mocca will not include the list of books as variable in the payload of the GraphQL message.
+In the example above, when calling `addAuthor`, Mocca will not include the list of books as variable in the payload of the GraphQL message. 
+For a slightly more complicated example, let's say you wanted to add a book along with the book's author but don't want to include the list
+of books written by the author. You would use the `ignore` property like this:
+
+```java
+public class Author {
+    String name;
+    Book[] books;
+    
+}
+   
+/**
+ * Adds a book with the author but without the list of books written by the author
+ */
+@Mutation
+int addBook(@Var(value = "book", ignore = "author.books") Book book);
+```
+In this case the `books` field in the `author` sub-object would be omitted.
 
 ### 4.5 Specifying GraphQL selection set
 
