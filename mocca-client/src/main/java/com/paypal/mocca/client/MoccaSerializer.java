@@ -247,21 +247,7 @@ class MoccaSerializer {
                     .filter(e -> e.value != null)
                     .peek(e -> {
                         Object v = e.value;
-                        if (v instanceof String) {
-                            e.value = "\\\"" + v + "\\\"";
-                        } else if (v instanceof Number || v instanceof Boolean) {
-                            e.value = String.valueOf(v);
-                        } else {
-                            ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
-
-                            final String prefix = e.key + ".";
-                            List<String> specificIgnoreFields = ignoreFields.stream()
-                                    .filter(f -> f.startsWith(prefix))
-                                    .map(f -> f.substring(prefix.length()))
-                                    .collect(Collectors.toList());
-                            writeRequestPojo(complexVariable, v.getClass(), v, specificIgnoreFields);
-                            e.value = "{" + complexVariable.toString() + "}";
-                        }
+                        e.value = objectToString(v, e.key, ignoreFields);
                     })
                     .map(e -> e.key + ": " + e.value)
                     .collect(Collectors.toList());
@@ -272,6 +258,40 @@ class MoccaSerializer {
         }
     }
 
+    private String objectToString(final Object v, String key, final List<String> ignoreFields) {
+        if (v instanceof String) {
+            return "\\\"" + v + "\\\"";
+        } else if (v instanceof Number || v instanceof Boolean) {
+            return String.valueOf(v);
+        } else if (v instanceof List) {
+            List<?> listElement = (List)v;
+            List<String> stringElements = listElement.stream().
+                    map(le -> objectToString(le, key, ignoreFields)).
+                    collect(Collectors.toList());
+            return "[" + String.join(", ", stringElements) + "]";
+        } else {
+            ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
+
+            writeRequestPojo(complexVariable, v.getClass(), v,
+                    getNextIgnoreFields(key + ".", ignoreFields));
+            return "{" + complexVariable.toString() + "}";
+        }
+    }
+
+    /**
+     * Remove the current key name from the ignore fields to get the ignore names
+     * for objects lower down in the hierarchy
+     * @param prefix prefix to remove
+     * @param ignoreFields current list of ignore fields
+     * @return new list of ignore fields for objects at or below the current position
+     */
+    private List<String> getNextIgnoreFields(String prefix, final List<String> ignoreFields) {
+        List<String> specificIgnoreFields = ignoreFields.stream()
+                .filter(f -> f.startsWith(prefix))
+                .map(f -> f.substring(prefix.length()))
+                .collect(Collectors.toList());
+        return specificIgnoreFields;
+    }
     /*
      * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation as reference.
      *
