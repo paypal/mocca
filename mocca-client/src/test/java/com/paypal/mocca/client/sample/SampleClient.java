@@ -3,6 +3,7 @@ package com.paypal.mocca.client.sample;
 import com.paypal.mocca.client.MoccaClient;
 import com.paypal.mocca.client.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RequestHeader("classheader: classvalue")
@@ -75,5 +76,8 @@ public interface SampleClient extends MoccaClient {
 
     @Mutation
     List<SampleResponseDTO> addSampleReturnList(@Var("foo") String foo, @Var("bar") String bar);
+
+    @Query
+    OffsetDateTime getDateTime(@Var("dateTimeToReturn") OffsetDateTime dateTimeToReturn);
 
 }

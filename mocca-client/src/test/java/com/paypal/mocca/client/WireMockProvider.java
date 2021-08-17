@@ -98,6 +98,9 @@ class WireMockProvider {
 
         final String EXPECTED_NO_PARAM_REQUEST = "{\"query\":\"query{getOneSample {bar foo}}\"}";
 
+        final String EXPECTED_OFFSETDATETIME_REQUEST = "{\"query\":\"query{getDateTime(dateTimeToReturn: \\\"2021-08-17T18:12:22.470076-03:00\\\")}\"}";
+        final String EXPECTED_OFFSETDATETIME_REQUEST_RESULT = "{\"data\": {\"getDateTime\": \"2021-08-17T18:12:22.470076-03:00\"}}";
+
         final String EXPECTED_ERROR_REQUEST = "{\"query\":\"query{getOneSample(foo: \\\"zoo\\\", bar: \\\"car\\\") {bar foo}}\"}";
         final String ERROR_RESULT = "{\"errors\": [{\"message\": \"Internal Server Error(s) while executing query\"}],\"data\": {\"getOneSample\": null}}";
 
@@ -119,7 +122,7 @@ class WireMockProvider {
         addGraphQlStub(EXPECTED_GOOD_LIST_REQUEST, GOOD_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_LIST_REQUEST, NO_DATA_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_PARAM_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
-        addGraphQlStub(EXPECTED_NO_PARAM_REQUEST, NULL_VAR_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_OFFSETDATETIME_REQUEST, EXPECTED_OFFSETDATETIME_REQUEST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_REQUEST, ERROR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_LIST_REQUEST, ERROR_LIST_RESULT, DEFAULT_HEADERS);
     }
@@ -128,10 +131,10 @@ class WireMockProvider {
         final String EXPECTED_GOOD_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String GOOD_RESULT = "{\"data\": {\"addSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
 
-        final String EXPECTED_DTO_REQUEST = "{\"query\":\"mutation{addSample(sampleRequest: {bar: \\\"czar 100%\\\", foo: \\\"moo\\\"}) {}}\"}";
+        final String EXPECTED_DTO_REQUEST = "{\"query\":\"mutation{addSample(sampleRequest: {bar: \\\"czar 100%\\\", foo: \\\"moo\\\"})}\"}";
 
         final String EXPECTED_NO_DATA_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"moo\\\", bar: \\\"czar 100%\\\") {bar foo}}\"}";
-        final String EXPECTED_NO_DATA_NO_SELECTION_SET_REQUEST = "{\"query\":\"mutation{addSample(bar: \\\"czar 100%\\\", foo: \\\"moo\\\") {}}\"}";
+        final String EXPECTED_NO_DATA_NO_SELECTION_SET_REQUEST = "{\"query\":\"mutation{addSample(bar: \\\"czar 100%\\\", foo: \\\"moo\\\")}\"}";
         final String NO_DATA_RESULT = "{\"data\": {\"addSample\": null}}";
 
         final String EXPECTED_ERROR_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"zoo\\\", bar: \\\"car\\\") {bar foo}}\"}";

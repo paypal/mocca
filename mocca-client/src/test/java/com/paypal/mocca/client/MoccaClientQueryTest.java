@@ -15,6 +15,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -94,6 +95,14 @@ public class MoccaClientQueryTest {
         assertNotNull(result);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");
+    }
+
+    @Test
+    public void queryOffsetDateTimeTest() {
+        OffsetDateTime expectedDateTime = OffsetDateTime.parse("2021-08-17T18:12:22.470076-03:00");
+        OffsetDateTime actualDateTime = client.getDateTime(expectedDateTime);
+        assertNotNull(actualDateTime);
+        assertEquals(actualDateTime.toInstant(), expectedDateTime.toInstant());
     }
 
     @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")

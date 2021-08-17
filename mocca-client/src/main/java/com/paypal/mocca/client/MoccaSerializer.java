@@ -192,7 +192,7 @@ class MoccaSerializer {
      * as it is supposed to be written in the request payload
      */
     private String writeRequestVariable(String name, Object value, Type type) {
-        return type == String.class || type == Character.class || type.getTypeName().equals("char") ?
+        return type == String.class || type == Character.class || type == OffsetDateTime.class || type.getTypeName().equals("char") ?
                 name + ": \\\"" + value.toString() + "\\\"" :
                 name + ": " + value.toString();
     }
@@ -273,7 +273,7 @@ class MoccaSerializer {
      * @return the String representation (in GraphQL variable notation) of the given object
      */
     private String objectToString(final Object object, final String name, final List<String> ignoreFields) {
-        if (object instanceof String) {
+        if (object instanceof String || object instanceof OffsetDateTime) {
             return "\\\"" + object + "\\\"";
         } else if (object instanceof Number || object instanceof Boolean) {
             return String.valueOf(object);
@@ -340,15 +340,19 @@ class MoccaSerializer {
     //  If not set by the user, a default number should be set (10 for example).
     private void writeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType) {
         try {
+
+            // Retrieving type out of parameterized types if necessary
+            final Type cfResponseType = MoccaUtils.getInnerType(responseType, CompletableFuture.class).orElse(responseType);
+            final Type rawResponseType = MoccaUtils.getInnerType(cfResponseType, List.class).orElse(cfResponseType);
+
+            if (!isPojo(rawResponseType)) {
+                // Nothing to be done here.
+                // A selection set should not exist if the return type is not a POJO.
+                return;
+            }
+
             write(requestPayload, " {");
-
-            // Retrieving DTO type out of completable future if necessary
-            final Type cfResponseDtoType = MoccaUtils.getInnerType(responseType, CompletableFuture.class).orElse(responseType);
-
-            // Retrieving DTO type out of list if necessary
-            final Type responseDtoType = MoccaUtils.getInnerType(cfResponseDtoType, List.class).orElse(cfResponseDtoType);
-
-            BeanInfo info = Introspector.getBeanInfo(MoccaUtils.erase(responseDtoType));
+            BeanInfo info = Introspector.getBeanInfo(MoccaUtils.erase(rawResponseType));
             PropertyDescriptor[] pds = info.getPropertyDescriptors();
             List<String> selectionSet = Arrays.stream(pds)
                     .filter(pd -> !pd.getReadMethod().getReturnType().equals(Class.class))
