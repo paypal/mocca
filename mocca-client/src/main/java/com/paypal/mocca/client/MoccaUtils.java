@@ -1,7 +1,12 @@
 package com.paypal.mocca.client;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.Optional;
 
 /**
@@ -40,11 +45,11 @@ final class MoccaUtils {
      * if the given type is parameterized and equals to the outer reference type.
      * If it is not, an empty optional is returned.
      */
-    static Optional<Type> getInnerType(final Type type, final Class<?> outerTypeReference) {
+    static Optional<Type> getInnerType(final Type type, final Type outerTypeReference) {
         if (!(type instanceof ParameterizedType)) return Optional.empty();
 
         ParameterizedType parameterizedType = (ParameterizedType) type;
-        if (parameterizedType.getRawType().getTypeName().equals(outerTypeReference.getName())) {
+        if (parameterizedType.getRawType().getTypeName().equals(outerTypeReference.getTypeName())) {
             return Optional.of(parameterizedType.getActualTypeArguments()[0]);
         } else {
             return Optional.empty();

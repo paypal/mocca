@@ -12,11 +12,16 @@ import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -140,7 +145,7 @@ class MoccaSerializer {
                 }
 
                 String variableString;
-                if (isComplexType(variable.type)) {
+                if (isPojo(variable.type)) {
                     List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
                     ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
                     writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), variable.type, variable.value, ignoreFields);
@@ -156,29 +161,30 @@ class MoccaSerializer {
         write(requestPayload, ")");
     }
 
+    private static final Set<Type> NON_POJO_TYPES = new HashSet<>();
+    static {
+        NON_POJO_TYPES.add(Optional.class);
+        NON_POJO_TYPES.add(OffsetDateTime.class);
+        NON_POJO_TYPES.add(Character.class);
+        NON_POJO_TYPES.add(String.class);
+        NON_POJO_TYPES.add(Boolean.class);
+    }
+
     /*
-     * Checks if the type is complex, which is anything different
-     * than a primitive, a primitive wrapper, or String
+     * Checks if the type is a POJO, which is anything different
+     * than a primitive, a primitive wrapper, or String.
+     * There are other special types that are not considered
+     * POJOs, such as java.time.OffsetDateTime and java.util.Optional.
      *
      * @param type the type to be evaluated
      * @return whether the type is complex
      */
-    private static boolean isComplexType(Type type) {
-        return !(
-                type == Character.class ||
-                type == String.class ||
-                type == Integer.class ||
-                type == Long.class ||
-                type == Float.class ||
-                type == Double.class ||
-                type == Boolean.class ||
-                type.getTypeName().equals("char") ||
-                type.getTypeName().equals("int") ||
-                type.getTypeName().equals("long") ||
-                type.getTypeName().equals("float") ||
-                type.getTypeName().equals("double") ||
-                type.getTypeName().equals("boolean")
-        );
+    private static boolean isPojo(Type type) {
+        if (NON_POJO_TYPES.contains(type)) return false;
+        if (!(type instanceof Class)) return false;
+        Class clazz = (Class) type;
+        if (Number.class.isAssignableFrom(clazz)) return false;
+        return !clazz.isPrimitive();
     }
 
     /*
@@ -258,22 +264,30 @@ class MoccaSerializer {
         }
     }
 
-    private String objectToString(final Object v, String key, final List<String> ignoreFields) {
-        if (v instanceof String) {
-            return "\\\"" + v + "\\\"";
-        } else if (v instanceof Number || v instanceof Boolean) {
-            return String.valueOf(v);
-        } else if (v instanceof List) {
-            List<?> listElement = (List)v;
+    /**
+     * Returns the String representation (in GraphQL variable notation) of the given object
+     *
+     * @param object the object whose String representation should be returned
+     * @param name the name of the GraphQL variable
+     * @param ignoreFields the object fields to be ignored
+     * @return the String representation (in GraphQL variable notation) of the given object
+     */
+    private String objectToString(final Object object, final String name, final List<String> ignoreFields) {
+        if (object instanceof String) {
+            return "\\\"" + object + "\\\"";
+        } else if (object instanceof Number || object instanceof Boolean) {
+            return String.valueOf(object);
+        } else if (object instanceof List) {
+            List<?> listElement = (List) object;
             List<String> stringElements = listElement.stream().
-                    map(le -> objectToString(le, key, ignoreFields)).
+                    map(le -> objectToString(le, name, ignoreFields)).
                     collect(Collectors.toList());
             return "[" + String.join(", ", stringElements) + "]";
         } else {
             ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
 
-            writeRequestPojo(complexVariable, v.getClass(), v,
-                    getNextIgnoreFields(key + ".", ignoreFields));
+            writeRequestPojo(complexVariable, object.getClass(), object,
+                    getNextIgnoreFields(name + ".", ignoreFields));
             return "{" + complexVariable.toString() + "}";
         }
     }
@@ -292,6 +306,7 @@ class MoccaSerializer {
                 .collect(Collectors.toList());
         return specificIgnoreFields;
     }
+
     /*
      * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation as reference.
      *
@@ -336,17 +351,31 @@ class MoccaSerializer {
             BeanInfo info = Introspector.getBeanInfo(MoccaUtils.erase(responseDtoType));
             PropertyDescriptor[] pds = info.getPropertyDescriptors();
             List<String> selectionSet = Arrays.stream(pds)
-                    .filter(pd -> !pd.getName().equals("class"))
-                    .map(pd -> new Tuple<Class<?>>(pd.getName(), pd.getReadMethod().getReturnType()))
+                    .filter(pd -> !pd.getReadMethod().getReturnType().equals(Class.class))
+                    // Parameterized types should not be treated as Java Beans and
+                    // shouldn't be serialized. The exception though is Lists
+                    // and Optionals, which should have their parameter types
+                    // processed instead.
+                    .filter(pd -> {
+                        Type type = pd.getReadMethod().getGenericReturnType();
+                        if (!(type instanceof ParameterizedType)) return true;
+                        Type rawType = ((ParameterizedType) type).getRawType();
+                        return rawType == List.class || rawType == Optional.class;
+                    })
+                    .map(pd -> new Tuple<>(pd.getName(), pd.getReadMethod().getGenericReturnType()))
                     .map(e -> {
-                        Class<?> c = e.value;
-                        if (isComplexType(c)) {
-                            ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
-                            writeSelectionSet(complexVariable, c);
-                            return e.key + complexVariable.toString();
-                        } else {
-                            return e.key;
+                        Type type = e.value;
+                        if (isPojo(type)) {
+                            return writeSelectionSetPojo(e.key, type);
+                        } else if (type instanceof ParameterizedType) {
+                            // Here we know it is either an Optional or a List
+                            Type rawType = ((ParameterizedType) type).getRawType();
+                            final Type typeParameter = MoccaUtils.getInnerType(type, rawType).get();
+                            if (isPojo(typeParameter)) return writeSelectionSetPojo(e.key, typeParameter);
                         }
+                        // If this line is reached, that means this is not a POJO and serialization
+                        // (for this particular field at least) in the selection set should end here.
+                        return e.key;
                     })
                     .collect(Collectors.toList());
             write(requestPayload, String.join(" ", selectionSet));
@@ -356,8 +385,28 @@ class MoccaSerializer {
         }
     }
 
-    private void write(ByteArrayOutputStream requestPayload, final String data) throws IOException {
-        requestPayload.write(data.getBytes());
+    /**
+     * Returns the String representation of a POJO in GraphQL SelectionSet notation
+     *
+     * @param fieldName the element (GraphQL field name and type) whose String representation should be returned
+     * @param type the particular type to be used to create the String representation of the given element
+     * @return the String representation of a POJO in GraphQL SelectionSet notation
+     */
+    private String writeSelectionSetPojo(final String fieldName, final Type type) {
+        ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
+        writeSelectionSet(complexVariable, type);
+        return fieldName + complexVariable.toString();
+    }
+
+    /**
+     * Utility method to write the given data into the given output stream
+     *
+     * @param outputStream the output stream to be written to
+     * @param data the data to be written
+     * @throws IOException in case of any IOException during the write operation
+     */
+    private void write(ByteArrayOutputStream outputStream, final String data) throws IOException {
+        outputStream.write(data.getBytes());
     }
 
 }

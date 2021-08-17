@@ -11,6 +11,8 @@ import feign.RequestTemplate;
 import feign.Response;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -29,6 +31,8 @@ import java.util.List;
 class MoccaFeignEncoder implements Encoder {
 
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
+
+    private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
@@ -135,6 +139,14 @@ class MoccaFeignEncoder implements Encoder {
         Parameter[] parametersMetadata = requestTemplate.methodMetadata().method().getParameters();
         List<Variable> variables = new ArrayList<>(parameters.length);
         for (int i = 0; i < parameters.length; i++) {
+
+            // TODO We could make it configurable, leaving for the user to decide if null variables should
+            // be omitted or just set with null value. For now we will just skip them.
+            if (parameters[i] == null) {
+                logger.debug("Skipping parameter at position {} as it is set to null");
+                continue;
+            }
+
             Parameter parameterMetadata = parametersMetadata[i];
             Var varAnnotation = parameterMetadata.getAnnotation(Var.class);
             // FIXME It would be better if this check happened at client definition time, instead of request time
