@@ -57,6 +57,14 @@ public class MoccaClientQueryTest {
     }
 
     @Test
+    public void queryNullVariableTest() {
+        SampleResponseDTO result = client.getOneSample(null, "far");
+        assertNotNull(result);
+        assertEquals(result.getFoo(), null);
+        assertEquals(result.getBar(), "far");
+    }
+
+    @Test
     public void queryDtoTest() {
         SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boom", "zaz");
         SampleResponseDTO result = client.getOneSample(sampleRequestDTO);

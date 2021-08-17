@@ -81,6 +81,9 @@ class WireMockProvider {
         final String EXPECTED_GOOD_REQUEST = "{\"query\":\"query{getOneSample(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String GOOD_RESULT = "{\"data\": {\"getOneSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
 
+        final String EXPECTED_NULL_VAR_REQUEST = "{\"query\":\"query{getOneSample(bar: \\\"far\\\") {bar foo}}\"}";
+        final String NULL_VAR_RESULT = "{\"data\": {\"getOneSample\": {\"bar\": \"far\"}}}";
+
         final String EXPECTED_DTO_REQUEST = "{\"query\":\"query{getOneSample(sampleRequest: {bar: \\\"zaz\\\", foo: \\\"boom\\\"}) {bar foo}}\"}";
         final String DTO_RESULT = "{\"data\": {\"getOneSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
 
@@ -108,6 +111,7 @@ class WireMockProvider {
         final String ERROR_LIST_RESULT = "{\"errors\": [{\"message\": \"Internal Server Error(s) while executing query\"}],\"data\": {\"getSamplesList\": null}}";
 
         addGraphQlStub(EXPECTED_GOOD_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_NULL_VAR_REQUEST, NULL_VAR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_DTO_REQUEST, DTO_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_CUSTOM_SELECT_REQUEST, CUSTOM_SELECT_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_IGNORE_FOO_REQUEST, IGNORE_FOO_RESULT, DEFAULT_HEADERS);
@@ -115,6 +119,7 @@ class WireMockProvider {
         addGraphQlStub(EXPECTED_GOOD_LIST_REQUEST, GOOD_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_LIST_REQUEST, NO_DATA_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_PARAM_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_NO_PARAM_REQUEST, NULL_VAR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_REQUEST, ERROR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_LIST_REQUEST, ERROR_LIST_RESULT, DEFAULT_HEADERS);
     }
