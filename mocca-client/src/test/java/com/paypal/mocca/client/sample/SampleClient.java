@@ -80,4 +80,7 @@ public interface SampleClient extends MoccaClient {
     @Query
     OffsetDateTime getDateTime(@Var("dateTimeToReturn") OffsetDateTime dateTimeToReturn);
 
+    @Query
+    SuperComplexResponseType getSuperComplexStuff(@Var("superComplexSampleType") SuperComplexSampleType superComplexSampleType);
+
 }

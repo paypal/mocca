@@ -7,6 +7,10 @@ import com.paypal.mocca.client.sample.AsyncSampleClient;
 import com.paypal.mocca.client.sample.SampleClient;
 import com.paypal.mocca.client.sample.SampleRequestDTO;
 import com.paypal.mocca.client.sample.SampleResponseDTO;
+import com.paypal.mocca.client.sample.SuperComplexResponseType;
+import com.paypal.mocca.client.sample.SuperComplexResponseType.SuperComplexResponseField;
+import com.paypal.mocca.client.sample.SuperComplexSampleType;
+import com.paypal.mocca.client.sample.SuperComplexSampleType.SuperComplexField;
 import feign.codec.DecodeException;
 import feign.codec.EncodeException;
 import org.testng.annotations.AfterClass;
@@ -16,13 +20,13 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 public class MoccaClientQueryTest {
 
@@ -103,6 +107,34 @@ public class MoccaClientQueryTest {
         OffsetDateTime actualDateTime = client.getDateTime(expectedDateTime);
         assertNotNull(actualDateTime);
         assertEquals(actualDateTime.toInstant(), expectedDateTime.toInstant());
+    }
+
+    @Test
+    public void queryComplexDataTest() {
+        List<String> stringList = Arrays.asList("blue", "yellow", "guacamole");
+        SuperComplexField innerComplexField = new SuperComplexField(1, "one", false, stringList, null, null);
+        SuperComplexField complexField = new SuperComplexField(1, "one", false, stringList, innerComplexField, Collections.singletonList(innerComplexField));
+        List<SuperComplexField> complexList = Collections.singletonList(complexField);
+
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true, complexField, complexList, stringList);
+        superComplexSampleType.setDateTime(OffsetDateTime.parse("2021-08-17T18:12:22.470076-03:00"));
+
+        SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
+
+        assertNotNull(superComplexResponse);
+        assertEquals(superComplexResponse.getIntVar(), 7);
+        assertEquals(superComplexResponse.getStringVar(), "seven");
+        assertTrue(superComplexResponse.isBooleanVar());
+        assertEquals(superComplexResponse.getStringListVar(), stringList);
+
+        SuperComplexResponseField expectedComplexField = new SuperComplexResponseField()
+                .setInnerBooleanVar(complexField.isInnerBooleanVar())
+                .setInnerIntVar(complexField.getInnerIntVar())
+                .setInnerStringVar(complexField.getInnerStringVar())
+                .setInnerStringListVar(complexField.getInnerStringListVar());
+
+        assertEquals(superComplexResponse.getComplexField(), expectedComplexField);
+        assertEquals(superComplexResponse.getComplexListVar(), Collections.singletonList(expectedComplexField));
     }
 
     @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
