@@ -12,7 +12,6 @@ import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -24,6 +23,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import static com.paypal.mocca.client.MoccaUtils.erase;
+import static com.paypal.mocca.client.MoccaUtils.getInnerType;
+import static com.paypal.mocca.client.MoccaUtils.isParameterizedType;
 
 /**
  * Mocca GraphQL request payload serializer
@@ -144,14 +147,31 @@ class MoccaSerializer {
                     throw new MoccaException("Only one GraphQL operation method parameter can have `raw` set to true under annotation " + Var.class.getName());
                 }
 
+                final Type type;
+                final Object value;
+
+                if (isParameterizedType(variable.type, Optional.class)) {
+                    Optional valueOptional = (Optional) variable.value;
+                    if (!valueOptional.isPresent()) {
+                        logger.warn("Skipping empty Optional variable {}", variable.metadata.value());
+                        continue;
+                    }
+                    type = getInnerType(variable.type);
+                    value = valueOptional.get();
+                } else {
+                    type = variable.type;
+                    value = variable.value;
+                }
+
                 String variableString;
-                if (isPojo(variable.type)) {
+
+                if (isPojo(type)) {
                     List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
                     ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
-                    writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), variable.type, variable.value, ignoreFields);
+                    writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), type, value, ignoreFields);
                     variableString = requestDtoOutputStream.toString();
                 } else {
-                    variableString = writeRequestVariable(variable.metadata.value(), variable.value, variable.type);
+                    variableString = writeRequestVariable(variable.metadata.value(), value, type);
                 }
                 variableStrings.add(variableString);
             }
@@ -231,13 +251,9 @@ class MoccaSerializer {
      * @param ignoreFields the names of properties present in the given value, but to be skipped when writing the GraphQL operation variables
      *        (names of properties in inner POJOs are specified using the outer field name followed by dot)
      */
-    // TODO Should there be a parameter here (to be exposed in the Var annotation as user configuration)
-    //  to limit how deep in the request POJO this process should go (to avoid cycles)?
-    //  If not set by the user, a default number should be set (10 for example).
-    //  What esle could be done to avoid cycle?
     private void writeRequestPojo(final ByteArrayOutputStream outputStream, final Type valueType, final Object value, final List<String> ignoreFields) {
         try {
-            final BeanInfo info = Introspector.getBeanInfo(MoccaUtils.erase(valueType));
+            final BeanInfo info = Introspector.getBeanInfo(erase(valueType));
             final PropertyDescriptor[] pds = info.getPropertyDescriptors();
             final List<String> variables = Arrays.stream(pds)
                     .filter(pd -> !pd.getName().equals("class"))
@@ -334,16 +350,32 @@ class MoccaSerializer {
      *
      * @param requestPayload the output stream object used to write the selection set, based on the other parameters
      * @param responseType the return type set in the GraphQL operation method, necessary to dynamically set the selection set
+     * @throws MoccaException if a cycle is found or any error happens when writing the selection set
      */
-    // TODO Add a parameter here (to be exposed in the SelectionSet annotation as user configuration)
-    //  to limit how deep in the response type this process should go (to avoid cycles).
-    //  If not set by the user, a default number should be set (10 for example).
     private void writeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType) {
+
+        // This is necessary to detect cycles and prevent stack overflow
+        Set<Type> seenPojoTypes = new HashSet<>();
+
+        writeSelectionSet(requestPayload, responseType, seenPojoTypes);
+    }
+
+    /*
+     * Writes the selection set of the GraphQL request message using the response type as reference.
+     * Notice this process also supports field names defined in inner types (done recursively).
+     *
+     * @param requestPayload the output stream object used to write the selection set, based on the other parameters
+     * @param responseType the return type set in the GraphQL operation method, necessary to dynamically set the selection set
+     * @param seenPojoTypes to detect cycles and prevent stack overflow
+     * @throws MoccaException if a cycle is found or any error happens when writing the selection set
+     */
+    private void writeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType, Set<Type> seenPojoTypes) throws MoccaException {
         try {
 
             // Retrieving type out of parameterized types if necessary
-            final Type cfResponseType = MoccaUtils.getInnerType(responseType, CompletableFuture.class).orElse(responseType);
-            final Type rawResponseType = MoccaUtils.getInnerType(cfResponseType, List.class).orElse(cfResponseType);
+            final Type cfResponseType = getInnerType(responseType, CompletableFuture.class).orElse(responseType);
+            final Type listResponseType = getInnerType(cfResponseType, List.class).orElse(cfResponseType);
+            final Type rawResponseType = getInnerType(listResponseType, Optional.class).orElse(listResponseType);
 
             if (!isPojo(rawResponseType)) {
                 // Nothing to be done here.
@@ -351,8 +383,13 @@ class MoccaSerializer {
                 return;
             }
 
+            if (seenPojoTypes.contains(rawResponseType)) {
+                throw new MoccaException("Selection set cannot be specified as there is a cycle in the return type caused by " + rawResponseType);
+            }
+            seenPojoTypes.add(rawResponseType);
+
             write(requestPayload, " {");
-            BeanInfo info = Introspector.getBeanInfo(MoccaUtils.erase(rawResponseType));
+            BeanInfo info = Introspector.getBeanInfo(erase(rawResponseType));
             PropertyDescriptor[] pds = info.getPropertyDescriptors();
             List<String> selectionSet = Arrays.stream(pds)
                     .filter(pd -> !pd.getReadMethod().getReturnType().equals(Class.class))
@@ -362,20 +399,18 @@ class MoccaSerializer {
                     // processed instead.
                     .filter(pd -> {
                         Type type = pd.getReadMethod().getGenericReturnType();
-                        if (!(type instanceof ParameterizedType)) return true;
-                        Type rawType = ((ParameterizedType) type).getRawType();
-                        return rawType == List.class || rawType == Optional.class;
+                        if (!isParameterizedType(type)) return true;
+                        return isParameterizedType(type, List.class, Optional.class);
                     })
                     .map(pd -> new Tuple<>(pd.getName(), pd.getReadMethod().getGenericReturnType()))
                     .map(e -> {
                         Type type = e.value;
                         if (isPojo(type)) {
-                            return writeSelectionSetPojo(e.key, type);
-                        } else if (type instanceof ParameterizedType) {
+                            return writeSelectionSetPojo(e.key, type, seenPojoTypes);
+                        } else if (isParameterizedType(type)) {
                             // Here we know it is either an Optional or a List
-                            Type rawType = ((ParameterizedType) type).getRawType();
-                            final Type typeParameter = MoccaUtils.getInnerType(type, rawType).get();
-                            if (isPojo(typeParameter)) return writeSelectionSetPojo(e.key, typeParameter);
+                            final Type typeParameter = getInnerType(type);
+                            if (isPojo(typeParameter)) return writeSelectionSetPojo(e.key, typeParameter, seenPojoTypes);
                         }
                         // If this line is reached, that means this is not a POJO and serialization
                         // (for this particular field at least) in the selection set should end here.
@@ -384,6 +419,8 @@ class MoccaSerializer {
                     .collect(Collectors.toList());
             write(requestPayload, String.join(" ", selectionSet));
             write(requestPayload, "}");
+
+            seenPojoTypes.remove(rawResponseType);
         } catch (Exception e) {
             throw new MoccaException("An error happened when writing selection set of type " + responseType, e);
         }
@@ -396,9 +433,9 @@ class MoccaSerializer {
      * @param type the particular type to be used to create the String representation of the given element
      * @return the String representation of a POJO in GraphQL SelectionSet notation
      */
-    private String writeSelectionSetPojo(final String fieldName, final Type type) {
+    private String writeSelectionSetPojo(final String fieldName, final Type type, Set<Type> seenPojoTypes) {
         ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
-        writeSelectionSet(complexVariable, type);
+        writeSelectionSet(complexVariable, type, seenPojoTypes);
         return fieldName + complexVariable.toString();
     }
 

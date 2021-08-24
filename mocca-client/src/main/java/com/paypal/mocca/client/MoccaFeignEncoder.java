@@ -160,7 +160,7 @@ class MoccaFeignEncoder implements Encoder {
                     final String method = requestTemplate.methodMetadata().method().getName();
                     throw new MoccaException("Invalid GraphQL operation method " + method + ", make sure all its parameters are annotated with one Mocca annotation");
                 }
-                Variable variable = new Variable(parameters[i], parameterMetadata.getType(), varAnnotation);
+                Variable variable = new Variable(parameters[i], parameterMetadata.getParameterizedType(), varAnnotation);
                 variables.add(variable);
             }
         }

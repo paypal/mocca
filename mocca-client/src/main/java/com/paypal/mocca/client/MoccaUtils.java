@@ -7,6 +7,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -41,12 +42,12 @@ final class MoccaUtils {
     }
 
     /*
-     * Returns an optional with the Type parametrized inside the given type,
+     * Returns an optional containing the Type parameterized inside the given type,
      * if the given type is parameterized and equals to the outer reference type.
      * If it is not, an empty optional is returned.
      */
     static Optional<Type> getInnerType(final Type type, final Type outerTypeReference) {
-        if (!(type instanceof ParameterizedType)) return Optional.empty();
+        if (!isParameterizedType(type)) return Optional.empty();
 
         ParameterizedType parameterizedType = (ParameterizedType) type;
         if (parameterizedType.getRawType().getTypeName().equals(outerTypeReference.getTypeName())) {
@@ -56,6 +57,42 @@ final class MoccaUtils {
         }
     }
 
+    /*
+     * Returns the first parametrized type inside the given type.
+     * If the given type is not parameterized an IllegalArgumentException is thrown.
+     */
+    static Type getInnerType(final Type type) {
+        if (!isParameterizedType(type)) throw new IllegalArgumentException("Given type is not parameterized");
+
+        ParameterizedType parameterizedType = (ParameterizedType) type;
+        return parameterizedType.getActualTypeArguments()[0];
+    }
+
+    /*
+     * Returns true if the given type is a parameterized type.
+     */
+    static boolean isParameterizedType(Type type) {
+        if (type == null) throw new IllegalArgumentException("Type cannot be null");
+
+        return type instanceof ParameterizedType;
+    }
+
+    /*
+     * Returns true if the given type is a parameterized type
+     * and its raw type is the same as one of the given raw types
+     */
+    static boolean isParameterizedType(Type type, Type... rawTypes) {
+        if (type == null) throw new IllegalArgumentException("Type cannot be null");
+        if (rawTypes == null) throw new IllegalArgumentException("Raw type cannot be null");
+
+        if(!(type instanceof ParameterizedType)) return false;
+        Type actualRawType = ((ParameterizedType) type).getRawType();
+        return Arrays.asList(rawTypes).contains(actualRawType);
+    }
+
+    /*
+     * Returns a class erased of any parameters, if there is any
+     */
     static Class<?> erase(Type type) {
         if (type instanceof Class) {
             return (Class) type;

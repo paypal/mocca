@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -137,6 +138,16 @@ public class MoccaClientQueryTest {
         assertEquals(superComplexResponse.getComplexListVar(), Collections.singletonList(expectedComplexField));
     }
 
+    @Test
+    public void queryOptionalTest() {
+        SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boom", "zaz");
+        Optional<SampleResponseDTO> result = client.getOneSample(Optional.of(sampleRequestDTO));
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+        assertEquals(result.get().getFoo(), "boo");
+        assertEquals(result.get().getBar(), "far");
+    }
+
     @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
     public void queryErrorTest() {
         client.getOneSample("zoo", "car");
@@ -175,8 +186,7 @@ public class MoccaClientQueryTest {
 
     @Test
     public void queryAsyncTest() throws Exception {
-        final AsyncSampleClient asyncClient =
-                MoccaClient.Builder.async(serverBaseUrl).build(AsyncSampleClient.class);
+        final AsyncSampleClient asyncClient = MoccaClient.Builder.async(serverBaseUrl).build(AsyncSampleClient.class);
         final SampleResponseDTO result = asyncClient.getOneSample("boo", "far").get(5, TimeUnit.SECONDS);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");

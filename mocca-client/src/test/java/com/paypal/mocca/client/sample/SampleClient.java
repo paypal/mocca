@@ -5,6 +5,7 @@ import com.paypal.mocca.client.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RequestHeader("classheader: classvalue")
 public interface SampleClient extends MoccaClient {
@@ -82,5 +83,8 @@ public interface SampleClient extends MoccaClient {
 
     @Query
     SuperComplexResponseType getSuperComplexStuff(@Var("superComplexSampleType") SuperComplexSampleType superComplexSampleType);
+
+    @Query
+    Optional<SampleResponseDTO> getOneSample(@Var("sampleRequest") Optional<SampleRequestDTO> sampleRequestDTO);
 
 }
