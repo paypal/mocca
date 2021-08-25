@@ -23,6 +23,9 @@ public interface SampleClient extends MoccaClient {
     List<SampleResponseDTO> getSamplesList(@Var("foo") String foo, @Var("bar") String bar);
 
     @Query
+    List<SampleResponseDTO> getSamplesList(@Var("sampleRequests") List<SampleRequestDTO> sampleRequests);
+
+    @Query
     SampleResponseDTO getOneSample(@Var("sampleRequest") SampleRequestDTO sampleRequestDTO);
 
     @Query

@@ -110,6 +110,8 @@ class WireMockProvider {
         final String EXPECTED_GOOD_LIST_REQUEST = "{\"query\":\"query{getSamplesList(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String GOOD_LIST_RESULT = "{\"data\": {\"getSamplesList\": [{\"foo\": \"boo1\",\"bar\": \"far1\"}, {\"foo\": \"boo2\",\"bar\": \"far2\"}]}}";
 
+        final String EXPECTED_PARAM_LIST_REQUEST = "{\"query\":\"query{getSamplesList(sampleRequests: [{bar: \\\"far1\\\", foo: \\\"boo1\\\"}, {bar: \\\"far2\\\", foo: \\\"boo2\\\"}]) {bar foo}}\"}";
+
         final String EXPECTED_NO_DATA_LIST_REQUEST = "{\"query\":\"query{getSamplesList(foo: \\\"moo\\\", bar: \\\"czar\\\") {bar foo}}\"}";
         final String NO_DATA_LIST_RESULT = "{\"data\": {\"getSamplesList\": []}}";
 
@@ -124,6 +126,7 @@ class WireMockProvider {
         addGraphQlStub(EXPECTED_IGNORE_FOO_REQUEST, IGNORE_FOO_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_GOOD_LIST_REQUEST, GOOD_LIST_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_PARAM_LIST_REQUEST, GOOD_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_LIST_REQUEST, NO_DATA_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_PARAM_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_OFFSETDATETIME_REQUEST, EXPECTED_OFFSETDATETIME_REQUEST_RESULT, DEFAULT_HEADERS);

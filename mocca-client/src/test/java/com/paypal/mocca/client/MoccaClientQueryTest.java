@@ -155,13 +155,27 @@ public class MoccaClientQueryTest {
 
     @Test
     public void queryListTest() {
-        List<SampleResponseDTO> sampleResponseDTOS = client.getSamplesList("boo", "far");
-        assertNotNull(sampleResponseDTOS);
-        assertEquals(sampleResponseDTOS.size(), 2);
-        assertEquals(sampleResponseDTOS.get(0).getFoo(), "boo1");
-        assertEquals(sampleResponseDTOS.get(0).getBar(), "far1");
-        assertEquals(sampleResponseDTOS.get(1).getFoo(), "boo2");
-        assertEquals(sampleResponseDTOS.get(1).getBar(), "far2");
+        List<SampleResponseDTO> sampleResponseDTOs = client.getSamplesList("boo", "far");
+        assertNotNull(sampleResponseDTOs);
+        assertEquals(sampleResponseDTOs.size(), 2);
+        assertEquals(sampleResponseDTOs.get(0).getFoo(), "boo1");
+        assertEquals(sampleResponseDTOs.get(0).getBar(), "far1");
+        assertEquals(sampleResponseDTOs.get(1).getFoo(), "boo2");
+        assertEquals(sampleResponseDTOs.get(1).getBar(), "far2");
+    }
+
+    @Test
+    public void queryListParameterListTest() {
+        List<SampleRequestDTO> sampleRequests = Arrays.asList(
+            new SampleRequestDTO("boo1", "far1"), new SampleRequestDTO("boo2", "far2")
+        );
+        List<SampleResponseDTO> sampleResponseDTOs = client.getSamplesList(sampleRequests);
+        assertNotNull(sampleResponseDTOs);
+        assertEquals(sampleResponseDTOs.size(), 2);
+        assertEquals(sampleResponseDTOs.get(0).getFoo(), "boo1");
+        assertEquals(sampleResponseDTOs.get(0).getBar(), "far1");
+        assertEquals(sampleResponseDTOs.get(1).getFoo(), "boo2");
+        assertEquals(sampleResponseDTOs.get(1).getBar(), "far2");
     }
 
     @Test

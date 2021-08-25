@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -147,32 +148,52 @@ class MoccaSerializer {
                     throw new MoccaException("Only one GraphQL operation method parameter can have `raw` set to true under annotation " + Var.class.getName());
                 }
 
-                final Type type;
-                final Object value;
-
-                if (isParameterizedType(variable.type, Optional.class)) {
-                    Optional valueOptional = (Optional) variable.value;
-                    if (!valueOptional.isPresent()) {
-                        logger.warn("Skipping empty Optional variable {}", variable.metadata.value());
-                        continue;
-                    }
-                    type = getInnerType(variable.type);
-                    value = valueOptional.get();
-                } else {
-                    type = variable.type;
-                    value = variable.value;
-                }
-
                 String variableString;
 
-                if (isPojo(type)) {
-                    List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
-                    ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
-                    writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), type, value, ignoreFields);
-                    variableString = requestDtoOutputStream.toString();
+                if (isParameterizedType(variable.type, List.class)) {
+                    StringJoiner listVariablesJoiner = new StringJoiner(", ", variable.metadata.value() + ": [", "]");
+                    List<?> variablesList = (List<?>) variable.value;
+                    if (!variablesList.isEmpty()) {
+                        final Type listType = getInnerType(variable.type);
+                        if (isPojo(listType)) {
+                            final List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
+                            variablesList.forEach(v -> {
+                                ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
+                                writeRequestPojo(requestDtoOutputStream, null, listType, v, ignoreFields);
+                                listVariablesJoiner.add(requestDtoOutputStream.toString());
+                            });
+                        } else {
+                            variablesList.forEach(v -> listVariablesJoiner.add(writeRequestVariable(variable.metadata.value(), v, listType)));
+                        }
+                    }
+                    variableString = listVariablesJoiner.toString();
                 } else {
-                    variableString = writeRequestVariable(variable.metadata.value(), value, type);
+                    final Type type;
+                    final Object value;
+
+                    if (isParameterizedType(variable.type, Optional.class)) {
+                        Optional valueOptional = (Optional) variable.value;
+                        if (!valueOptional.isPresent()) {
+                            logger.warn("Skipping empty Optional variable {}", variable.metadata.value());
+                            continue;
+                        }
+                        type = getInnerType(variable.type);
+                        value = valueOptional.get();
+                    } else {
+                        type = variable.type;
+                        value = variable.value;
+                    }
+
+                    if (isPojo(type)) {
+                        List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
+                        ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
+                        writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), type, value, ignoreFields);
+                        variableString = requestDtoOutputStream.toString();
+                    } else {
+                        variableString = writeRequestVariable(variable.metadata.value(), value, type);
+                    }
                 }
+
                 variableStrings.add(variableString);
             }
 
@@ -231,8 +252,11 @@ class MoccaSerializer {
      */
     private void writeRequestPojo(final ByteArrayOutputStream outputStream, final String valueName, final Type valueType, final Object value, final List<String> ignoreFields) {
         try {
-            write(outputStream, valueName);
-            write(outputStream, ": {");
+            if (valueName != null) {
+                write(outputStream, valueName);
+                write(outputStream, ": ");
+            }
+            write(outputStream, "{");
             writeRequestPojo(outputStream, valueType, value, ignoreFields);
             write(outputStream, "}");
         } catch (Exception e) {
