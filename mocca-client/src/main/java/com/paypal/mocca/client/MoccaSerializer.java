@@ -163,7 +163,7 @@ class MoccaSerializer {
                                 listVariablesJoiner.add(requestDtoOutputStream.toString());
                             });
                         } else {
-                            variablesList.forEach(v -> listVariablesJoiner.add(writeRequestVariable(variable.metadata.value(), v, listType)));
+                            variablesList.forEach(v -> listVariablesJoiner.add(writeRequestVariable(null, v, listType)));
                         }
                     }
                     variableString = listVariablesJoiner.toString();
@@ -233,9 +233,10 @@ class MoccaSerializer {
      * as it is supposed to be written in the request payload
      */
     private String writeRequestVariable(String name, Object value, Type type) {
+        final String prefix = name == null ? "" : name + ": ";
         return type == String.class || type == Character.class || type == OffsetDateTime.class || type.getTypeName().equals("char") ?
-                name + ": \\\"" + value.toString() + "\\\"" :
-                name + ": " + value.toString();
+                prefix + "\\\"" + value.toString() + "\\\"" :
+                prefix + value.toString();
     }
 
     /*

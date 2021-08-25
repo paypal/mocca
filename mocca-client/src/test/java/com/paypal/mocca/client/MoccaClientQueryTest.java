@@ -165,11 +165,13 @@ public class MoccaClientQueryTest {
     }
 
     @Test
-    public void queryListParameterListTest() {
+    public void queryListParameterTest() {
         List<SampleRequestDTO> sampleRequests = Arrays.asList(
             new SampleRequestDTO("boo1", "far1"), new SampleRequestDTO("boo2", "far2")
         );
-        List<SampleResponseDTO> sampleResponseDTOs = client.getSamplesList(sampleRequests);
+        List<Integer> numbers = Arrays.asList(1, 2, 3);
+
+        List<SampleResponseDTO> sampleResponseDTOs = client.getSamplesList(sampleRequests, numbers, "seven", 7);
         assertNotNull(sampleResponseDTOs);
         assertEquals(sampleResponseDTOs.size(), 2);
         assertEquals(sampleResponseDTOs.get(0).getFoo(), "boo1");
