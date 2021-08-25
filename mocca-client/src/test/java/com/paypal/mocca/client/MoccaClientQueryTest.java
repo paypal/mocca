@@ -27,7 +27,11 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.FileAssert.fail;
 
 public class MoccaClientQueryTest {
 
@@ -250,6 +254,16 @@ public class MoccaClientQueryTest {
     public void moreThanOneMoccaAnnotationTest() {
         InvalidClient invalidClient = MoccaClient.Builder.sync("localhost").build(InvalidClient.class);
         invalidClient.moreThanOneMoccaAnnotation("boo", "far");
+    }
+
+    @Test
+    public void selectionSetCycleTest() {
+        try {
+            client.getResponseWithCycle();
+            fail("A Mocca exception was supposed to have been thrown!");
+        } catch (EncodeException e) {
+            assertEquals(e.getCause().getCause().getCause().getMessage(), "Selection set cannot be specified as there is a cycle in the return type caused by class com.paypal.mocca.client.sample.CyclePojo");
+        }
     }
 
     private interface InvalidClient extends MoccaClient {

@@ -90,4 +90,7 @@ public interface SampleClient extends MoccaClient {
     @Query
     Optional<SampleResponseDTO> getOneSample(@Var("sampleRequest") Optional<SampleRequestDTO> sampleRequestDTO);
 
+    @Query
+    CyclePojo getResponseWithCycle();
+
 }

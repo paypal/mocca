@@ -9,7 +9,8 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
-import static com.paypal.mocca.client.MoccaUtils.*;
+import static com.paypal.mocca.client.MoccaUtils.getInnerType;
+import static com.paypal.mocca.client.MoccaUtils.isParameterizedType;
 
 /**
  * Mocca Feign decoder, responsible for deserializing the response payload
