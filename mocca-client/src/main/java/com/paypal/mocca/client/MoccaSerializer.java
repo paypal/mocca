@@ -1,6 +1,5 @@
 package com.paypal.mocca.client;
 
-import com.paypal.mocca.client.MoccaUtils.OperationType;
 import com.paypal.mocca.client.annotation.SelectionSet;
 import com.paypal.mocca.client.annotation.Var;
 import org.slf4j.Logger;
@@ -25,9 +24,9 @@ import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static com.paypal.mocca.client.MoccaUtils.erase;
-import static com.paypal.mocca.client.MoccaUtils.getInnerType;
-import static com.paypal.mocca.client.MoccaUtils.isParameterizedType;
+import static com.paypal.mocca.client.MoccaReflection.erase;
+import static com.paypal.mocca.client.MoccaReflection.getInnerType;
+import static com.paypal.mocca.client.MoccaReflection.isParameterizedType;
 
 /**
  * Mocca GraphQL request payload serializer

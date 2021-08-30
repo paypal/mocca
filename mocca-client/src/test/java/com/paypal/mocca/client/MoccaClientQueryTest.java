@@ -262,7 +262,8 @@ public class MoccaClientQueryTest {
             client.getResponseWithCycle();
             fail("A Mocca exception was supposed to have been thrown!");
         } catch (EncodeException e) {
-            assertEquals(e.getCause().getCause().getCause().getMessage(), "Selection set cannot be specified as there is a cycle in the return type caused by class com.paypal.mocca.client.sample.CyclePojo");
+            assertEquals(e.getCause().getCause().getCause().getMessage(),
+                    "Selection set cannot be specified as there is a cycle in the return type caused by class com.paypal.mocca.client.sample.CyclePojo");
         }
     }
 

@@ -38,10 +38,10 @@ class MoccaDeserializer {
      * @return an optional with the deserialized and bound response object, which can be a list or not
      */
     Optional<?> deserialize(final InputStream inputStream, final Type responseType, final String operationName) {
-        return MoccaUtils.getInnerType(responseType, List.class)
-                .map(MoccaUtils::erase)
+        return MoccaReflection.getInnerType(responseType, List.class)
+                .map(MoccaReflection::erase)
                 .<Optional<?>>map(listParameterClass -> deserializeList(inputStream, listParameterClass, operationName))
-                .orElseGet(() -> deserializeObject(inputStream, MoccaUtils.erase(responseType), operationName));
+                .orElseGet(() -> deserializeObject(inputStream, MoccaReflection.erase(responseType), operationName));
     }
 
     /*

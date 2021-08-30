@@ -1,7 +1,6 @@
 package com.paypal.mocca.client;
 
 import com.paypal.mocca.client.MoccaSerializer.Variable;
-import com.paypal.mocca.client.MoccaUtils.OperationType;
 import com.paypal.mocca.client.annotation.Mutation;
 import com.paypal.mocca.client.annotation.Query;
 import com.paypal.mocca.client.annotation.SelectionSet;

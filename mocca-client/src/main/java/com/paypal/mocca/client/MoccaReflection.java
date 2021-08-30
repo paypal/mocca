@@ -1,6 +1,5 @@
 package com.paypal.mocca.client;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -12,34 +11,14 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Mocca utility class
+ * This class provide reflection utility static methods
+ * used across Mocca project
  *
  * @author fabiocarvalho777@gmail.com
  */
-final class MoccaUtils {
+final class MoccaReflection {
 
-    private MoccaUtils() {
-    }
-
-    enum OperationType {
-        Query("query"),
-        Mutation("mutation");
-
-        private final String value;
-
-        OperationType(String value) {
-            this.value = value;
-        }
-
-        static OperationType getFromAnnotation(Annotation operationAnnotation) {
-            if (operationAnnotation instanceof com.paypal.mocca.client.annotation.Query) return Query;
-            if (operationAnnotation instanceof com.paypal.mocca.client.annotation.Mutation) return Mutation;
-            throw new IllegalArgumentException("Unsupported annotation " + operationAnnotation.getClass().getName());
-        }
-
-        String getValue() {
-            return value;
-        }
+    private MoccaReflection() {
     }
 
     /*
@@ -73,7 +52,7 @@ final class MoccaUtils {
      * Returns true if the given type is a parameterized type.
      */
     static boolean isParameterizedType(Type type) {
-        if (type == null) throw new IllegalArgumentException("Type cannot be null");
+        Arguments.requireNonNull(type, "Type cannot be null");
 
         return type instanceof ParameterizedType;
     }
@@ -83,15 +62,14 @@ final class MoccaUtils {
      * and its raw type is the same as one of the given raw types
      */
     static boolean isParameterizedType(Type type, Type... rawTypes) {
-        if (type == null) throw new IllegalArgumentException("Type cannot be null");
-        if (rawTypes == null) throw new IllegalArgumentException("Raw type cannot be null");
+        Arguments.requireNonNull(type, "Type cannot be null");
+        Arguments.requireNonNull(rawTypes, "Raw type cannot be null");
 
         if(!(type instanceof ParameterizedType)) return false;
-        Type actualRawType = ((ParameterizedType) type).getRawType();
+        final Type actualRawType = ((ParameterizedType) type).getRawType();
 
-        final Set<Type> rawTypesSet = new HashSet<>();
-        for (Type t : rawTypes) rawTypesSet.add(t);
-        return rawTypesSet.contains(actualRawType);
+        for (Type t : rawTypes) if (t == actualRawType) return true;
+        return false;
     }
 
     /*
