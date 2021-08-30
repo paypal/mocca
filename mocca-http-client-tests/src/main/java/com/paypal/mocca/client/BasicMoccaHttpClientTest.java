@@ -16,6 +16,8 @@ import static org.testng.Assert.assertEquals;
 
 abstract class BasicMoccaHttpClientTest {
 
+    private static final String GRAPHQL_GREETING = "Hello!";
+
     private final MoccaHttpClient moccaHttpClient;
     private Server graphqlServer;
     private SampleDataClient sampleDataClient;
@@ -33,7 +35,7 @@ abstract class BasicMoccaHttpClientTest {
             public void handle(String target, Request baseRequest, HttpServletRequest req, HttpServletResponse resp)
                 throws IOException {
                 baseRequest.setHandled(true);
-                resp.getWriter().write("Hi!");
+                resp.getWriter().write("{ \"data\": { \"greeting\": \"" + GRAPHQL_GREETING + "\" } }");
             }
         });
         graphqlServer.start();
@@ -50,7 +52,7 @@ abstract class BasicMoccaHttpClientTest {
     @Test(description = "Basic GraphQL call")
     void testBasic() {
         final String greeting = sampleDataClient.greeting();
-        assertEquals(greeting, "hi!");
+        assertEquals(greeting, GRAPHQL_GREETING);
     }
 
     public interface SampleDataClient extends MoccaClient {
