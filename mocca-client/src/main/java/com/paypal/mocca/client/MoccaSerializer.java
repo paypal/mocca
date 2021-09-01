@@ -305,8 +305,12 @@ class MoccaSerializer {
      * @return the String representation (in GraphQL variable notation) of the given object
      */
     private String objectToString(final Object object, final String name, final List<String> ignoreFields) {
-        if (object instanceof String || object instanceof OffsetDateTime) {
-            return "\\\"" + object + "\\\"";
+        if (object instanceof String) {
+            String stringObject = (String) object;
+            stringObject = stringObject.replaceAll("\"", "\\\\\\\\\\\\\"");
+            return "\\\"" + stringObject + "\\\"";
+        } else if (object instanceof OffsetDateTime) {
+                return "\\\"" + object + "\\\"";
         } else if (object instanceof Number || object instanceof Boolean) {
             return String.valueOf(object);
         } else if (object instanceof List || object instanceof Set) {
