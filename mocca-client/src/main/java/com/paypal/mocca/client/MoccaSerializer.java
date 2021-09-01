@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -80,18 +81,8 @@ class MoccaSerializer {
         // Adding operation variables using object and its type
         writeRequestVariables(requestPayload, variables);
 
-        if (selectionSet != null && (selectionSet.value().equals(SelectionSet.UNDEFINED) || selectionSet.value().trim().isEmpty())) {
-            throw new MoccaException("A com.paypal.mocca.client.annotation.SelectionSet annotation with an undefined value is present at the method related to operation "
-                    + operationName + ". Please, set its value, or remove the annotation, letting Mocca use the return type to automatically set the selection set.");
-        } else if (selectionSet != null) {
-            // Adding selection set using the selection set annotation
-            writeSelectionSet(requestPayload, selectionSet);
-        } else if (responseType != null) {
-            // Adding selection set using the response type
-            writeSelectionSet(requestPayload, responseType);
-        } else {
-            logger.debug("Response type is null and a custom selection set was not provided, so a selection set will not be written to the GraphQL operation");
-        }
+        // Adding selection set according to client configuration
+        writeSelectionSet(requestPayload, operationName, selectionSet, responseType);
 
         // Adding end of payload right after selection set
         write(requestPayload, "}\"\n}");
@@ -291,6 +282,7 @@ class MoccaSerializer {
                         }
                     })
                     .filter(e -> e.value != null)
+                    .filter(e -> !(e.value instanceof Optional) || ((Optional) e.value).isPresent())
                     .peek(e -> {
                         Object v = e.value;
                         e.value = objectToString(v, e.key, ignoreFields);
@@ -317,12 +309,15 @@ class MoccaSerializer {
             return "\\\"" + object + "\\\"";
         } else if (object instanceof Number || object instanceof Boolean) {
             return String.valueOf(object);
-        } else if (object instanceof List) {
-            List<?> listElement = (List) object;
-            List<String> stringElements = listElement.stream().
+        } else if (object instanceof List || object instanceof Set) {
+            Collection<?> listElement = (Collection) object;
+            Collection<String> stringElements = listElement.stream().
                     map(le -> objectToString(le, name, ignoreFields)).
                     collect(Collectors.toList());
             return "[" + String.join(", ", stringElements) + "]";
+        } else if (object instanceof Optional) {
+            Optional<?> optional = (Optional) object;
+            return optional.map(v -> objectToString(v, name, ignoreFields)).orElse("null");
         } else {
             ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
 
@@ -347,13 +342,36 @@ class MoccaSerializer {
         return specificIgnoreFields;
     }
 
+    /**
+     * Writes the selection set of the GraphQL request message according to client configuration.
+     *
+     * @param requestPayload the output stream object used to write the selection set, based on the other parameters
+     * @param operationName the name of the GraphQL operation
+     * @param selectionSet the SelectionSet annotation set in the GraphQL operation method, necessary to set the selection set
+     * @param responseType the return type set in the GraphQL operation method, necessary to dynamically set the selection set
+     */
+    private void writeSelectionSet(final ByteArrayOutputStream requestPayload, final String operationName, final SelectionSet selectionSet, Type responseType) {
+        if (selectionSet != null && (selectionSet.value().equals(SelectionSet.UNDEFINED) || selectionSet.value().trim().isEmpty())) {
+            throw new MoccaException("A com.paypal.mocca.client.annotation.SelectionSet annotation with an undefined value is present at the method related to operation "
+                    + operationName + ". Please, set its value, or remove the annotation, letting Mocca use the return type to automatically set the selection set.");
+        } else if (selectionSet != null) {
+            // Adding selection set using the selection set annotation
+            writeUserProvidedSelectionSet(requestPayload, selectionSet);
+        } else if (responseType != null) {
+            // Adding selection set using the response type
+            writeResponseTypeSelectionSet(requestPayload, responseType);
+        } else {
+            logger.debug("Response type is null and a custom selection set was not provided, so a selection set will not be written to the GraphQL operation");
+        }
+    }
+
     /*
      * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation as reference.
      *
      * @param requestPayload the output stream object used to write the selection set, based on the other parameters
      * @param selectionSet the SelectionSet annotation set in the GraphQL operation method, necessary to set the selection set
      */
-    private void writeSelectionSet(final ByteArrayOutputStream requestPayload, final SelectionSet selectionSet) {
+    private void writeUserProvidedSelectionSet(final ByteArrayOutputStream requestPayload, final SelectionSet selectionSet) {
         try {
             String selectionSetValue = selectionSet.value();
             if (selectionSetValue.trim().isEmpty()) logger.warn("Annotation provided selection set is blank");
@@ -376,12 +394,12 @@ class MoccaSerializer {
      * @param responseType the return type set in the GraphQL operation method, necessary to dynamically set the selection set
      * @throws MoccaException if a cycle is found or any error happens when writing the selection set
      */
-    private void writeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType) {
+    private void writeResponseTypeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType) {
 
         // This is necessary to detect cycles and prevent stack overflow
         Set<Type> seenPojoTypes = new HashSet<>();
 
-        writeSelectionSet(requestPayload, responseType, seenPojoTypes);
+        writeResponseTypeSelectionSet(requestPayload, responseType, seenPojoTypes);
     }
 
     /*
@@ -393,7 +411,7 @@ class MoccaSerializer {
      * @param seenPojoTypes to detect cycles and prevent stack overflow
      * @throws MoccaException if a cycle is found or any error happens when writing the selection set
      */
-    private void writeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType, Set<Type> seenPojoTypes) throws MoccaException {
+    private void writeResponseTypeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType, Set<Type> seenPojoTypes) throws MoccaException {
         try {
 
             // Retrieving type out of parameterized types if necessary
@@ -459,7 +477,7 @@ class MoccaSerializer {
      */
     private String writeSelectionSetPojo(final String fieldName, final Type type, Set<Type> seenPojoTypes) {
         ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
-        writeSelectionSet(complexVariable, type, seenPojoTypes);
+        writeResponseTypeSelectionSet(complexVariable, type, seenPojoTypes);
         return fieldName + complexVariable.toString();
     }
 

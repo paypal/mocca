@@ -120,9 +120,10 @@ public class MoccaClientQueryTest {
         SuperComplexField innerComplexField = new SuperComplexField(1, "one", false, stringList, null, null);
         SuperComplexField complexField = new SuperComplexField(1, "one", false, stringList, innerComplexField, Collections.singletonList(innerComplexField));
         List<SuperComplexField> complexList = Collections.singletonList(complexField);
+        OffsetDateTime dateTime = OffsetDateTime.parse("2021-08-17T18:12:22.470076-03:00");
 
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true, complexField, complexList, stringList);
-        superComplexSampleType.setDateTime(OffsetDateTime.parse("2021-08-17T18:12:22.470076-03:00"));
+        superComplexSampleType.setDateTime(dateTime);
 
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
@@ -131,6 +132,7 @@ public class MoccaClientQueryTest {
         assertEquals(superComplexResponse.getStringVar(), "seven");
         assertTrue(superComplexResponse.isBooleanVar());
         assertEquals(superComplexResponse.getStringListVar(), stringList);
+        assertEquals(superComplexResponse.getDateTime().toInstant(), dateTime.toInstant());
 
         SuperComplexResponseField expectedComplexField = new SuperComplexResponseField()
                 .setInnerBooleanVar(complexField.isInnerBooleanVar())
@@ -144,12 +146,30 @@ public class MoccaClientQueryTest {
 
     @Test
     public void queryOptionalTest() {
+
+        // Testing optional explicitly used in the return type and request variable
         SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boom", "zaz");
         Optional<SampleResponseDTO> result = client.getOneSample(Optional.of(sampleRequestDTO));
         assertNotNull(result);
         assertTrue(result.isPresent());
         assertEquals(result.get().getFoo(), "boo");
         assertEquals(result.get().getBar(), "far");
+
+        // Testing optional used inside the return type and the request variable POJO
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(1, "one", true, null, null, null);
+        superComplexSampleType.setOptionalField("love");
+        SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
+
+        assertNotNull(superComplexResponse);
+        assertEquals(superComplexResponse.getIntVar(), 1);
+        assertEquals(superComplexResponse.getStringVar(), "one");
+        assertTrue(superComplexResponse.isBooleanVar());
+        assertNull(superComplexResponse.getComplexField());
+        assertNull(superComplexResponse.getComplexListVar());
+        assertNull(superComplexResponse.getStringListVar());
+        assertNull(superComplexResponse.getDateTime());
+        assertTrue(superComplexResponse.getOptionalField().isPresent());
+        assertEquals(superComplexResponse.getOptionalField().get(), "love");
     }
 
     @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")

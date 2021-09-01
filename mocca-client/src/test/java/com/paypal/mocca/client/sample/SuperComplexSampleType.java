@@ -2,6 +2,7 @@ package com.paypal.mocca.client.sample;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 public class SuperComplexSampleType {
@@ -122,6 +123,7 @@ public class SuperComplexSampleType {
     private List<SuperComplexField> complexListVar;
     private List<String> stringListVar;
     private OffsetDateTime dateTime;
+    private String optionalField;
 
     public SuperComplexSampleType(int intVar, String stringVar, boolean booleanVar, SuperComplexField complexField,
                                   List<SuperComplexField> complexListVar,
@@ -174,10 +176,6 @@ public class SuperComplexSampleType {
         return complexListVar;
     }
 
-    public OffsetDateTime getDateTime() {
-        return dateTime;
-    }
-
     public void setComplexListVar(List<SuperComplexField> complexListVar) {
         this.complexListVar = complexListVar;
     }
@@ -190,14 +188,27 @@ public class SuperComplexSampleType {
         this.stringListVar = stringListVar;
     }
 
+    public OffsetDateTime getDateTime() {
+        return dateTime;
+    }
+
     public SuperComplexSampleType setDateTime(OffsetDateTime dateTime) {
         this.dateTime = dateTime;
         return this;
     }
 
+    public Optional<String> getOptionalField() {
+        return Optional.ofNullable(optionalField);
+    }
+
+    public SuperComplexSampleType setOptionalField(String optionalField) {
+        this.optionalField = optionalField;
+        return this;
+    }
+
     @Override
     public String toString() {
-        return new StringJoiner(",\n", SuperComplexSampleType.class.getSimpleName() + "[\n", "]")
+        return new StringJoiner(", ", SuperComplexSampleType.class.getSimpleName() + "[", "]")
                 .add("intVar=" + intVar)
                 .add("stringVar='" + stringVar + "'")
                 .add("booleanVar=" + booleanVar)
@@ -205,6 +216,8 @@ public class SuperComplexSampleType {
                 .add("complexListVar=" + complexListVar)
                 .add("stringListVar=" + stringListVar)
                 .add("dateTime=" + dateTime)
+                .add("optionalField='" + optionalField + "'")
                 .toString();
     }
+
 }
