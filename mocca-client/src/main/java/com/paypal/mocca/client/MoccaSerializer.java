@@ -73,7 +73,7 @@ class MoccaSerializer {
         ByteArrayOutputStream requestPayload = new ByteArrayOutputStream();
 
         // Adding beginning of payload all the way to input parameters
-        write(requestPayload, "{\n  \"query\" : \"");
+        write(requestPayload, "{ \"query\" : \"");
         write(requestPayload, operationType.getValue());
         write(requestPayload, "{");
         write(requestPayload, operationName);
@@ -85,7 +85,7 @@ class MoccaSerializer {
         writeSelectionSet(requestPayload, operationName, selectionSet, responseType);
 
         // Adding end of payload right after selection set
-        write(requestPayload, "}\"\n}");
+        write(requestPayload, "}\"}");
 
         return requestPayload.toByteArray();
     }
