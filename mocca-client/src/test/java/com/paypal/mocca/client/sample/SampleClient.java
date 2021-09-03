@@ -29,6 +29,9 @@ public interface SampleClient extends MoccaClient {
     SampleResponseDTO getOneSample(@Var("sampleRequest") SampleRequestDTO sampleRequestDTO);
 
     @Query
+    SampleResponseDTO getOneValidSample(@Var("sampleRequest") ValidatedRequestDTO validatedRequestDTO);
+
+    @Query
     SampleResponseDTO getOneSampleWithIgnore(@Var(value = "sampleRequest", ignore = "foo") SampleRequestDTO sampleRequestDTO);
 
     @Query

@@ -11,6 +11,7 @@ import com.paypal.mocca.client.sample.SuperComplexResponseType;
 import com.paypal.mocca.client.sample.SuperComplexResponseType.SuperComplexResponseField;
 import com.paypal.mocca.client.sample.SuperComplexSampleType;
 import com.paypal.mocca.client.sample.SuperComplexSampleType.SuperComplexField;
+import com.paypal.mocca.client.sample.ValidatedRequestDTO;
 import feign.codec.DecodeException;
 import feign.codec.EncodeException;
 import org.testng.annotations.AfterClass;
@@ -18,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -56,6 +58,18 @@ public class MoccaClientQueryTest {
         assertNotNull(result);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");
+    }
+
+    @Test
+    public void queryInvalidRequest() {
+        try {
+            SampleResponseDTO result = client.getOneValidSample(new ValidatedRequestDTO(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz"));
+        } catch (EncodeException e) {
+            assertTrue(e.getCause() != null);
+            assertEquals(e.getMessage(), "Constraint violations found in request parameter 'sampleRequest'");
+            assertTrue(e.getCause().getClass().equals(ConstraintViolationException.class));
+            assertEquals(e.getCause().getMessage(), "foo: must not be null");
+        }
     }
 
     @Test

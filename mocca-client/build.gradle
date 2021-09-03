@@ -4,7 +4,11 @@ dependencies {
                    lib.jackson_databind,
                    lib.jackson_datatype_jsr301,
                    lib.jackson_modules_java8
+                   lib.jakarta_validation_api
+
     testImplementation lib.testng,
                        lib.slf4j_simple,
-                       lib.wiremock
+                       lib.wiremock,
+                       lib.hibernate_validator,
+                       lib.jakarta_el
 }

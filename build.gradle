@@ -201,6 +201,12 @@ ext.lib = [
         resilience4j_ratelimiter: 'io.github.resilience4j:resilience4j-ratelimiter:1.3.0',
         resilience4j_bulkhead: 'io.github.resilience4j:resilience4j-bulkhead:1.3.0',
 
+        // Bean validation
+        jakarta_validation_api: 'jakarta.validation:jakarta.validation-api:2.0.2',
+        hibernate_validator: 'org.hibernate.validator:hibernate-validator:6.1.7.Final',
+        jakarta_el: 'org.glassfish:jakarta.el:3.0.3',
+
+        //jakarta_el_api: 'jakarta.el:jakarta.el-api:3.0.3',
         // Tests
         testng: 'org.testng:testng:6.14.3',
         slf4j_simple: 'org.slf4j:slf4j-simple:1.7.25',

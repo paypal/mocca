@@ -13,6 +13,10 @@ import feign.codec.Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -21,6 +25,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Mocca Feign encoder, responsible for serializing the request payload
@@ -30,6 +35,16 @@ import java.util.List;
 class MoccaFeignEncoder implements Encoder {
 
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
+    Validator validator;
+
+    MoccaFeignEncoder() {
+        try {
+            Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+            this.validator = validator;
+        } catch (Exception e) {
+            // No validation provider found
+        }
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
 
@@ -47,12 +62,25 @@ class MoccaFeignEncoder implements Encoder {
             final OperationType operationType = getOperationType(template);
             final SelectionSet selectionSet = getSelectionSet(template);
             final List<Variable> variables = getVariables(parameters, template);
-
+            if (validator != null) {
+                validateVariables(variables);
+            }
             final byte[] data = moccaSerializer.serialize(variables, responseType, operationName, operationType, selectionSet);
             template.body(data, Charset.defaultCharset());
 
         } catch (IOException e) {
             throw new MoccaException("An error happened when serializing the request payload from type " + bodyType.getTypeName(), e);
+        }
+    }
+
+    void validateVariables(List<Variable> vars) {
+        for (Variable var: vars) {
+            // should we skip "raw" variables?
+            Set<ConstraintViolation<Object>> violationSet = validator.validate(var.getValue());
+            if (violationSet.size() > 0) {
+                throw new EncodeException("Constraint violations found in request parameter '"+ var.getMetadata().value()+"'",
+                        new ConstraintViolationException(violationSet));
+            }
         }
     }
 
