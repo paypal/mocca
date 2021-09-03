@@ -10,5 +10,3 @@ include 'mocca-jaxrs2'
 include 'mocca-okhttp'
 include 'mocca-micrometer'
 include 'mocca-resiliency4j'
-include 'mocca-validation'
-
