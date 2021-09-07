@@ -42,7 +42,7 @@ final class MoccaReflection {
      * If the given type is not parameterized an IllegalArgumentException is thrown.
      */
     static Type getInnerType(final Type type) {
-        if (!isParameterizedType(type)) throw new IllegalArgumentException("Given type is not parameterized");
+        Arguments.require(isParameterizedType(type), "Given type is not parameterized");
 
         ParameterizedType parameterizedType = (ParameterizedType) type;
         return parameterizedType.getActualTypeArguments()[0];
