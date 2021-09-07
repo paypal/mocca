@@ -3,7 +3,9 @@ package com.paypal.mocca.client.sample;
 import com.paypal.mocca.client.MoccaClient;
 import com.paypal.mocca.client.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RequestHeader("classheader: classvalue")
 public interface SampleClient extends MoccaClient {
@@ -19,6 +21,9 @@ public interface SampleClient extends MoccaClient {
 
     @Query
     List<SampleResponseDTO> getSamplesList(@Var("foo") String foo, @Var("bar") String bar);
+
+    @Query
+    List<SampleResponseDTO> getSamplesList(@Var("sampleRequests") List<SampleRequestDTO> sampleRequests, @Var("numbers") List<Integer> numbers, @Var("string") String string,  @Var("number") int number);
 
     @Query
     SampleResponseDTO getOneSample(@Var("sampleRequest") SampleRequestDTO sampleRequestDTO);
@@ -75,5 +80,17 @@ public interface SampleClient extends MoccaClient {
 
     @Mutation
     List<SampleResponseDTO> addSampleReturnList(@Var("foo") String foo, @Var("bar") String bar);
+
+    @Query
+    OffsetDateTime getDateTime(@Var("dateTimeToReturn") OffsetDateTime dateTimeToReturn);
+
+    @Query
+    SuperComplexResponseType getSuperComplexStuff(@Var("superComplexSampleType") SuperComplexSampleType superComplexSampleType);
+
+    @Query
+    Optional<SampleResponseDTO> getOneSample(@Var("sampleRequest") Optional<SampleRequestDTO> sampleRequestDTO);
+
+    @Query
+    CyclePojo getResponseWithCycle();
 
 }

@@ -1,6 +1,9 @@
 package com.paypal.mocca.client.sample;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 public class SuperComplexSampleType {
 
@@ -73,6 +76,44 @@ public class SuperComplexSampleType {
         public void setInnerComplexListVar(List<SuperComplexField> innerComplexListVar) {
             this.innerComplexListVar = innerComplexListVar;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            SuperComplexField that = (SuperComplexField) o;
+
+            if (innerIntVar != that.innerIntVar) return false;
+            if (innerBooleanVar != that.innerBooleanVar) return false;
+            if (innerStringVar != null ? !innerStringVar.equals(that.innerStringVar) : that.innerStringVar != null) return false;
+            if (innerStringListVar != null ? !innerStringListVar.equals(that.innerStringListVar) : that.innerStringListVar != null) return false;
+            if (innerComplexVar != null ? !innerComplexVar.equals(that.innerComplexVar) : that.innerComplexVar != null) return false;
+            return innerComplexListVar != null ? innerComplexListVar.equals(that.innerComplexListVar) : that.innerComplexListVar == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = innerIntVar;
+            result = 31 * result + (innerStringVar != null ? innerStringVar.hashCode() : 0);
+            result = 31 * result + (innerBooleanVar ? 1 : 0);
+            result = 31 * result + (innerStringListVar != null ? innerStringListVar.hashCode() : 0);
+            result = 31 * result + (innerComplexVar != null ? innerComplexVar.hashCode() : 0);
+            result = 31 * result + (innerComplexListVar != null ? innerComplexListVar.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(",\n", SuperComplexField.class.getSimpleName() + "[\n", "]")
+                    .add("innerIntVar=" + innerIntVar)
+                    .add("innerStringVar='" + innerStringVar + "'")
+                    .add("innerBooleanVar=" + innerBooleanVar)
+                    .add("innerStringListVar=" + innerStringListVar)
+                    .add("innerComplexVar=" + innerComplexVar)
+                    .add("innerComplexListVar=" + innerComplexListVar)
+                    .toString();
+        }
     }
 
     private int intVar;
@@ -81,6 +122,8 @@ public class SuperComplexSampleType {
     private SuperComplexField complexField;
     private List<SuperComplexField> complexListVar;
     private List<String> stringListVar;
+    private OffsetDateTime dateTime;
+    private String optionalField;
 
     public SuperComplexSampleType(int intVar, String stringVar, boolean booleanVar, SuperComplexField complexField,
                                   List<SuperComplexField> complexListVar,
@@ -144,4 +187,37 @@ public class SuperComplexSampleType {
     public void setStringListVar(List<String> stringListVar) {
         this.stringListVar = stringListVar;
     }
+
+    public OffsetDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public SuperComplexSampleType setDateTime(OffsetDateTime dateTime) {
+        this.dateTime = dateTime;
+        return this;
+    }
+
+    public Optional<String> getOptionalField() {
+        return Optional.ofNullable(optionalField);
+    }
+
+    public SuperComplexSampleType setOptionalField(String optionalField) {
+        this.optionalField = optionalField;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SuperComplexSampleType.class.getSimpleName() + "[", "]")
+                .add("intVar=" + intVar)
+                .add("stringVar='" + stringVar + "'")
+                .add("booleanVar=" + booleanVar)
+                .add("complexField=" + complexField)
+                .add("complexListVar=" + complexListVar)
+                .add("stringListVar=" + stringListVar)
+                .add("dateTime=" + dateTime)
+                .add("optionalField='" + optionalField + "'")
+                .toString();
+    }
+
 }

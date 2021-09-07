@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
+import static com.paypal.mocca.client.MoccaReflection.getInnerType;
+import static com.paypal.mocca.client.MoccaReflection.isParameterizedType;
+
 /**
  * Mocca Feign decoder, responsible for deserializing the response payload
  *
@@ -24,6 +27,8 @@ class MoccaFeignDecoder implements Decoder {
             throw new MoccaException("Unexpected HTTP response status code: " + response.status());
         }
 
+        final boolean optionalResultType = isParameterizedType(type, Optional.class);
+
         Optional<?> result;
         try (InputStream inputStream = response.body().asInputStream()) {
             if (inputStream == null) {
@@ -31,10 +36,11 @@ class MoccaFeignDecoder implements Decoder {
             }
 
             final String operationName = MoccaFeignEncoder.getOperationName(response);
-            result = moccaDeserializer.deserialize(inputStream, type, operationName);
+            final Type responseType = optionalResultType ? getInnerType(type) : type;
+            result = moccaDeserializer.deserialize(inputStream, responseType, operationName);
         }
 
-        return result.orElse(null);
+        return optionalResultType ? result : result.orElse(null);
     }
 
 }

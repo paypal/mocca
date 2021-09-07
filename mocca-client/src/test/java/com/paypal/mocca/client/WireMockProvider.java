@@ -81,6 +81,15 @@ class WireMockProvider {
         final String EXPECTED_GOOD_REQUEST = "{\"query\":\"query{getOneSample(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String GOOD_RESULT = "{\"data\": {\"getOneSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
 
+        final String EXPECTED_NULL_VAR_REQUEST = "{\"query\":\"query{getOneSample(bar: \\\"far\\\") {bar foo}}\"}";
+        final String NULL_VAR_RESULT = "{\"data\": {\"getOneSample\": {\"bar\": \"far\"}}}";
+
+        final String EXPECTED_COMPLEX_DATA_REQUEST = "{ \"query\" : \"query{getSuperComplexStuff(superComplexSampleType: {booleanVar: true, complexField: {innerBooleanVar: false, innerComplexListVar: [{innerBooleanVar: false, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}], innerComplexVar: {innerBooleanVar: false, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}, complexListVar: [{innerBooleanVar: false, innerComplexListVar: [{innerBooleanVar: false, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}], innerComplexVar: {innerBooleanVar: false, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}], dateTime: \\\"2021-08-17T18:12:22.470076-03:00\\\", intVar: 7, stringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], stringVar: \\\"seven\\\"}) {booleanVar complexField {innerBooleanVar innerIntVar innerStringListVar innerStringVar} complexListVar {innerBooleanVar innerIntVar innerStringListVar innerStringVar} dateTime intVar optionalField stringListVar stringVar}}\" }";
+        final String COMPLEX_DATA_RESULT = "{\"data\": {\"getSuperComplexStuff\": {\"booleanVar\": true, \"dateTime\": \"2021-08-17T18:12:22.470076-03:00\", \"intVar\": 7, \"stringVar\": \"seven\", \"stringListVar\": [\"blue\", \"yellow\", \"guacamole\"], \"complexField\": {\"innerBooleanVar\": false, \"innerIntVar\": 1, \"innerStringVar\": \"one\", \"innerStringListVar\": [\"blue\", \"yellow\", \"guacamole\"]}, \"complexListVar\": [{\"innerBooleanVar\": false, \"innerIntVar\": 1, \"innerStringVar\": \"one\", \"innerStringListVar\": [\"blue\", \"yellow\", \"guacamole\"]}] }}}";
+
+        final String EXPECTED_OPTIONAL_REQUEST = "{ \"query\" : \"query{getSuperComplexStuff(superComplexSampleType: {booleanVar: true, intVar: 1, optionalField: \\\"love\\\", stringVar: \\\"one\\\"}) {booleanVar complexField {innerBooleanVar innerIntVar innerStringListVar innerStringVar} complexListVar {innerBooleanVar innerIntVar innerStringListVar innerStringVar} dateTime intVar optionalField stringListVar stringVar}}\" }";
+        final String OPTIONAL_RESULT = "{\"data\": {\"getSuperComplexStuff\": {\"booleanVar\": true, \"intVar\": 1, \"optionalField\": \"love\", \"stringVar\": \"one\"}}}";
+
         final String EXPECTED_DTO_REQUEST = "{\"query\":\"query{getOneSample(sampleRequest: {bar: \\\"zaz\\\", foo: \\\"boom\\\"}) {bar foo}}\"}";
         final String DTO_RESULT = "{\"data\": {\"getOneSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
 
@@ -95,11 +104,16 @@ class WireMockProvider {
 
         final String EXPECTED_NO_PARAM_REQUEST = "{\"query\":\"query{getOneSample {bar foo}}\"}";
 
+        final String EXPECTED_OFFSETDATETIME_REQUEST = "{\"query\":\"query{getDateTime(dateTimeToReturn: \\\"2021-08-17T18:12:22.470076-03:00\\\")}\"}";
+        final String EXPECTED_OFFSETDATETIME_REQUEST_RESULT = "{\"data\": {\"getDateTime\": \"2021-08-17T18:12:22.470076-03:00\"}}";
+
         final String EXPECTED_ERROR_REQUEST = "{\"query\":\"query{getOneSample(foo: \\\"zoo\\\", bar: \\\"car\\\") {bar foo}}\"}";
         final String ERROR_RESULT = "{\"errors\": [{\"message\": \"Internal Server Error(s) while executing query\"}],\"data\": {\"getOneSample\": null}}";
 
         final String EXPECTED_GOOD_LIST_REQUEST = "{\"query\":\"query{getSamplesList(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String GOOD_LIST_RESULT = "{\"data\": {\"getSamplesList\": [{\"foo\": \"boo1\",\"bar\": \"far1\"}, {\"foo\": \"boo2\",\"bar\": \"far2\"}]}}";
+
+        final String EXPECTED_PARAM_LIST_REQUEST = "{\"query\":\"query{getSamplesList(sampleRequests: [{bar: \\\"far1\\\", foo: \\\"boo1\\\"}, {bar: \\\"far2\\\", foo: \\\"boo2\\\"}], numbers: [1, 2, 3], string: \\\"seven\\\", number: 7) {bar foo}}\"}";
 
         final String EXPECTED_NO_DATA_LIST_REQUEST = "{\"query\":\"query{getSamplesList(foo: \\\"moo\\\", bar: \\\"czar\\\") {bar foo}}\"}";
         final String NO_DATA_LIST_RESULT = "{\"data\": {\"getSamplesList\": []}}";
@@ -108,13 +122,18 @@ class WireMockProvider {
         final String ERROR_LIST_RESULT = "{\"errors\": [{\"message\": \"Internal Server Error(s) while executing query\"}],\"data\": {\"getSamplesList\": null}}";
 
         addGraphQlStub(EXPECTED_GOOD_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_NULL_VAR_REQUEST, NULL_VAR_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_COMPLEX_DATA_REQUEST, COMPLEX_DATA_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_OPTIONAL_REQUEST, OPTIONAL_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_DTO_REQUEST, DTO_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_CUSTOM_SELECT_REQUEST, CUSTOM_SELECT_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_IGNORE_FOO_REQUEST, IGNORE_FOO_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_GOOD_LIST_REQUEST, GOOD_LIST_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_PARAM_LIST_REQUEST, GOOD_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_LIST_REQUEST, NO_DATA_LIST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_PARAM_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_OFFSETDATETIME_REQUEST, EXPECTED_OFFSETDATETIME_REQUEST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_REQUEST, ERROR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_LIST_REQUEST, ERROR_LIST_RESULT, DEFAULT_HEADERS);
     }
@@ -123,10 +142,10 @@ class WireMockProvider {
         final String EXPECTED_GOOD_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"boo\\\", bar: \\\"far\\\") {bar foo}}\"}";
         final String GOOD_RESULT = "{\"data\": {\"addSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
 
-        final String EXPECTED_DTO_REQUEST = "{\"query\":\"mutation{addSample(sampleRequest: {bar: \\\"czar 100%\\\", foo: \\\"moo\\\"}) {}}\"}";
+        final String EXPECTED_DTO_REQUEST = "{\"query\":\"mutation{addSample(sampleRequest: {bar: \\\"czar 100%\\\", foo: \\\"moo\\\"})}\"}";
 
         final String EXPECTED_NO_DATA_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"moo\\\", bar: \\\"czar 100%\\\") {bar foo}}\"}";
-        final String EXPECTED_NO_DATA_NO_SELECTION_SET_REQUEST = "{\"query\":\"mutation{addSample(bar: \\\"czar 100%\\\", foo: \\\"moo\\\") {}}\"}";
+        final String EXPECTED_NO_DATA_NO_SELECTION_SET_REQUEST = "{\"query\":\"mutation{addSample(bar: \\\"czar 100%\\\", foo: \\\"moo\\\")}\"}";
         final String NO_DATA_RESULT = "{\"data\": {\"addSample\": null}}";
 
         final String EXPECTED_ERROR_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"zoo\\\", bar: \\\"car\\\") {bar foo}}\"}";

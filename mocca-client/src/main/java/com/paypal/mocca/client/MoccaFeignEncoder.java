@@ -1,7 +1,6 @@
 package com.paypal.mocca.client;
 
 import com.paypal.mocca.client.MoccaSerializer.Variable;
-import com.paypal.mocca.client.MoccaUtils.OperationType;
 import com.paypal.mocca.client.annotation.Mutation;
 import com.paypal.mocca.client.annotation.Query;
 import com.paypal.mocca.client.annotation.SelectionSet;
@@ -11,6 +10,8 @@ import feign.RequestTemplate;
 import feign.Response;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -29,6 +30,8 @@ import java.util.List;
 class MoccaFeignEncoder implements Encoder {
 
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
+
+    private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
@@ -93,7 +96,7 @@ class MoccaFeignEncoder implements Encoder {
      */
     static OperationType getOperationType(RequestTemplate requestTemplate) {
         Annotation operationAnnotation = getOperationAnnotation(requestTemplate);
-        return OperationType.getFromAnnotation(operationAnnotation);
+        return OperationType.valueOf(operationAnnotation);
     }
 
     private static Annotation getOperationAnnotation(RequestTemplate requestTemplate) {
@@ -135,6 +138,14 @@ class MoccaFeignEncoder implements Encoder {
         Parameter[] parametersMetadata = requestTemplate.methodMetadata().method().getParameters();
         List<Variable> variables = new ArrayList<>(parameters.length);
         for (int i = 0; i < parameters.length; i++) {
+
+            // TODO We could make it configurable, leaving for the user to decide if null variables should
+            // be omitted or just set with null value. For now we will just skip them.
+            if (parameters[i] == null) {
+                logger.info("Skipping parameter at position {} as it is set to null", i);
+                continue;
+            }
+
             Parameter parameterMetadata = parametersMetadata[i];
             Var varAnnotation = parameterMetadata.getAnnotation(Var.class);
             // FIXME It would be better if this check happened at client definition time, instead of request time
@@ -148,7 +159,7 @@ class MoccaFeignEncoder implements Encoder {
                     final String method = requestTemplate.methodMetadata().method().getName();
                     throw new MoccaException("Invalid GraphQL operation method " + method + ", make sure all its parameters are annotated with one Mocca annotation");
                 }
-                Variable variable = new Variable(parameters[i], parameterMetadata.getType(), varAnnotation);
+                Variable variable = new Variable(parameters[i], parameterMetadata.getParameterizedType(), varAnnotation);
                 variables.add(variable);
             }
         }
