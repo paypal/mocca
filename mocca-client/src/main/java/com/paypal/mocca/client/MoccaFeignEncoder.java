@@ -96,7 +96,7 @@ class MoccaFeignEncoder implements Encoder {
      */
     static OperationType getOperationType(RequestTemplate requestTemplate) {
         Annotation operationAnnotation = getOperationAnnotation(requestTemplate);
-        return OperationType.getFromAnnotation(operationAnnotation);
+        return OperationType.valueOf(operationAnnotation);
     }
 
     private static Annotation getOperationAnnotation(RequestTemplate requestTemplate) {

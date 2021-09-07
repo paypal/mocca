@@ -20,7 +20,7 @@ enum OperationType {
         this.value = value;
     }
 
-    static OperationType getFromAnnotation(Annotation operationAnnotation) {
+    static OperationType valueOf(Annotation operationAnnotation) {
         if (operationAnnotation instanceof com.paypal.mocca.client.annotation.Query) return Query;
         if (operationAnnotation instanceof com.paypal.mocca.client.annotation.Mutation) return Mutation;
         throw new IllegalArgumentException("Unsupported annotation: " + operationAnnotation.getClass().getName());
