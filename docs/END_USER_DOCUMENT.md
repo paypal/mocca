@@ -177,15 +177,15 @@ The most basic rules when writing a client API are listed below. Other rules, as
 
 1. The Java interface must extend `com.paypal.mocca.client.MoccaClient`
 1. The signature of each GraphQL operation method must:
-   1. Declare a list of parameters containing zero or more parameters to represent the variables section declared in the GraphQL schema of same operation. All parameters must be annotated with `com.paypal.mocca.client.annotation.Var`, used to name the variable, plus additional optional configuration. The parameter name is not relevant, the GraphQL variable name is defined in the annotation., but its type must be one of the following:
+   1. Have zero or more parameters to represent the variables section declared in the GraphQL schema of same operation. All parameters representing a GraphQL variable must be annotated with `com.paypal.mocca.client.annotation.Var`, used to name the variable, plus additional optional configuration. The parameter name is not relevant, the GraphQL variable name is defined in the annotation, but its type must be one of the following:
       1. Any primitive type, or primitive wrapper
       1. `java.lang.String`
       1. A POJO following Java beans conventions
-      1. A `java.util.List` whose type can be any of the types mentioned earlier (except primitives)
+      1. A `java.util.List` or `java.util.Optional` whose type can be any of the types mentioned earlier (except primitives)
    1. Declare a return type (it cannot be `void`) analog to the type declared in the GraphQL schema of same operation. This return type must be one of the following:
       1. Any primitive type, or primitive wrapper
       1. A DTO
-      1. A `java.util.List` whose type can be a DTO or a primitive wrapper
+      1. A `java.util.List` or `java.util.Optional` whose type can be a DTO or a primitive wrapper
 1. Each GraphQL operation method must be annotated with a `Query` or `Mutation` annotation (from package `com.paypal.mocca.client.annotation`) depending on whether the operation is a GraphQL query or mutation respectively.
 1. The method name should be the same as the GraphQL operation name. If a different name is desired for the Java method, then the GraphQL operation name must be set using the `name` attribute in the `Query` or `Mutation` annotation.
 
