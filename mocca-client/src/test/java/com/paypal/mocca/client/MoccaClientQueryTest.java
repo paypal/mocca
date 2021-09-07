@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import static org.testng.Assert.fail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -63,7 +64,8 @@ public class MoccaClientQueryTest {
     @Test
     public void queryInvalidRequest() {
         try {
-            SampleResponseDTO result = client.getOneValidSample(new ValidatedRequestDTO(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz"));
+            client.getOneValidSample(new ValidatedRequestDTO(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz"));
+            fail("should throw a validation exception");
         } catch (EncodeException e) {
             assertTrue(e.getCause() != null);
             assertEquals(e.getMessage(), "Constraint violations found in request parameter 'sampleRequest'");

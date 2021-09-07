@@ -35,7 +35,7 @@ import java.util.Set;
 class MoccaFeignEncoder implements Encoder {
 
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
-    Validator validator;
+    private Validator validator;
 
     MoccaFeignEncoder() {
         try {
