@@ -14,7 +14,21 @@ import java.io.IOException;
 
 import static org.testng.Assert.assertEquals;
 
+/**
+ * Verifies that a supplied {@link MoccaHttpClient} works for
+ * some basic GraphQL call.  The general idea being that we're
+ * just testing the basic HTTP parts function correctly (e.g.
+ * POST requests).
+ * <p></p>
+ * Unfortunately, there seems to be a Gradle or TestNG bug where
+ * if a class contains no tests but extends one that does, then
+ * Gradle build will not execute the test. Annotating the concrete
+ * class with `@Test` appears to 'solve' the problem.
+ */
 abstract class BasicMoccaHttpClientTest {
+    // TODO solve the gradlew problem described above.  Some links:
+    // https://discuss.gradle.org/t/testng-tests-that-inherit-from-a-base-class-but-do-not-add-new-test-methods-are-not-detected/1259
+    // https://stackoverflow.com/questions/64087969/testng-cannot-find-test-methods-with-inheritance
 
     private static final String GRAPHQL_GREETING = "Hello!";
 
@@ -40,7 +54,7 @@ abstract class BasicMoccaHttpClientTest {
         });
         graphqlServer.start();
         sampleDataClient = MoccaClient.Builder.sync(graphqlServer.getURI().toASCIIString())
-                .client(Arguments.requireNonNull(moccaHttpClient))
+                .client(moccaHttpClient)
                 .build(SampleDataClient.class);
     }
 

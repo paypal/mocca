@@ -2,4 +2,7 @@ dependencies {
     implementation  project(':mocca-client'),
                     lib.feign_google
     api             lib.google_client
+
+    testImplementation project(':mocca-http-client-tests'),
+                       lib.testng
 }
