@@ -1,5 +1,7 @@
 package com.paypal.mocca.client.sample;
 
+import org.hibernate.validator.constraints.Length;
+
 import javax.validation.constraints.NotNull;
 
 public class ValidatedRequestDTO {
@@ -7,6 +9,7 @@ public class ValidatedRequestDTO {
     @NotNull
     private String foo;
 
+    @Length(max=5)
     private String bar;
 
     public ValidatedRequestDTO() {
