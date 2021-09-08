@@ -33,9 +33,11 @@ import java.util.Set;
  * @author fabiocarvalho777@gmail.com
  */
 class MoccaFeignEncoder implements Encoder {
+    private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
 
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
     private Validator validator;
+    private MoccaClient client;
 
     MoccaFeignEncoder() {
         try {
@@ -46,7 +48,9 @@ class MoccaFeignEncoder implements Encoder {
         }
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
+    public void setClient(MoccaClient client) {
+        this.client = client;
+    }
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
@@ -63,7 +67,7 @@ class MoccaFeignEncoder implements Encoder {
             final SelectionSet selectionSet = getSelectionSet(template);
             final List<Variable> variables = getVariables(parameters, template);
             if (validator != null) {
-                validateVariables(variables);
+                validateVariables(parameters, template);
             }
             final byte[] data = moccaSerializer.serialize(variables, responseType, operationName, operationType, selectionSet);
             template.body(data, Charset.defaultCharset());
@@ -73,14 +77,13 @@ class MoccaFeignEncoder implements Encoder {
         }
     }
 
-    void validateVariables(List<Variable> vars) {
-        for (Variable var: vars) {
-            // should we skip "raw" variables?
-            Set<ConstraintViolation<Object>> violationSet = validator.validate(var.getValue());
-            if (violationSet.size() > 0) {
-                throw new EncodeException("Constraint violations found in request parameter '"+ var.getMetadata().value()+"'",
-                        new ConstraintViolationException(violationSet));
-            }
+    void validateVariables(Object[] parameters, RequestTemplate template) {
+        Method method = template.methodMetadata().method();
+        Set<ConstraintViolation<Object>> violationSet = validator.forExecutables().validateParameters(client, method, parameters);
+
+        if (violationSet.size() > 0) {
+            throw new EncodeException("Constraint violations found in request parameter:",
+                    new ConstraintViolationException(violationSet));
         }
     }
 

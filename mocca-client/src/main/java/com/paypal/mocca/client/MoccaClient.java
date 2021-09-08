@@ -232,8 +232,9 @@ public interface MoccaClient {
             public <C extends MoccaClient> C build(final Class<C> apiType) {
                 Feign.Builder builder = (resiliency != null) ? resiliency.getFeignBuilder() : Feign.builder();
 
+                MoccaFeignEncoder encoder = new MoccaFeignEncoder();
                 builder = builder.contract(new MoccaFeignContract())
-                    .encoder(new MoccaFeignEncoder())
+                    .encoder(encoder)
                     .decoder(new MoccaFeignDecoder());
 
                 if (moccaHttpClient != null) {
@@ -242,7 +243,9 @@ public interface MoccaClient {
                 for (final MoccaCapability c : capabilities) {
                     builder = builder.addCapability(c.getFeignCapability());
                 }
-                return builder.target(apiType, graphQLUrlString);
+                C client =  builder.target(apiType, graphQLUrlString);
+                encoder.setClient(client);
+                return client;
             }
         }
 
@@ -372,14 +375,18 @@ public interface MoccaClient {
                 }
 
                 public <C extends MoccaClient> C build(final Class<C> apiType) {
+                    MoccaFeignEncoder encoder = new MoccaFeignEncoder();
+
                     AsyncFeign.AsyncBuilder<CC> builder = AsyncFeign.<CC>asyncBuilder()
                         .contract(new MoccaFeignContract())
-                        .encoder(new MoccaFeignEncoder())
+                        .encoder(encoder)
                         .decoder(new MoccaFeignDecoder());
                     if (asyncClient != null) {
                         builder = builder.client(asyncClient);
                     }
-                    return builder.target(apiType, serverUrl);
+                    C client =  builder.target(apiType, graphQLUrlString);
+                    encoder.setClient(client);
+                    return client;
                 }
             }
         }

@@ -68,9 +68,9 @@ public class MoccaClientQueryTest {
             fail("should throw a validation exception");
         } catch (EncodeException e) {
             assertTrue(e.getCause() != null);
-            assertEquals(e.getMessage(), "Constraint violations found in request parameter 'sampleRequest'");
+            assertEquals(e.getMessage(), "Constraint violations found in request parameter:");
             assertTrue(e.getCause().getClass().equals(ConstraintViolationException.class));
-            assertEquals(e.getCause().getMessage(), "foo: must not be null");
+            assertEquals(e.getCause().getMessage(), "getOneValidSample.arg0.foo: must not be null");
         }
     }
 
