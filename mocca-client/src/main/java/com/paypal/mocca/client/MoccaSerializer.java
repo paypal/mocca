@@ -379,8 +379,7 @@ class MoccaSerializer {
 
     /**
      *
-     * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation
-     * with ignore values.
+     * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation with Ignore attribute set as reference.
      *
      * It uses the Response type to start an initial list which is then filtered if the value is present in the ignore list
      *
@@ -423,7 +422,7 @@ class MoccaSerializer {
     }
 
     /*
-     * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation as reference.
+     * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation with Value attribute set as reference.
      *
      * @param requestPayload the output stream object used to write the selection set, based on the other parameters
      * @param selectionSet the SelectionSet annotation set in the GraphQL operation method, necessary to set the selection set
