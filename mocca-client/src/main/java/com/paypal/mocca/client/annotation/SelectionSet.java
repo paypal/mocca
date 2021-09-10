@@ -53,4 +53,12 @@ public @interface SelectionSet {
      */
     String value() default UNDEFINED;
 
+    /**
+     * The fields to be ignored from the selection set.
+     *
+     *
+     * @return an array containing all fields to be ignored in a POJO variable
+     */
+    String[] ignore() default UNDEFINED;
+
 }

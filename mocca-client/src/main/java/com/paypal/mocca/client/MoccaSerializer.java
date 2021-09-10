@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
@@ -355,17 +356,69 @@ class MoccaSerializer {
      * @param responseType the return type set in the GraphQL operation method, necessary to dynamically set the selection set
      */
     private void writeSelectionSet(final ByteArrayOutputStream requestPayload, final String operationName, final SelectionSet selectionSet, Type responseType) {
-        if (selectionSet != null && (selectionSet.value().equals(SelectionSet.UNDEFINED) || selectionSet.value().trim().isEmpty())) {
-            throw new MoccaException("A com.paypal.mocca.client.annotation.SelectionSet annotation with an undefined value is present at the method related to operation "
-                    + operationName + ". Please, set its value, or remove the annotation, letting Mocca use the return type to automatically set the selection set.");
-        } else if (selectionSet != null) {
-            // Adding selection set using the selection set annotation
-            writeUserProvidedSelectionSet(requestPayload, selectionSet);
+
+        if (selectionSet != null && isUndefinedOrNullOrEmpty(selectionSet.value()) && isUndefinedOrNullOrEmpty(selectionSet.ignore())) {
+            throw new MoccaException("A com.paypal.mocca.client.annotation.SelectionSet annotation with undefined value and ignore fields is present at the method related to operation "
+                    + operationName + ". Please, set its value or ignore fields, or remove the annotation, letting Mocca use the return type to automatically set the selection set.");
+        } else if (selectionSet != null && !isUndefinedOrNullOrEmpty(selectionSet.value())) {
+            // Adding selection set using the selection set annotation with value
+            if(!isUndefinedOrNullOrEmpty(selectionSet.ignore())) {
+                logger.warn("Value and Ignore both present in Selection set Annotation, Value was used to generate the Selection Set");
+            }
+            writeUserProvidedSelectionSetUsingValue(requestPayload, selectionSet);
+        } else if(selectionSet != null && !isUndefinedOrNullOrEmpty(selectionSet.ignore())) {
+            // Adding selection set using the ignore values in the selection set annotation
+            writeUserProvidedSelectionSetUsingIgnore(requestPayload, Arrays.asList(selectionSet.ignore()), responseType);
         } else if (responseType != null) {
             // Adding selection set using the response type
             writeResponseTypeSelectionSet(requestPayload, responseType);
         } else {
             logger.debug("Response type is null and a custom selection set was not provided, so a selection set will not be written to the GraphQL operation");
+        }
+    }
+
+    /**
+     *
+     * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation
+     * with ignore values.
+     *
+     * It uses the Response type to start an initial list which is then filtered if the value is present in the ignore list
+     *
+     * @param requestPayload the output stream object used to write the request payload, based on the other parameters
+     * @param ignoreFields The list of fields which have to be ignored in selection set generation
+     * @param responseType the return type set in the GraphQL operation method, useful when defining the request selection set
+     */
+    private void writeUserProvidedSelectionSetUsingIgnore(ByteArrayOutputStream requestPayload,
+                                                          List<String> ignoreFields,
+                                                          Type responseType) {
+
+        try {
+            BeanInfo info = Introspector.getBeanInfo(erase(responseType));
+            write(requestPayload, " {");
+
+            final PropertyDescriptor[] pds = info.getPropertyDescriptors();
+
+            final List<String> selectionSet = Arrays.stream(pds)
+                    .filter(pd -> !pd.getName().equals("class"))
+                    .filter(pd -> !ignoreFields.contains(pd.getName()))
+                    .map(pd -> new Tuple<Class<?>>(pd.getName(), pd.getReadMethod().getReturnType()))
+                    .map(e -> {
+                        Class<?> c = e.value;
+                        if (isPojo(c)) {
+                            ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
+                            final List<String> nextIgnoreFields = getNextIgnoreFields(e.key + ".", ignoreFields);
+                            writeUserProvidedSelectionSetUsingIgnore(complexVariable, nextIgnoreFields, c);
+                            return e.key + complexVariable.toString();
+                        } else {
+                            return e.key;
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            write(requestPayload, String.join(" ", selectionSet));
+            write(requestPayload, "}");
+        } catch (IntrospectionException | IOException e) {
+            throw new MoccaException("An error happened when writing selection set of type " + responseType, e);
         }
     }
 
@@ -375,7 +428,7 @@ class MoccaSerializer {
      * @param requestPayload the output stream object used to write the selection set, based on the other parameters
      * @param selectionSet the SelectionSet annotation set in the GraphQL operation method, necessary to set the selection set
      */
-    private void writeUserProvidedSelectionSet(final ByteArrayOutputStream requestPayload, final SelectionSet selectionSet) {
+    private void writeUserProvidedSelectionSetUsingValue(final ByteArrayOutputStream requestPayload, final SelectionSet selectionSet) {
         try {
             String selectionSetValue = selectionSet.value();
             if (selectionSetValue.trim().isEmpty()) logger.warn("Annotation provided selection set is blank");
@@ -494,6 +547,14 @@ class MoccaSerializer {
      */
     private void write(ByteArrayOutputStream outputStream, final String data) throws IOException {
         outputStream.write(data.getBytes());
+    }
+
+    private boolean isUndefinedOrNullOrEmpty(String value) {
+        return value==null || value.equals(SelectionSet.UNDEFINED) || value.trim().isEmpty();
+    }
+
+    private boolean isUndefinedOrNullOrEmpty(String[] value) {
+        return value==null || value.length==0;
     }
 
 }
