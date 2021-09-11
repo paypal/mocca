@@ -1,8 +1,8 @@
 dependencies {
     implementation  project(':mocca-client'),
                     lib.feign_jaxrs2,
-                    lib.jaxrs2,
                     lib.slf4j_api
+    api             lib.jaxrs2
 
     testImplementation project(':mocca-http-client-tests'),
                        lib.testng,
