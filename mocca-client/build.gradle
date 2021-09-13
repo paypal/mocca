@@ -3,7 +3,7 @@ dependencies {
                    lib.feign_core,
                    lib.jackson_databind,
                    lib.jackson_datatype_jsr301,
-                   lib.jackson_modules_java8
+                   lib.jackson_modules_java8,
                    lib.jakarta_validation_api
 
     testImplementation lib.testng,

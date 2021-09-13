@@ -35,8 +35,6 @@ import java.util.Set;
 class MoccaFeignEncoder implements Encoder {
     private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
 
-    private static Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
-
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
     /**
      * Not that this Validator is in the older javax.validation package not newer jakarta.validation package.
