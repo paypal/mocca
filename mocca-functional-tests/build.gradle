@@ -58,6 +58,6 @@ dependencies {
                        lib.testng,
                        lib.jersey_test,
                        lib.jersey_jetty,
-                       lib.hibernate_validator,
-                       lib.jakarta_el
+                       lib.hibernate_validator
+                       //lib.jakarta_el
 }

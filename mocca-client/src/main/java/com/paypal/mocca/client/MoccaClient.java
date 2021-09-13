@@ -244,6 +244,8 @@ public interface MoccaClient {
                     builder = builder.addCapability(c.getFeignCapability());
                 }
                 C client =  builder.target(apiType, graphQLUrlString);
+                // the client object is needed in the encoder to perform
+                // bean validation for the request
                 encoder.setClient(client);
                 return client;
             }
@@ -386,6 +388,8 @@ public interface MoccaClient {
                     }
                     C client =  builder.target(apiType, graphQLUrlString);
                     encoder.setClient(client);
+                    // the client object is needed in the encoder to perform
+                    // bean validation for the request
                     return client;
                 }
             }

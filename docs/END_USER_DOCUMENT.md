@@ -36,14 +36,15 @@ Mocca offers support for:
     1. Automatic selection set definition based on DTO response type
     1. Annotation and String based custom input variables
     1. Annotation and String based custom selection set
-1. Static and dynamic HTTP request headers
-1. Observability via Micrometer
-1. Resilience with via Resilience4J
-1. Flexible API allowing various pluggable HTTP clients
-1. Asynchronous support
+2. Static and dynamic HTTP request headers
+3. Observability via Micrometer
+4. Resilience with via Resilience4J
+5. Flexible API allowing various pluggable HTTP clients
+6. Asynchronous support
     1. CompletableFuture
     1. Pluggable asynchronous HTTP clients
     1. User provided executor services
+7. Request Parameter Validation
 
 ## 2 Quick start
 
@@ -750,3 +751,38 @@ AsyncBooksAppClient asyncClient = MoccaClient.Builder
         .client(executorClient)
         .build(AsyncBooksAppClient.class);
 ```
+## 8. Request Validation
+Mocca now supports validation of request parameters using a standard bean validation 2.0 implementation like hibernate.
+Please refer to [this site](https://beanvalidation.org/2.0-jsr380/) for information on bean validation. 
+
+**Important Note:** Mocca supports Bean Validation 2.0, not Jakarta Bean Validation 2.0 which has repackaged the api 
+classes from `java.validation` to `jakarta.validation`.
+
+### 8.1 Adding Request Validation to your Application
+If an implementation of the bean validation-api is provided on the classpath, bean validation will be automatically
+performed on each request. Below we show example of how to add bean validation implementations using maven and
+gradle. 
+
+Bean validation is not required, so if you omit these runtime dependencies, Mocca will skip bean validation.
+
+``` Groovy
+// Adding Bean Validation in Gradle
+dependencies {
+    implementation 'org.hibernate.validator:hibernate-validator:6.1.7.Final', 'org.glassfish:jakarta.el:3.0.3'
+}
+```
+
+``` XML
+<!-- Adding Bean validation in Maven -->
+<dependency>
+    <groupId>org.hibernate.validator</groupId>
+    <artifactId>hibernate-validator</artifactId>
+    <version>6.1.7.Final</version>
+</dependency>
+<dependency>
+    <groupId>org.glassfish</groupId>
+    <artifactId>javax.el</artifactId>
+    <version>3.0.3</version>
+</dependency>
+```
+Note that Mocca will transitively include the validation api artifact: `jakarta.validation:jakarta.validation-api:2.0.2`

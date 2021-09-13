@@ -35,8 +35,16 @@ import java.util.Set;
 class MoccaFeignEncoder implements Encoder {
     private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
 
+    private static Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
+
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
+    /**
+     * Not that this Validator is in the older javax.validation package not newer jakarta.validation package.
+     * Please refer to {@link javax.validation.Validator} for more information.
+     */
     private Validator validator;
+
+    // The client is only used for validation and is not needed for encoding.
     private MoccaClient client;
 
     MoccaFeignEncoder() {
@@ -45,6 +53,7 @@ class MoccaFeignEncoder implements Encoder {
             this.validator = validator;
         } catch (Exception e) {
             // No validation provider found
+            logger.warn("No implementation of javax.validation.Validator was found on the classpath");
         }
     }
 
@@ -77,13 +86,21 @@ class MoccaFeignEncoder implements Encoder {
         }
     }
 
+    /**
+     * Validates the client request using the bean validation
+     * API for validating all the parameters in a method invocation.
+     * @param parameters
+     * @param template
+     */
     void validateVariables(Object[] parameters, RequestTemplate template) {
+
         Method method = template.methodMetadata().method();
         Set<ConstraintViolation<Object>> violationSet = validator.forExecutables().validateParameters(client, method, parameters);
 
         if (violationSet.size() > 0) {
-            throw new EncodeException("Constraint violations found in request parameter:",
-                    new ConstraintViolationException(violationSet));
+            throw new EncodeException("Constraint violations found in one or more request parameters",
+                    new ConstraintViolationException(violationSet)
+            );
         }
     }
 
