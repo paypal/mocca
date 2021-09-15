@@ -36,8 +36,8 @@ final public class MoccaJaxrsClient extends MoccaHttpClient {
      */
     public MoccaJaxrsClient(final Client client) {
         super(new JAXRSClient(new StubbornClientBuilder(client)));
-        log.debug("Users of this may attempt to set read timeout and connect timeout per request.  " +
-            "However, those are ignored.  They should be established in the supplied javax.ws.rs.Client.");
+        log.debug("Users of this may attempt to set read timeout and connect timeout per request. " +
+            "However, those are ignored. They should be established in the supplied javax.ws.rs.Client.");
     }
 
     private static class StubbornClientBuilder extends ClientBuilder {
