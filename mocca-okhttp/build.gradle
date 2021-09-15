@@ -2,4 +2,8 @@ dependencies {
     implementation  project(':mocca-client'),
                     lib.feign_okhttp
     api             lib.okhttp_client
+
+
+    testImplementation project(':mocca-http-client-tests'),
+                       lib.testng
 }

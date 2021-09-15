@@ -2,7 +2,8 @@
 description = "Mocca is a GraphQL client for JVM languages with the goal of being easy to use, flexible and modular."
 
 Set testModules = [
-    "mocca-functional-tests"
+    "mocca-functional-tests",
+    "mocca-http-client-tests"
 ]
 
 subprojects {

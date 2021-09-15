@@ -2,4 +2,7 @@ dependencies {
     implementation  project(':mocca-client'),
                     lib.feign_hc5
     api             lib.hc5_client
+
+    testImplementation project(':mocca-http-client-tests'),
+                       lib.testng
 }
