@@ -36,15 +36,15 @@ Mocca offers support for:
     1. Automatic selection set definition based on DTO response type
     1. Annotation and String based custom input variables
     1. Annotation and String based custom selection set
-2. Static and dynamic HTTP request headers
-3. Observability via Micrometer
-4. Resilience with via Resilience4J
-5. Flexible API allowing various pluggable HTTP clients
-6. Asynchronous support
+1. Static and dynamic HTTP request headers
+1. Observability via Micrometer
+1. Resilience with via Resilience4J
+1. Flexible API allowing various pluggable HTTP clients
+1. Asynchronous support
     1. CompletableFuture
     1. Pluggable asynchronous HTTP clients
     1. User provided executor services
-7. Request Parameter Validation
+1. Request Parameter Validation
 
 ## 2 Quick start
 
