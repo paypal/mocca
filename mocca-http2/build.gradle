@@ -4,4 +4,7 @@ targetCompatibility = 1.11
 dependencies {
     implementation  project(':mocca-client'),
                     lib.feign_java11
+
+    testImplementation project(':mocca-http-client-tests'),
+                       lib.testng
 }
