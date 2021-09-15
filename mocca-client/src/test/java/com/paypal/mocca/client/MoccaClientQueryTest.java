@@ -66,6 +66,7 @@ public class MoccaClientQueryTest {
             client.getOneValidSample(new ValidatedRequestDTO(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz"));
             fail("should throw a validation exception");
         } catch (EncodeException e) {
+            System.out.println(((ConstraintViolationException) e.getCause()).toString());
             assertTrue(e.getCause() != null);
             assertEquals(e.getMessage(), "Constraint violations found in one or more request parameters");
             assertTrue(e.getCause().getClass().equals(ConstraintViolationException.class));

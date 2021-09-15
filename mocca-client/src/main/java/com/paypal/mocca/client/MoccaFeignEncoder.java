@@ -37,7 +37,7 @@ class MoccaFeignEncoder implements Encoder {
 
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
     /**
-     * Not that this Validator is in the older javax.validation package not newer jakarta.validation package.
+     * Notice that this Validator is in the older javax.validation package not newer jakarta.validation package.
      * Please refer to {@link javax.validation.Validator} for more information.
      */
     private Validator validator;
@@ -51,7 +51,7 @@ class MoccaFeignEncoder implements Encoder {
             this.validator = validator;
         } catch (Exception e) {
             // No validation provider found
-            logger.warn("No implementation of javax.validation.Validator was found on the classpath");
+            logger.warn("No implementation of javax.validation.Validator was found on the classpath. Mocca will be unable to perform request parameters validation.");
         }
     }
 
@@ -87,8 +87,11 @@ class MoccaFeignEncoder implements Encoder {
     /**
      * Validates the client request using the bean validation
      * API for validating all the parameters in a method invocation.
-     * @param parameters
-     * @param template
+     * The Feign request object points to the method being invoked but
+     * not the client object itself. This is why we have to set the client
+     * as a field in the encoder.
+     * @param parameters all the parameters passed to the client method
+     * @param template the Feign request template object
      */
     void validateVariables(Object[] parameters, RequestTemplate template) {
 

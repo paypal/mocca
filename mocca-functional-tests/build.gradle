@@ -59,5 +59,4 @@ dependencies {
                        lib.jersey_test,
                        lib.jersey_jetty,
                        lib.hibernate_validator
-                       //lib.jakarta_el
 }
