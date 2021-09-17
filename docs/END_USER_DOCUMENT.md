@@ -14,7 +14,7 @@
 5 Code generation<br>
 6 Client build and configuration<br>
 7 Asynchronous development<br>
-8 Request Validation**
+8 Request validation**
 
 ## 1 Introduction
 
@@ -39,13 +39,13 @@ Mocca offers support for:
     1. Annotation and String based custom selection set
 1. Static and dynamic HTTP request headers
 1. Observability via Micrometer
-1. Resilience with via Resilience4J
+1. Resilience via Resilience4J
 1. Flexible API allowing various pluggable HTTP clients
 1. Asynchronous support
     1. CompletableFuture
     1. Pluggable asynchronous HTTP clients
     1. User provided executor services
-1. Request Parameter Validation
+1. Request parameters validation via Bean Validation
 
 ## 2 Quick start
 
@@ -752,14 +752,17 @@ AsyncBooksAppClient asyncClient = MoccaClient.Builder
         .client(executorClient)
         .build(AsyncBooksAppClient.class);
 ```
-## 8. Request Validation
+
+## 8. Request validation
+
 Mocca supports validation of request parameters using a standard bean validation 2.0 implementation like hibernate.
 Please refer to [this site](https://beanvalidation.org/2.0-jsr380/) for information on bean validation. 
 
 **Important Note:** Mocca supports Bean Validation 2.0, not Jakarta Bean Validation 2.0 which has repackaged the api 
 classes from `java.validation` to `jakarta.validation`.
 
-### 8.1 Adding Request Validation to your Application
+### 8.1 Adding request validation to your application
+
 If an implementation of the bean validation-api is provided on the classpath, bean validation will be automatically
 performed on each request. Below we show example of how to add bean validation implementations using maven and
 gradle. 
@@ -787,7 +790,9 @@ dependencies {
 </dependency>
 ```
 Note that Mocca will transitively include the validation api artifact: `jakarta.validation:jakarta.validation-api:2.0.2`
-### 8.2 Request Validation Example
+
+### 8.2 Request validation example
+
 Let's take the following example of a Mocca client that includes validation.
 
 ``` java
