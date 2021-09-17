@@ -28,13 +28,13 @@ Mocca offers support for:
     1. Annotation and String based custom selection set
 1. Static and dynamic HTTP request headers
 1. Observability via Micrometer
-1. Resilience with via Resilience4J
+1. Resilience via Resilience4J
 1. Flexible API allowing various pluggable HTTP clients
 1. Asynchronous support
     1. CompletableFuture
     1. Pluggable asynchronous HTTP clients
     1. User provided executor services
-1. Request Parameter Validation
+1. Request parameters validation via Bean Validation
 
 ## Quick start
 
