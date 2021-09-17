@@ -4,6 +4,8 @@ import com.paypal.mocca.client.MoccaClient;
 import com.paypal.mocca.client.annotation.*;
 
 import java.time.OffsetDateTime;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +22,9 @@ public interface SampleClient extends MoccaClient {
     SampleResponseDTO getOneSample(@Var("foo") String foo, @Var("bar") String bar);
 
     @Query
+    SampleResponseDTO getOneSampleNotNull(@Var("foo") @NotNull String foo, @Var("bar") @NotNull String bar);
+
+    @Query
     List<SampleResponseDTO> getSamplesList(@Var("foo") String foo, @Var("bar") String bar);
 
     @Query
@@ -27,6 +32,9 @@ public interface SampleClient extends MoccaClient {
 
     @Query
     SampleResponseDTO getOneSample(@Var("sampleRequest") SampleRequestDTO sampleRequestDTO);
+
+    @Query
+    SampleResponseDTO getOneValidSample(@Var("sampleRequest") @Valid ValidatedRequestDTO validatedRequestDTO);
 
     @Query
     SampleResponseDTO getOneSampleWithIgnore(@Var(value = "sampleRequest", ignore = "foo") SampleRequestDTO sampleRequestDTO);

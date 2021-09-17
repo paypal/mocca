@@ -11,6 +11,7 @@ import com.paypal.mocca.client.sample.SuperComplexResponseType;
 import com.paypal.mocca.client.sample.SuperComplexResponseType.SuperComplexResponseField;
 import com.paypal.mocca.client.sample.SuperComplexSampleType;
 import com.paypal.mocca.client.sample.SuperComplexSampleType.SuperComplexField;
+import com.paypal.mocca.client.sample.ValidatedRequestDTO;
 import feign.codec.DecodeException;
 import feign.codec.EncodeException;
 import org.testng.annotations.AfterClass;
@@ -18,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -27,11 +29,11 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import static org.testng.Assert.fail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.FileAssert.fail;
 
 public class MoccaClientQueryTest {
 
@@ -56,6 +58,33 @@ public class MoccaClientQueryTest {
         assertNotNull(result);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");
+    }
+
+    @Test
+    public void queryInvalidRequest() {
+        try {
+            client.getOneValidSample(new ValidatedRequestDTO(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz"));
+            fail("should throw a validation exception");
+        } catch (EncodeException e) {
+            assertTrue(e.getCause() != null);
+            assertEquals(e.getMessage(), "Constraint violations found in one or more request parameters");
+            assertTrue(e.getCause().getClass().equals(ConstraintViolationException.class));
+            assertTrue(e.getCause().getMessage().contains( "getOneValidSample.arg0.bar: length must be between 0 and 5"));
+            assertTrue(e.getCause().getMessage().contains( "getOneValidSample.arg0.foo: must not be null"));
+        }
+    }
+
+    @Test
+    public void queryNotNullViolation() {
+        try {
+            client.getOneSampleNotNull(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz");
+            fail("should throw a validation exception");
+        } catch (EncodeException e) {
+            assertTrue(e.getCause() != null);
+            assertEquals(e.getMessage(), "Constraint violations found in one or more request parameters");
+            assertTrue(e.getCause().getClass().equals(ConstraintViolationException.class));
+            assertEquals(e.getCause().getMessage(), "getOneSampleNotNull.arg0: must not be null");
+        }
     }
 
     @Test

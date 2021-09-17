@@ -56,6 +56,17 @@ class MoccaSerializer {
             this.type = type;
             this.metadata = metadata;
         }
+        public Object getValue() {
+            return value;
+        }
+
+        public Type getType() {
+            return type;
+        }
+
+        public Var getMetadata() {
+            return metadata;
+        }
     }
 
     /*
