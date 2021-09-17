@@ -13,7 +13,8 @@
 4 API definition<br>
 5 Code generation<br>
 6 Client build and configuration<br>
-7 Asynchronous development**
+7 Asynchronous development<br>
+8 Request Validation**
 
 ## 1 Introduction
 
@@ -798,6 +799,10 @@ public class Author {
     @Size( min = 1 )
     Book[] books;
     
+    public Author(String name, Book[] books) {
+        this.name = name;
+        this.books = books;
+    }
 }
 
 public interface BooksAppClient extends MoccaClient {
@@ -821,7 +826,8 @@ If the validation of a method call fails, then the cause of the `EncodeException
 
 ```java
     try {
-        client.addAuthor(new );
+        Author author = new Author("James Joyce", new Book[] {})
+        client.addAuthor(author);
     } catch (EncodeException e) {
         if (e.getCause() != null && e.getCause() instanceof ConstraintViolationException)  {
             for (ConstraintViolation violation: ((ConstraintViolationException) e.getCause()).getConstraintViolations()) {
