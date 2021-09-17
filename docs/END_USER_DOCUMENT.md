@@ -753,7 +753,7 @@ AsyncBooksAppClient asyncClient = MoccaClient.Builder
         .build(AsyncBooksAppClient.class);
 ```
 ## 8. Request Validation
-Mocca now supports validation of request parameters using a standard bean validation 2.0 implementation like hibernate.
+Mocca supports validation of request parameters using a standard bean validation 2.0 implementation like hibernate.
 Please refer to [this site](https://beanvalidation.org/2.0-jsr380/) for information on bean validation. 
 
 **Important Note:** Mocca supports Bean Validation 2.0, not Jakarta Bean Validation 2.0 which has repackaged the api 
