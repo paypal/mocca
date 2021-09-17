@@ -13,7 +13,8 @@
 4 API definition<br>
 5 Code generation<br>
 6 Client build and configuration<br>
-7 Asynchronous development**
+7 Asynchronous development<br>
+8 Request validation**
 
 ## 1 Introduction
 
@@ -38,12 +39,13 @@ Mocca offers support for:
     1. Annotation and String based custom selection set
 1. Static and dynamic HTTP request headers
 1. Observability via Micrometer
-1. Resilience with via Resilience4J
+1. Resilience via Resilience4J
 1. Flexible API allowing various pluggable HTTP clients
 1. Asynchronous support
     1. CompletableFuture
     1. Pluggable asynchronous HTTP clients
     1. User provided executor services
+1. Request parameters validation via Bean Validation
 
 ## 2 Quick start
 
@@ -749,4 +751,93 @@ AsyncBooksAppClient asyncClient = MoccaClient.Builder
         .async("localhost:8080/booksapp")
         .client(executorClient)
         .build(AsyncBooksAppClient.class);
+```
+
+## 8. Request validation
+
+Mocca supports validation of request parameters using a standard bean validation 2.0 implementation like hibernate.
+Please refer to [this site](https://beanvalidation.org/2.0-jsr380/) for information on bean validation. 
+
+**Important Note:** Mocca supports Bean Validation 2.0, not Jakarta Bean Validation 2.0 which has repackaged the api 
+classes from `java.validation` to `jakarta.validation`.
+
+### 8.1 Adding request validation to your application
+
+If an implementation of the bean validation-api is provided on the classpath, bean validation will be automatically
+performed on each request. Below we show example of how to add bean validation implementations using maven and
+gradle. 
+
+Bean validation is not required, so if you omit these runtime dependencies, Mocca will skip bean validation.
+
+``` Groovy
+// Adding Bean Validation in Gradle
+dependencies {
+    implementation 'org.hibernate.validator:hibernate-validator:6.1.7.Final', 'org.glassfish:jakarta.el:3.0.3'
+}
+```
+
+``` XML
+<!-- Adding Bean validation in Maven -->
+<dependency>
+    <groupId>org.hibernate.validator</groupId>
+    <artifactId>hibernate-validator</artifactId>
+    <version>6.1.7.Final</version>
+</dependency>
+<dependency>
+    <groupId>org.glassfish</groupId>
+    <artifactId>javax.el</artifactId>
+    <version>3.0.3</version>
+</dependency>
+```
+Note that Mocca will transitively include the validation api artifact: `jakarta.validation:jakarta.validation-api:2.0.2`
+
+### 8.2 Request validation example
+
+Let's take the following example of a Mocca client that includes validation.
+
+``` java
+
+public class Author {
+    @NotNull
+    String name;
+    
+    @Size( min = 1 )
+    Book[] books;
+    
+    public Author(String name, Book[] books) {
+        this.name = name;
+        this.books = books;
+    }
+}
+
+public interface BooksAppClient extends MoccaClient {
+    /**
+     * Adds an author and returns its id
+     */
+    @Mutation
+    int addAuthor(@Var(value = "author", ignore = "books") @NotNull @Valid Author author);
+
+}    
+```
+If validation is enabled by the inclusion of an implementation of the bean validation api on the classpath, then
+a `feign.codec.EncodeException` will be thrown if any of the following conditions are true:
+* the `author` object provided to the method is `null`
+* the `name` field in the `Author` object is `null`
+* the `books` array field in the `Author` object is empty
+
+If the validation of a method call fails, then the cause of the `EncodeException` will be an exception of type
+[`javax.validation.ConstraintViolationException`](https://docs.oracle.com/javaee/7/api/javax/validation/ConstraintViolationException.html)
+ that will contain a set of `ConstraintViolation` objects. Here's an example of how to process validation exceptions
+
+```java
+    try {
+        Author author = new Author("James Joyce", new Book[] {})
+        client.addAuthor(author);
+    } catch (EncodeException e) {
+        if (e.getCause() != null && e.getCause() instanceof ConstraintViolationException)  {
+            for (ConstraintViolation violation: ((ConstraintViolationException) e.getCause()).getConstraintViolations()) {
+                System.out.println(violation.getMessage());
+            }
+        }
+    }
 ```

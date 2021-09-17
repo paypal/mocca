@@ -13,6 +13,10 @@ import feign.codec.Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -21,6 +25,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Mocca Feign encoder, responsible for serializing the request payload
@@ -28,10 +33,31 @@ import java.util.List;
  * @author fabiocarvalho777@gmail.com
  */
 class MoccaFeignEncoder implements Encoder {
+    private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
 
     private final MoccaSerializer moccaSerializer = new MoccaSerializer();
+    /**
+     * Notice that this Validator is in the older javax.validation package not newer jakarta.validation package.
+     * Please refer to {@link javax.validation.Validator} for more information.
+     */
+    private Validator validator;
 
-    private static final Logger logger = LoggerFactory.getLogger(MoccaFeignEncoder.class);
+    // The client is only used for validation and is not needed for encoding.
+    private MoccaClient client;
+
+    MoccaFeignEncoder() {
+        try {
+            Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+            this.validator = validator;
+        } catch (Exception e) {
+            // No validation provider found
+            logger.warn("No implementation of javax.validation.Validator was found on the classpath. Mocca will be unable to perform request parameters validation.");
+        }
+    }
+
+    public void setClient(MoccaClient client) {
+        this.client = client;
+    }
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
@@ -47,12 +73,35 @@ class MoccaFeignEncoder implements Encoder {
             final OperationType operationType = getOperationType(template);
             final SelectionSet selectionSet = getSelectionSet(template);
             final List<Variable> variables = getVariables(parameters, template);
-
+            if (validator != null) {
+                validateVariables(parameters, template);
+            }
             final byte[] data = moccaSerializer.serialize(variables, responseType, operationName, operationType, selectionSet);
             template.body(data, Charset.defaultCharset());
 
         } catch (IOException e) {
             throw new MoccaException("An error happened when serializing the request payload from type " + bodyType.getTypeName(), e);
+        }
+    }
+
+    /**
+     * Validates the client request using the bean validation
+     * API for validating all the parameters in a method invocation.
+     * The Feign request object points to the method being invoked but
+     * not the client object itself. This is why we have to set the client
+     * as a field in the encoder.
+     * @param parameters all the parameters passed to the client method
+     * @param template the Feign request template object
+     */
+    void validateVariables(Object[] parameters, RequestTemplate template) {
+
+        Method method = template.methodMetadata().method();
+        Set<ConstraintViolation<Object>> violationSet = validator.forExecutables().validateParameters(client, method, parameters);
+
+        if (violationSet.size() > 0) {
+            throw new EncodeException("Constraint violations found in one or more request parameters",
+                    new ConstraintViolationException(violationSet)
+            );
         }
     }
 
