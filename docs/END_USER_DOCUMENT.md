@@ -423,7 +423,7 @@ public class Book {
 
 ``` java
 @Query
-@SelectionSet({id, title})
+@SelectionSet("{id, title}")
 Book getBookById(int bookId);
 ```
 
