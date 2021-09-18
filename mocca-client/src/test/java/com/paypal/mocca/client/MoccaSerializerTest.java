@@ -156,16 +156,16 @@ public class MoccaSerializerTest {
                 selectionSet, expectedReq);
     }
 
-    @Test
-    public void customSelectionWithIgnoreFieldsAndValueTest() throws IOException {
+    @Test(dataProvider = "valueWithIgnoreSelectionSetCases")
+    public void customSelectionWithValueAndIgnoreFieldsTest(String expectedReq, String value, String... ignoreArr) throws IOException {
         SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("foo", "bar");
-        SelectionSet selectionSet = newSelectionSet("{booleanVar complexField {innerStringVar} intVar stringVar}", "innerBooleanVar");
+        SelectionSet selectionSet = newSelectionSet(value, ignoreArr);
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable(sampleRequestDTO, SampleRequestDTO.class, newVar("sampleRequest"))
         );
 
         requestTest(variables, ComplexSampleType.class,"getABeer", OperationType.Query,
-                selectionSet, "{ \"query\" : \"query{getABeer(sampleRequest: {bar: \\\"bar\\\", foo: \\\"foo\\\"}) {booleanVar complexField {innerStringVar} intVar stringVar}}\"}");
+                selectionSet, expectedReq);
     }
 
     @Test
@@ -305,7 +305,7 @@ public class MoccaSerializerTest {
     }
 
     @DataProvider(name = "ignoreSelectionSetCases")
-    public static Object[][] standardDelaysDataProvider() {
+    public static Object[][] ignoreSelectionSetCases() {
         return new Object[][]{
                 // Ignore one value of Complex type and 1 outer boolean var
                 {"{ \"query\" : \"query{getABeer(sampleRequest: {bar: \\\"bar\\\", foo: \\\"foo\\\"}) {complexField {innerBooleanVar innerIntVar} intVar stringVar}}\"}",
@@ -325,6 +325,18 @@ public class MoccaSerializerTest {
                 // ignore a field Not present in the response Type and an inner ComplexField value
                 {"{ \"query\" : \"query{getABeer(sampleRequest: {bar: \\\"bar\\\", foo: \\\"foo\\\"}) {booleanVar complexField {innerBooleanVar innerIntVar} intVar stringVar}}\"}",
                         "complexField.innerStringVar", "complexField.someFieldNotPresent"}
+        };
+    }
+
+    @DataProvider(name = "valueWithIgnoreSelectionSetCases")
+    public static Object[][] ignoreWithValueSelectionSetCases() {
+        return new Object[][]{
+                // Custom Selection set with an Ignore value not present in it, Ignore attribute should not be used
+                {"{ \"query\" : \"query{getABeer(sampleRequest: {bar: \\\"bar\\\", foo: \\\"foo\\\"}) {booleanVar complexField {innerStringVar} intVar stringVar}}\"}",
+                        "{booleanVar complexField {innerStringVar} intVar stringVar}", "innerBooleanVar"},
+                // Custom Selection set with an Ignore value present in it, Ignore attribute should not be used
+                {"{ \"query\" : \"query{getABeer(sampleRequest: {bar: \\\"bar\\\", foo: \\\"foo\\\"}) {booleanVar complexField {innerStringVar} intVar stringVar}}\"}",
+                        "{booleanVar complexField {innerStringVar} intVar stringVar}", "complexField.innerStringVar"},
         };
     }
 }

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
@@ -363,61 +362,18 @@ class MoccaSerializer {
         } else if (selectionSet != null && !isUndefinedOrNullOrEmpty(selectionSet.value())) {
             // Adding selection set using the selection set annotation with value
             if(!isUndefinedOrNullOrEmpty(selectionSet.ignore())) {
-                logger.warn("Value and Ignore both present in Selection set Annotation, Value was used to generate the Selection Set");
+                logger.warn("Value and ignore fields are both set in the com.paypal.mocca.client.annotation.SelectionSet annotation at"
+                        + operationName + ". Value will be used to generate the selection set and no fields will be ignored.");
             }
-            writeUserProvidedSelectionSetUsingValue(requestPayload, selectionSet);
+            writeUserProvidedSelectionSet(requestPayload, selectionSet);
         } else if(selectionSet != null && !isUndefinedOrNullOrEmpty(selectionSet.ignore())) {
             // Adding selection set using the ignore values in the selection set annotation
-            writeUserProvidedSelectionSetUsingIgnore(requestPayload, Arrays.asList(selectionSet.ignore()), responseType);
+            writeResponseTypeSelectionSet(requestPayload, responseType, Arrays.asList(selectionSet.ignore()));
         } else if (responseType != null) {
-            // Adding selection set using the response type
-            writeResponseTypeSelectionSet(requestPayload, responseType);
+            // Adding selection set using the response type and empty ignore list
+            writeResponseTypeSelectionSet(requestPayload, responseType, Collections.emptyList());
         } else {
             logger.debug("Response type is null and a custom selection set was not provided, so a selection set will not be written to the GraphQL operation");
-        }
-    }
-
-    /**
-     *
-     * Writes the selection set of the GraphQL request message using the user provided SelectionSet annotation with Ignore attribute set as reference.
-     *
-     * It uses the Response type to start an initial list which is then filtered if the value is present in the ignore list
-     *
-     * @param requestPayload the output stream object used to write the request payload, based on the other parameters
-     * @param ignoreFields The list of fields which have to be ignored in selection set generation
-     * @param responseType the return type set in the GraphQL operation method, useful when defining the request selection set
-     */
-    private void writeUserProvidedSelectionSetUsingIgnore(ByteArrayOutputStream requestPayload,
-                                                          List<String> ignoreFields,
-                                                          Type responseType) {
-
-        try {
-            BeanInfo info = Introspector.getBeanInfo(erase(responseType));
-            write(requestPayload, " {");
-
-            final PropertyDescriptor[] pds = info.getPropertyDescriptors();
-
-            final List<String> selectionSet = Arrays.stream(pds)
-                    .filter(pd -> !pd.getName().equals("class"))
-                    .filter(pd -> !ignoreFields.contains(pd.getName()))
-                    .map(pd -> new Tuple<Class<?>>(pd.getName(), pd.getReadMethod().getReturnType()))
-                    .map(e -> {
-                        Class<?> c = e.value;
-                        if (isPojo(c)) {
-                            ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
-                            final List<String> nextIgnoreFields = getNextIgnoreFields(e.key + ".", ignoreFields);
-                            writeUserProvidedSelectionSetUsingIgnore(complexVariable, nextIgnoreFields, c);
-                            return e.key + complexVariable.toString();
-                        } else {
-                            return e.key;
-                        }
-                    })
-                    .collect(Collectors.toList());
-
-            write(requestPayload, String.join(" ", selectionSet));
-            write(requestPayload, "}");
-        } catch (IntrospectionException | IOException e) {
-            throw new MoccaException("An error happened when writing selection set of type " + responseType, e);
         }
     }
 
@@ -427,7 +383,7 @@ class MoccaSerializer {
      * @param requestPayload the output stream object used to write the selection set, based on the other parameters
      * @param selectionSet the SelectionSet annotation set in the GraphQL operation method, necessary to set the selection set
      */
-    private void writeUserProvidedSelectionSetUsingValue(final ByteArrayOutputStream requestPayload, final SelectionSet selectionSet) {
+    private void writeUserProvidedSelectionSet(final ByteArrayOutputStream requestPayload, final SelectionSet selectionSet) {
         try {
             String selectionSetValue = selectionSet.value();
             if (selectionSetValue.trim().isEmpty()) logger.warn("Annotation provided selection set is blank");
@@ -448,14 +404,15 @@ class MoccaSerializer {
      *
      * @param requestPayload the output stream object used to write the selection set, based on the other parameters
      * @param responseType the return type set in the GraphQL operation method, necessary to dynamically set the selection set
+     * @param ignoreFields The list of fields which have to be ignored in selection set generation
      * @throws MoccaException if a cycle is found or any error happens when writing the selection set
      */
-    private void writeResponseTypeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType) {
+    private void writeResponseTypeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType, List<String> ignoreFields) {
 
         // This is necessary to detect cycles and prevent stack overflow
         Set<Type> seenPojoTypes = new HashSet<>();
 
-        writeResponseTypeSelectionSet(requestPayload, responseType, seenPojoTypes);
+        writeResponseTypeSelectionSet(requestPayload, responseType, seenPojoTypes, ignoreFields);
     }
 
     /*
@@ -465,9 +422,10 @@ class MoccaSerializer {
      * @param requestPayload the output stream object used to write the selection set, based on the other parameters
      * @param responseType the return type set in the GraphQL operation method, necessary to dynamically set the selection set
      * @param seenPojoTypes to detect cycles and prevent stack overflow
+     * @param ignoreFields The list of fields which have to be ignored in selection set generation
      * @throws MoccaException if a cycle is found or any error happens when writing the selection set
      */
-    private void writeResponseTypeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType, Set<Type> seenPojoTypes) throws MoccaException {
+    private void writeResponseTypeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType, Set<Type> seenPojoTypes, List<String> ignoreFields) throws MoccaException {
         try {
 
             // Retrieving type out of parameterized types if necessary
@@ -491,6 +449,7 @@ class MoccaSerializer {
             PropertyDescriptor[] pds = info.getPropertyDescriptors();
             List<String> selectionSet = Arrays.stream(pds)
                     .filter(pd -> !pd.getReadMethod().getReturnType().equals(Class.class))
+                    .filter(pd -> !ignoreFields.contains(pd.getName()))
                     // Parameterized types should not be treated as Java Beans and
                     // shouldn't be serialized. The exception though is Lists
                     // and Optionals, which should have their parameter types
@@ -503,12 +462,14 @@ class MoccaSerializer {
                     .map(pd -> new Tuple<>(pd.getName(), pd.getReadMethod().getGenericReturnType()))
                     .map(e -> {
                         Type type = e.value;
+                        final List<String> nextIgnoreFields = getNextIgnoreFields(e.key + ".", ignoreFields);
                         if (isPojo(type)) {
-                            return writeSelectionSetPojo(e.key, type, seenPojoTypes);
+                            return writeSelectionSetPojo(e.key, type, seenPojoTypes, nextIgnoreFields);
                         } else if (isParameterizedType(type)) {
                             // Here we know it is either an Optional or a List
                             final Type typeParameter = getInnerType(type);
-                            if (isPojo(typeParameter)) return writeSelectionSetPojo(e.key, typeParameter, seenPojoTypes);
+                            if (isPojo(typeParameter))
+                                return writeSelectionSetPojo(e.key, typeParameter, seenPojoTypes, nextIgnoreFields);
                         }
                         // If this line is reached, that means this is not a POJO and serialization
                         // (for this particular field at least) in the selection set should end here.
@@ -529,11 +490,12 @@ class MoccaSerializer {
      *
      * @param fieldName the element (GraphQL field name and type) whose String representation should be returned
      * @param type the particular type to be used to create the String representation of the given element
+     * @param ignoreFields The list of fields which have to be ignored in selection set generation
      * @return the String representation of a POJO in GraphQL SelectionSet notation
      */
-    private String writeSelectionSetPojo(final String fieldName, final Type type, Set<Type> seenPojoTypes) {
+    private String writeSelectionSetPojo(final String fieldName, final Type type, Set<Type> seenPojoTypes, List<String> ignoreFields) {
         ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
-        writeResponseTypeSelectionSet(complexVariable, type, seenPojoTypes);
+        writeResponseTypeSelectionSet(complexVariable, type, seenPojoTypes, ignoreFields);
         return fieldName + complexVariable.toString();
     }
 
