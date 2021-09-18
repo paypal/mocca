@@ -65,8 +65,14 @@ public @interface SelectionSet {
     String value() default UNDEFINED;
 
     /**
-     * Specify the fields to be ignored when generating the Selection set using the response type
-     * Multiple values can be set to `SelectionSet` `ignore` as an array of `String` values.
+     * When the Response type is a POJO (following Java bean conventions), sometimes it is populated with certain properties
+     * the application would like to be ignored by Mocca when generating the GraphQL Selection Set.
+     * In order to do so, specify here an array containing all fields to be ignored in the Selection Set.
+     * The name of a property in an inner POJO can be specified using the outer field name followed by dot.
+     * If the request type is not a POJO, or if {@link #value()} is set, then {@code ignore} will have no effect.
+     * If the property set to be ignored doesn't exist, then it has no effect, the Selection set is generated normally as
+     * if that ignore value had not been set.
+     * If both {@link #value()} and {@code ignore} attributes are set, then the {@code ignore} value is not used by Mocca, and a warning is logged.
      *
      * @return an array containing all fields to be ignored in the return type, in case it is a DTO
      */
