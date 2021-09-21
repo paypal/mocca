@@ -328,13 +328,15 @@ public class MoccaSerializerTest {
         };
     }
 
+    // Testcases for Custom Selection set with Value and Ignore fields both set. Ignore attribute should NOT be used
     @DataProvider(name = "valueWithIgnoreSelectionSetCases")
     public static Object[][] ignoreWithValueSelectionSetCases() {
         return new Object[][]{
-                // Custom Selection set with an Ignore value not present in it, Ignore attribute should not be used
+
+                // here innerBooleanVar is not a part of the requested SelectionSet
                 {"{ \"query\" : \"query{getABeer(sampleRequest: {bar: \\\"bar\\\", foo: \\\"foo\\\"}) {booleanVar complexField {innerStringVar} intVar stringVar}}\"}",
                         "{booleanVar complexField {innerStringVar} intVar stringVar}", "innerBooleanVar"},
-                // Custom Selection set with an Ignore value present in it, Ignore attribute should not be used
+                // here complexField.innerStringVar is a part of the requested SelectionSet
                 {"{ \"query\" : \"query{getABeer(sampleRequest: {bar: \\\"bar\\\", foo: \\\"foo\\\"}) {booleanVar complexField {innerStringVar} intVar stringVar}}\"}",
                         "{booleanVar complexField {innerStringVar} intVar stringVar}", "complexField.innerStringVar"},
         };
