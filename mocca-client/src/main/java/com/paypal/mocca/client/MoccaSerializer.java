@@ -468,8 +468,9 @@ class MoccaSerializer {
                         } else if (isParameterizedType(type)) {
                             // Here we know it is either an Optional or a List
                             final Type typeParameter = getInnerType(type);
-                            if (isPojo(typeParameter))
+                            if (isPojo(typeParameter)) {
                                 return writeSelectionSetPojo(e.key, typeParameter, seenPojoTypes, nextIgnoreFields);
+                            }
                         }
                         // If this line is reached, that means this is not a POJO and serialization
                         // (for this particular field at least) in the selection set should end here.
