@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <br>
  * When {@code SelectionSet} annotation is present, although Mocca won't resolve automatically the selection set using the return type, still the application has to make sure all fields in the provided custom selection set exist in the DTO used in the return type.
  * <br>
- * SelectionSet would then behave like this:
+ * {@code SelectionSet} would then behave like this:
  * <ol>
  *     <li>If annotation is present and its value attribute is set, Mocca automatic selection set resolution is turned off, and SelectionSet value is used to define the selection set. In this case if ignore value is also set, then that is not used by Mocca, and a warning is logged.</li>
  *     <li>If annotation is present, its value attribute is NOT set, but ignore is, then Mocca automatic selection set resolution is turned ON, and SelectionSet ignore is used to pick which response DTO fields to ignore from the selection set.</li>
