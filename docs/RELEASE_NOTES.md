@@ -4,13 +4,22 @@
 ## 0.0.3
 
 #### Release date
-TBD
+September 21st, 2021
 
 #### New features and enhancements
-TBD
+1. [Various mocca-client impls should get functionally tested](https://github.com/paypal/mocca/issues/32)
+1. [Additional enhancements to support GraphQL variables and selection set data types corner cases](https://github.com/paypal/mocca/issues/30)
+1. [Add support for Bean Validations annotations to validate GraphQL operation method parameters](https://github.com/paypal/mocca/issues/28)
+1. [Enhance SelectionSet annotation to ignore fields in the return type](https://github.com/paypal/mocca/issues/27)
+1. [Add support for operations with no variables by setting no parameters in the request method](https://github.com/paypal/mocca/issues/14)
+1. [Mocca should support the usage of multiple method parameters as GraphQL variables](https://github.com/paypal/mocca/issues/13)
+1. [Add support for Resilience4j Fallback](https://github.com/paypal/mocca/issues/11)
+1. [JAXRS-based JagaHttpClient takes a JAXRS ClientBuilder, not Client.. ](https://github.com/paypal/mocca/issues/7)
+1. [Hosted javadoc (UI)](https://github.com/paypal/mocca/issues/3)
 
 #### Bug fixes
-TBD
+1. [Fix serialization and deserialization issues and make sure client honors documentation](https://github.com/paypal/mocca/issues/24)
+1. [Implement a mechanism in Mocca serializer to avoid cycles in request and response](https://github.com/paypal/mocca/issues/15)
 
 ## 0.0.2
 
