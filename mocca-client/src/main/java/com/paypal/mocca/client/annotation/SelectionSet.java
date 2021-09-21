@@ -16,7 +16,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@code SelectionSet} would then behave like this:
  * <ol>
  *     <li>If annotation is present and its value attribute is set, Mocca automatic selection set resolution is turned off, and {@code SelectionSet} value is used to define the selection set. In this case if ignore value is also set, then that is not used by Mocca, and a warning is logged.</li>
- *     <li>If annotation is present, its value attribute is NOT set, but ignore is, then Mocca automatic selection set resolution is turned ON, and SelectionSet ignore is used to pick which response DTO fields to ignore from the selection set.</li>
+ *     <li>If annotation is present, its value attribute is NOT set, but ignore is, then Mocca automatic selection set resolution is turned ON, and {@code SelectionSet} ignore is used to pick which response DTO fields to ignore from the selection set.</li>
  *     <li>If annotation is present and both value and ignore attributes are NOT set, then a MoccaException is thrown.</li>
  * </ol>
  *
