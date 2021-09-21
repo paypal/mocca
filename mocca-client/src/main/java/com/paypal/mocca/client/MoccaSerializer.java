@@ -362,7 +362,7 @@ class MoccaSerializer {
         } else if (selectionSet != null && !isUndefinedOrNullOrEmpty(selectionSet.value())) {
             // Adding selection set using the selection set annotation with value
             if(!isUndefinedOrNullOrEmpty(selectionSet.ignore())) {
-                logger.warn("Value and ignore fields are both set in the com.paypal.mocca.client.annotation.SelectionSet annotation at"
+                logger.warn("Value and ignore fields are both set in the com.paypal.mocca.client.annotation.SelectionSet annotation at "
                         + operationName + ". Value will be used to generate the selection set and no fields will be ignored.");
             }
             writeUserProvidedSelectionSet(requestPayload, selectionSet);
