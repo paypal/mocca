@@ -145,6 +145,8 @@ def resilience4j_feign_version = '1.7.1'
 def jersey_version = '2.35'
 def jackson_version = '2.12.6'
 
+def jetty_version = '9.2.28.v20190418'
+
 // Dependencies version management
 ext.lib = [
 
@@ -185,7 +187,8 @@ ext.lib = [
         graphql_tools: 'com.graphql-java-kickstart:graphql-java-tools:6.1.0',
         
         // Jetty
-        jetty_server: 'org.eclipse.jetty:jetty-server:9.2.28.v20190418',
+        jetty_server: "org.eclipse.jetty:jetty-server:" + jetty_version,
+        jetty_servlet: "org.eclipse.jetty:jetty-servlet:" + jetty_version,
 
         // Utils
         activation: 'javax.activation:activation:1.1.1',

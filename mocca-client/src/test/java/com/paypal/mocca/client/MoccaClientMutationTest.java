@@ -19,7 +19,7 @@ public class MoccaClientMutationTest {
     @BeforeClass
     private void setup() throws IOException {
         String serverBaseUrl = WireMockProvider.startServer();
-        client = MoccaClient.Builder.sync(serverBaseUrl).build(SampleClient.class);
+        client = MoccaClient.Builder.sync(serverBaseUrl).defaultClient().build(SampleClient.class);
     }
 
     @AfterClass

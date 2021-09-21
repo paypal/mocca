@@ -20,9 +20,25 @@ abstract class MoccaHttpClient {
 
     private final Client feignClient;
 
-    protected MoccaHttpClient(Client feignClient) {
+    // private + extensions = pseudo sealed case class in Java 8 and below.  Modeled after Optional.
+    private MoccaHttpClient(Client feignClient) {
         this.feignClient =
             Arguments.requireNonNull(feignClient, "Feign client cannot be null");
+    }
+
+    /**
+     * This is a 'marker interface'
+     */
+    abstract static class WithRequestTimeouts extends MoccaHttpClient {
+        public WithRequestTimeouts(Client feignClient) {
+            super(feignClient);
+        }
+    }
+
+    abstract static class WithoutRequestTimeouts extends MoccaHttpClient {
+        public WithoutRequestTimeouts(Client feignClient) {
+            super(feignClient);
+        }
     }
 
     /**

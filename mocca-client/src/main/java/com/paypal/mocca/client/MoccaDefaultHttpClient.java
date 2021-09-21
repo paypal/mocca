@@ -10,7 +10,7 @@ import java.net.HttpURLConnection;
  *
  * @author fabiocarvalho777@gmail.com
  */
-final public class MoccaDefaultHttpClient extends MoccaHttpClient {
+final public class MoccaDefaultHttpClient extends MoccaHttpClient.WithRequestTimeouts {
 
     /**
      * Creates a new Mocca default HTTP client using
