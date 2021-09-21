@@ -1,8 +1,9 @@
 # Release steps
 
 1. Working from a feature branch (out of develop) in your fork:
+   1. Run javadoc task to all non-test modules individually and make sure they all work
    1. Rev up root build.gradle file to the release version
-   1. Build and test it
+   1. Build it and make sure it works (build includes all tests)
    1. Make sure version is correct in end user document
       1. If necessary, do a Search & Replace (there are many occurrences)
    1. Update release notes
@@ -10,7 +11,8 @@
    1. Push from local feature branch to origin feature branch (`git push origin <branch name>`)
 1. Send and merge PR from origin feature branch to upstream develop
 1. Send and merge PR from upstream develop to upstream master (PR must be merged with `Rebase Merge`)
-1. Tag new release from master
+1. Delete develop branch, since it will be out of sync with master (commits in master will have different hash number)
+1. Create a new Release and tag
    1. Tag name should be the version name
    1. Release title should be left blank
    1. Add sections `New Features and enhancements` and `Bug fixes` from release notes (in GitHub Markdown format) to Release description
@@ -29,6 +31,7 @@
    1. Release the repository
    1. Make sure new artifacts version shows at Sonatye Nexus Repository Manager
    1. Wait a couple of hours and make sure new artifacts version show at http://search.maven.org/#search|ga|1|g:com.paypal.mocca
+1. Recreate develop branch from master branch
 1. Working from a feature branch (out of develop) in your fork:
    1. Rev up root build.gradle file to the next SNAPSHOT version
    1. Change version in the end user document (there are many occurrences, do a Search & Replace)
