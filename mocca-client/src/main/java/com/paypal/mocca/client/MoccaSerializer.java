@@ -422,7 +422,7 @@ class MoccaSerializer {
      * @param requestPayload the output stream object used to write the selection set, based on the other parameters
      * @param responseType the return type set in the GraphQL operation method, necessary to dynamically set the selection set
      * @param seenPojoTypes to detect cycles and prevent stack overflow
-     * @param ignoreFields The list of fields which have to be ignored in selection set generation
+     * @param ignoreFields the list of fields which have to be ignored in selection set generation
      * @throws MoccaException if a cycle is found or any error happens when writing the selection set
      */
     private void writeResponseTypeSelectionSet(final ByteArrayOutputStream requestPayload, final Type responseType, Set<Type> seenPojoTypes, List<String> ignoreFields) throws MoccaException {
