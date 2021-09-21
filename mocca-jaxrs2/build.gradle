@@ -7,5 +7,6 @@ dependencies {
     testImplementation project(':mocca-http-client-tests'),
                        lib.testng,
                        lib.jersey_client,
-                       lib.jersey_hk2
+                       lib.jersey_hk2,
+                       lib.activation
 }

@@ -12,7 +12,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
  *
  * @author fabiocarvalho777@gmail.com
  */
-final public class MoccaApache5Client extends MoccaHttpClient {
+final public class MoccaApache5Client extends MoccaHttpClient.WithRequestTimeouts {
 
     /**
      * Creates a new Mocca Apache 5 HTTP client using

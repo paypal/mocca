@@ -1,5 +1,7 @@
 dependencies {
     implementation project(':mocca-client'),
+                   lib.feign_core,
                    lib.jetty_server,
+                   lib.jetty_servlet,
                    lib.testng
 }

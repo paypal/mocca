@@ -10,7 +10,10 @@ public class MoccaDynamicHeaderTest {
 
     @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "(Header value:\\{ classvalue } at class level cannot be dynamic)")
     public void verifyDynamicHeader() {
-        DynamicHeaderClient client = MoccaClient.Builder.sync("dummyurl").build(DynamicHeaderClient.class);
+        DynamicHeaderClient client =
+            MoccaClient.Builder.sync("dummyurl")
+                .defaultClient()
+                .build(DynamicHeaderClient.class);
         String queryVariables = "foo: \"zoo\", bar: \"car\"";
         client.getOneSample(queryVariables);
     }

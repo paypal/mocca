@@ -12,7 +12,7 @@ import java.net.http.HttpClient;
  *
  * @author fabiocarvalho777@gmail.com
  */
-final public class MoccaHttp2Client extends MoccaHttpClient {
+final public class MoccaHttp2Client extends MoccaHttpClient.WithRequestTimeouts {
 
     /**
      * Creates a new Mocca Java 11 HTTP 2 client using

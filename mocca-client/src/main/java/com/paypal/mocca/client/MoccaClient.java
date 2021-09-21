@@ -3,9 +3,14 @@ package com.paypal.mocca.client;
 import feign.AsyncClient;
 import feign.AsyncFeign;
 import feign.Feign;
+import feign.Request;
 
+import java.time.Duration;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * Applications are supposed to create an interface, extending this one, to define their GraphQL client API. Each
@@ -147,12 +152,12 @@ public interface MoccaClient {
          * </code></pre>
          * Notice this builder is not thread-safe.
          */
-        public static class SyncBuilder extends Builder.BaseBuilder<Builder.SyncBuilder> {
+        public static class SyncBuilder  {
             private MoccaHttpClient moccaHttpClient;
-            private MoccaResiliency resiliency;
+            private final String serverBaseUrl;
 
             private SyncBuilder(final String serverBaseUrl) {
-                super(serverBaseUrl);
+                this.serverBaseUrl = Arguments.requireNonNull(serverBaseUrl);
             }
 
             /**
@@ -209,46 +214,96 @@ public interface MoccaClient {
              * @param moccaHttpClient Mocca HTTP Client
              * @return this builder
              */
-            public Builder.SyncBuilder client(final MoccaHttpClient moccaHttpClient) {
+            // TODO fix javadoc
+            public Builder.SyncBuilder.WithRequestTimeouts client(final MoccaHttpClient.WithRequestTimeouts moccaHttpClient) {
                 this.moccaHttpClient = Arguments.requireNonNull(moccaHttpClient);
-                return this;
+                return this.new WithRequestTimeouts();
             }
 
-            /**
-             * Adds a {@link MoccaResiliency} feature to be configured in this client builder.
-             *
-             * @param resiliency the resilience object to be set in this builder
-             * @return this builder
-             */
-            public SyncBuilder resiliency(final MoccaResiliency resiliency) {
-                this.resiliency = resiliency;
-                return this;
+            public Builder.SyncBuilder.WithoutRequestTimeouts client(final MoccaHttpClient.WithoutRequestTimeouts moccaHttpClient) {
+                this.moccaHttpClient = Arguments.requireNonNull(moccaHttpClient);
+                return this.new WithoutRequestTimeouts();
             }
 
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public <C extends MoccaClient> C build(final Class<C> apiType) {
-                Feign.Builder builder = (resiliency != null) ? resiliency.getFeignBuilder() : Feign.builder();
+            public Builder.SyncBuilder.WithRequestTimeouts defaultClient() {
+                return this.new WithRequestTimeouts();
+            }
 
-                MoccaFeignEncoder encoder = new MoccaFeignEncoder();
-                builder = builder.contract(new MoccaFeignContract())
-                    .encoder(encoder)
-                    .decoder(new MoccaFeignDecoder());
+            public class WithRequestTimeouts extends Base {
+                private Optional<Request.Options> options = Optional.empty();
 
-                if (moccaHttpClient != null) {
-                    builder = builder.client(moccaHttpClient.getFeignClient());
+                public WithRequestTimeouts options(
+                    final Duration connectTimeout,
+                    final Duration readTimeout,
+                    final boolean followRedirects
+                ) {
+                    this.options = Optional.of(new Request.Options(
+                        connectTimeout.toMillis(), TimeUnit.MILLISECONDS,
+                        readTimeout.toMillis(), TimeUnit.MILLISECONDS,
+                        followRedirects
+                    ));
+                    return this;
                 }
-                for (final MoccaCapability c : capabilities) {
-                    builder = builder.addCapability(c.getFeignCapability());
+
+                @Override
+                protected Optional<Request.Options> options() {
+                    return this.options;
                 }
-                C client =  builder.target(apiType, graphQLUrlString);
-                // the client object is needed in the encoder to perform
-                // bean validation for the request
-                encoder.setClient(client);
-                return client;
             }
+
+            // Marker, not technically required..
+            class WithoutRequestTimeouts extends Base {}
+
+            public abstract class Base extends Builder.BaseBuilder<Builder.SyncBuilder.Base> {
+                private MoccaResiliency resiliency;
+
+                public Base() {
+                    super(serverBaseUrl);
+                }
+
+                protected Optional<Request.Options> options() {
+                    return Optional.empty();
+                }
+
+                /**
+                 * Adds a {@link MoccaResiliency} feature to be configured in this client builder.
+                 *
+                 * @param resiliency the resilience object to be set in this builder
+                 * @return this builder
+                 */
+                public Base resiliency(final MoccaResiliency resiliency) {
+                    this.resiliency = resiliency;
+                    return this;
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public <C extends MoccaClient> C build(final Class<C> apiType) {
+                    Feign.Builder builder = (resiliency != null) ? resiliency.getFeignBuilder() : Feign.builder();
+
+                    MoccaFeignEncoder encoder = new MoccaFeignEncoder();
+                    builder = builder.contract(new MoccaFeignContract())
+                        .options(options().orElse(new Request.Options()))
+                        .encoder(encoder)
+                        .decoder(new MoccaFeignDecoder());
+
+                    if (moccaHttpClient != null) {
+                        builder = builder.client(moccaHttpClient.getFeignClient());
+                    }
+                    for (final MoccaCapability c : capabilities) {
+                        builder = builder.addCapability(c.getFeignCapability());
+                    }
+                    C client =  builder.target(apiType, graphQLUrlString);
+                    // the client object is needed in the encoder to perform
+                    // bean validation for the request
+                    encoder.setClient(client);
+                    return client;
+                }
+            }
+
+
         }
 
         /**
@@ -266,6 +321,7 @@ public interface MoccaClient {
          * </code></pre>
          * Notice this builder is not thread-safe.
          */
+        // TODO Deal with client support/not-support request level timeouts
         public static class AsyncBuilder extends Builder.BaseBuilder<Builder.AsyncBuilder> {
             private MoccaAsyncHttpClient<?> moccaAsyncHttpClient;
 

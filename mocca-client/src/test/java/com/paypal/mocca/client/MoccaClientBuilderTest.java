@@ -92,6 +92,7 @@ public class MoccaClientBuilderTest {
 
         try {
             MoccaClient.Builder.sync("http://localhost:8080")
+                .defaultClient()
                 .resiliency(new BadResilience())
                 .build(SampleClient.class);
             fail("Expected an exception to be the thrown.");
@@ -109,10 +110,12 @@ public class MoccaClientBuilderTest {
         }
         try {
             MoccaClient.Builder.sync("http://foo")
+                .defaultClient()
                 .addCapability(new MyCap())
                 .build(SampleClient.class);
             fail("Expected an exception caused by MyCap.");
         } catch (final Exception e) {
+            e.printStackTrace();
             assertEquals(
                 ((InvocationTargetException)e.getCause()).getTargetException().getMessage(),
                 PoorFeignCapability.errorMessage

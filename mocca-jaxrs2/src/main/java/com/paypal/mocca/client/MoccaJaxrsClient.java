@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * request.  However, those are ignored.  The only timeouts that are used are what's established in the supplied
  * {@link Client}.
  */
-final public class MoccaJaxrsClient extends MoccaHttpClient {
+final public class MoccaJaxrsClient extends MoccaHttpClient.WithoutRequestTimeouts {
     private static Logger log = LoggerFactory.getLogger(MoccaJaxrsClient.class);
 
     /**
@@ -36,8 +36,8 @@ final public class MoccaJaxrsClient extends MoccaHttpClient {
      */
     public MoccaJaxrsClient(final Client client) {
         super(new JAXRSClient(new StubbornClientBuilder(client)));
-        log.debug("Users of this may attempt to set read timeout and connect timeout per request. " +
-            "However, those are ignored. They should be established in the supplied javax.ws.rs.Client.");
+        log.info("Mocca implementation _may_ attempt to set read timeout and connect timeout per request.  " +
+            "However, those are ignored.  They should be established in the supplied javax.ws.rs.Client.");
     }
 
     private static class StubbornClientBuilder extends ClientBuilder {
@@ -53,6 +53,16 @@ final public class MoccaJaxrsClient extends MoccaHttpClient {
         @Override
         public Client build() {
             return client;
+        }
+
+        @Override
+        public ClientBuilder connectTimeout(long timeout, TimeUnit unit) {
+            return this;
+        }
+
+        @Override
+        public ClientBuilder readTimeout(long timeout, TimeUnit unit) {
+            return this;
         }
 
         @Override
@@ -94,16 +104,6 @@ final public class MoccaJaxrsClient extends MoccaHttpClient {
         @Override
         public ClientBuilder scheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
             log.warn(USAGE_ERR_MSG);
-            return this;
-        }
-
-        @Override
-        public ClientBuilder connectTimeout(long timeout, TimeUnit unit) {
-            return this;
-        }
-
-        @Override
-        public ClientBuilder readTimeout(long timeout, TimeUnit unit) {
             return this;
         }
 

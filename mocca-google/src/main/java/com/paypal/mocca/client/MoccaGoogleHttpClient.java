@@ -11,7 +11,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
  *
  * @author fabiocarvalho777@gmail.com
  */
-final public class MoccaGoogleHttpClient extends MoccaHttpClient {
+final public class MoccaGoogleHttpClient extends MoccaHttpClient.WithRequestTimeouts {
 
     /**
      * Creates a new Mocca Google HTTP client using

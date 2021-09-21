@@ -46,6 +46,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
         final SimpleMeterRegistry reg = new SimpleMeterRegistry();
         final BooksAppClient micrometerEnabledClient =
             MoccaClient.Builder.sync(getBaseUri().toString())
+                .defaultClient()
                 .addCapability(new MoccaMicrometerCapability(reg))
                 .build(BooksAppClient.class);
 
@@ -109,6 +110,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
         final BooksAppClient client =
             MoccaClient.Builder
                 .sync(getBaseUri().toString())
+                .defaultClient()
                 .resiliency(
                     new MoccaResilience4j.Builder()
                         .circuitBreaker(circuitBreaker)
