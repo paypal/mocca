@@ -490,7 +490,7 @@ class MoccaSerializer {
      *
      * @param fieldName the element (GraphQL field name and type) whose String representation should be returned
      * @param type the particular type to be used to create the String representation of the given element
-     * @param ignoreFields The list of fields which have to be ignored in selection set generation
+     * @param ignoreFields the list of fields which have to be ignored in selection set generation
      * @return the String representation of a POJO in GraphQL SelectionSet notation
      */
     private String writeSelectionSetPojo(final String fieldName, final Type type, Set<Type> seenPojoTypes, List<String> ignoreFields) {
