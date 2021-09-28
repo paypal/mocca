@@ -21,6 +21,10 @@ branches:
   - develop
   - master
 
+sonarqube:
+  branches :
+  - /.*/
+
 install:
   - ./gradlew clean build
 
