@@ -7,6 +7,12 @@ cache:
   - $HOME/.m2
   - $HOME/.gradle
 
+addons:
+  sonarcloud:
+    organization: "paypal"
+    token:
+      secure: "J8c8dsLcZYO0+8Qm5RNPzEyZCYXSbPDey8IwuMm64aGNnJoIwBAmyAPemd5UefF905lOMgoJ8VFzomIKOap+py5b2WUQ0/+9pPESMmvKkpoq+T/kww1ujID43RUJo8+6wrZBGbd0J8zGBk3NKEVozUv/lc27F54OqhgLxstsTLhZbn0eJAOcFZFAiQ7IhcGBnrz70tn4jD7O5O1zKnJT2KBLhhDY+5Xp1RxbZUgvImuPBSKeJSQ1kp7feXwBnYQO3OBj12RrhZUMV1GIAh/BU0KmAFfkmFcEjx2TqHSga/CHT2HrX+3gX4VIsbLfvJ1Jq1GIQ7qk0KDehfIhEf1HAw1KRsnE+z31FbLI8L8u0P2A/D+Y/8v6Qq8rplfLmfKrDudxnLYtRqpJSag5dYBcsAJSzitqjozDWlPwz457pXm4GzbTJ+9N4XFAK9Iqc/TUg+kAAFChixlDiy0rMXPCgVmFX6J1g7sPoKG5xzm0smMUZOGfQhpuC0NxTD/oheyJoHbf8wJZ4QtQq3rvW/mRmQN7IP0gfTXJfPhUe7bkq8Qj3pxDB8YXvRQYU7XGZNsRpGqC/37R7F9naosxr/5pM4qIneSkwrG0bPCCbw5TdDXcjN8X1P/GavpKHil2jytFevkN9QH4QsYJ4Xj/QdwDdYAxV5oP3kqa3n78UPWTyWQ="
+
 jdk:
   - openjdk11
 
@@ -17,3 +23,6 @@ branches:
 
 install:
   - ./gradlew clean build
+
+script:
+  - ./gradlew sonarqube

@@ -1,3 +1,6 @@
+plugins {
+    id "org.sonarqube" version "3.3"
+}
 
 description = "Mocca is a GraphQL client for JVM languages with the goal of being easy to use, flexible and modular."
 
@@ -15,6 +18,7 @@ subprojects {
     apply plugin: 'pmd'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
+    apply plugin: 'jacoco'
 
     def javaVersion = JavaVersion.VERSION_1_8
     sourceCompatibility = javaVersion
@@ -24,6 +28,12 @@ subprojects {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
+    }
+
+    sonarqube {
+        properties {
+            property "sonar.projectKey", "paypal_mocca"
+        }
     }
 
     compileJava {
@@ -44,6 +54,18 @@ subprojects {
             html.required = true
             xml.destination file("${buildDir}/reports/pmd/pmd_report.xml")
             html.destination file("${buildDir}/reports/pmd/pmd_report.html")
+        }
+    }
+
+    test {
+        finalizedBy jacocoTestReport // report is always generated after tests run
+    }
+    jacocoTestReport {
+        dependsOn test // tests are required to run before generating the report
+        reports {
+            html.required = true
+            xml.required = true
+            csv.required = false
         }
     }
 
