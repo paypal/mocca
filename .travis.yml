@@ -23,7 +23,7 @@ branches:
 
 sonarqube:
   branches :
-  - /.*/
+  - develop
 
 install:
   - ./gradlew clean build
