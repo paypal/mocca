@@ -29,4 +29,4 @@ install:
   - ./gradlew clean build
 
 script:
-  - ./gradlew sonarqube
+  - sonar-scanner
