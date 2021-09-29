@@ -21,12 +21,8 @@ branches:
   - develop
   - master
 
-sonarqube:
-  branches:
-  - develop
-
 install:
   - ./gradlew clean build
 
 script:
-  - sonar-scanner
+  - ./gradlew sonarqube -Dsonar.branch.name=$TRAVIS_BRANCH
