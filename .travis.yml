@@ -27,6 +27,3 @@ sonarqube:
 
 install:
   - ./gradlew clean build
-
-script:
-  - ./gradlew sonarqube
