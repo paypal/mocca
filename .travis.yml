@@ -25,4 +25,4 @@ install:
   - ./gradlew clean build
 
 script:
-  - ./gradlew sonarqube -Dsonar.branch.name=$TRAVIS_BRANCH
+  - sonar-scanner
