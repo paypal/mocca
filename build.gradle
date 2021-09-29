@@ -32,7 +32,7 @@ subprojects {
 
     sonarqube {
         properties {
-            property "sonar.projectKey", "paypal_mocca"
+            property "sonar.projectKey", "abhijith-prabhakar_mocca"
         }
     }
 

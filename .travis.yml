@@ -9,7 +9,7 @@ cache:
 
 addons:
   sonarcloud:
-    organization: "paypal"
+    organization: "abhijith-prabhakar"
     token:
       secure: "drnJzVMBRViP9y5NTdFR+STYrVMDgSbozfz3fVt+eUTBDZHRRUWvdcw3uipu0UI4wTOJ3Q8Kcxg0ftW80bhHqcTdl3C+fRrPkkH+cXAe9FRTcd0kQjcIo+CLHlP4AXSqlqsDHWZBwMZ6+vPMDFyt+zWd7WV3ja4NUtiECt0tCt4PFGksWB0SYntX3KXcHSeLyTWKdMYyeti2wwSOOHx6dr+pP+cVNYT8qg+PgXgiYHAACWhpfuMfYf2Xb3y8GpSJjrXJ2JVVWdsv6UsE0zdBAOlVbUhBHwLX5IcyTg0dI/R5Z3UFzYjAscQT0w0p/hLcX52FywHKR0i1AVFSKlwkwGeUWqRkr3kW5oymCIOsNhxpMk5ZTkiT07ZHMafRDA0Nd+iDqQpp4FmiTq0d7ThPciEYNbagYhuYh8E4KD4h0mJF7XLT8/c1V+ghZl009Kx12xpf3+y8RzCqEP26ZEP7gCmYNiiW7ud+AAv20OorxI9EqlvfKUiRV3aqFEBiYFZ5X6ld4tkIOCtu2MDDTaEoEuNceU9Vgw0tZ40SP3QDcH5JzGbpemT+nKCaT1ZUZOY1scV112vQKOiZeHeguIE/xfXJsqxTzcXIr8exR26UHnpxKWXHuAsgOA240JSGXeGyeAZphR8q94OgZG2tW9eSZw833QmxYdeBXv1churH904="
 
@@ -22,7 +22,7 @@ branches:
   - master
 
 sonarqube:
-  branches :
+  branches:
   - develop
 
 install:
