@@ -1,3 +1,7 @@
+plugins {
+    id "org.sonarqube" version "3.3"
+}
+
 description = "Mocca is a GraphQL client for JVM languages with the goal of being easy to use, flexible and modular."
 
 Set testModules = [
@@ -15,6 +19,7 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
     apply plugin: 'jacoco'
+    apply plugin: 'org.sonarqube'
 
     def javaVersion = JavaVersion.VERSION_1_8
     sourceCompatibility = javaVersion
@@ -24,6 +29,14 @@ subprojects {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
+    }
+
+    sonarqube {
+        properties {
+            property "sonar.projectKey", "abhijith-prabhakar_mocca"
+            property "sonar.sources", "src/main"
+            property "sonar.tests", "src/test"
+        }
     }
 
     compileJava {
