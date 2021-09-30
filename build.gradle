@@ -34,6 +34,7 @@ subprojects {
     sonarqube {
         properties {
             property "sonar.projectKey", "abhijith-prabhakar_mocca"
+            property "sonar.branch.name", "develop"
             property "sonar.sources", "src/main"
             property "sonar.tests", "src/test"
         }
