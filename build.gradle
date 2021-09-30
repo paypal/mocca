@@ -170,6 +170,11 @@ project(":mocca-http-client-tests") {
         skipProject = true
     }
 }
+project(":mocca-micrometer") {
+    sonarqube {
+        skipProject = true
+    }
+}
 
 def feign_version = '11.5'
 
