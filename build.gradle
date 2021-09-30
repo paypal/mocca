@@ -39,13 +39,6 @@ subprojects {
         gradlePluginPortal()
     }
 
-    sonarqube {
-        properties {
-            property "sonar.sources", "src/main"
-            property "sonar.tests", "src/test"
-        }
-    }
-
     compileJava {
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
