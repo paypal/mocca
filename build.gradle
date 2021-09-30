@@ -11,7 +11,7 @@ Set testModules = [
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "abhijith-prabhakar_mocca"
+        property "sonar.projectKey", "paypal_mocca"
         property "sonar.sourceEncoding", "UTF-8"
         property "sonar.branch", "develop"
     }
