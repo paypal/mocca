@@ -1,11 +1,11 @@
 dependencies {
     implementation lib.slf4j_api,
-                   lib.feign_core,
                    lib.jackson_databind,
                    lib.jackson_datatype_jsr301,
                    lib.jackson_modules_java8
 
-    api lib.jakarta_validation_api
+    api lib.feign_core,
+        lib.jakarta_validation_api
 
     testImplementation lib.testng,
                        lib.slf4j_simple,
