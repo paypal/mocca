@@ -3,7 +3,6 @@ package com.paypal.mocca.client;
 import com.paypal.mocca.client.sample.SampleClient;
 import com.paypal.mocca.client.sample.SampleRequestDTO;
 import com.paypal.mocca.client.sample.SampleResponseDTO;
-import feign.codec.DecodeException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -48,7 +47,7 @@ public class MoccaClientMutationTest {
         assertNull(result);
     }
 
-    @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
+    @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
     public void mutationErrorTest() {
         client.addSample("zoo", "car");
     }
