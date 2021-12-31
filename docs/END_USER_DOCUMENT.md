@@ -830,6 +830,7 @@ Let's take the following example of a Mocca client that includes validation.
 ``` java
 
 public class Author {
+
     @NotNull
     String name;
     
@@ -843,6 +844,7 @@ public class Author {
 }
 
 public interface BooksAppClient extends MoccaClient {
+
     /**
      * Adds an author and returns its id
      */
