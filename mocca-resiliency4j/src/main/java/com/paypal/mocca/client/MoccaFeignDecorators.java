@@ -7,23 +7,18 @@ import io.github.resilience4j.feign.FeignDecorator;
 import io.github.resilience4j.feign.FeignDecorators;
 import io.vavr.CheckedFunction1;
 
-import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
+ * This class allows Mocca to hide Feign exception types from applications
+ * when using Resilience4j
+ *
+ * @author facarvalho, crankydillo@gmail.com
  * @author facarvalho
  */
 class MoccaFeignDecorators implements FeignDecorator {
 
     private FeignDecorators feignDecorators;
-    private static final Set<Class<? extends Throwable>> acceptableExceptions = new HashSet<>();
-
-    static {
-        acceptableExceptions.add(MoccaException.class);
-        acceptableExceptions.add(ConstraintViolationException.class);
-    }
 
     MoccaFeignDecorators(FeignDecorators feignDecorators) {
         this.feignDecorators = feignDecorators;
@@ -31,17 +26,13 @@ class MoccaFeignDecorators implements FeignDecorator {
 
     @Override
     public CheckedFunction1<Object[], Object> decorate(CheckedFunction1<Object[], Object> invocationCall, Method method, InvocationHandlerFactory.MethodHandler methodHandler, Target<?> target) {
-        return (obj) -> {
+        return (clientMethodParameters) -> {
             try {
-                CheckedFunction1<Object[], Object> decorator = feignDecorators.decorate(invocationCall, method, methodHandler, target);
-                return decorator.apply(obj);
+                return feignDecorators
+                        .decorate(invocationCall, method, methodHandler, target)
+                        .apply(clientMethodParameters);
             } catch (FeignException e) {
-                Throwable cause = e.getCause();
-                if (acceptableExceptions.contains(cause.getClass()) && cause instanceof RuntimeException) {
-                    throw cause;
-                } else {
-                    throw new MoccaException("A exception has happened when invoking the client target", e);
-                }
+                throw MoccaExceptionHandler.handleException(e);
             }
         };
     }
