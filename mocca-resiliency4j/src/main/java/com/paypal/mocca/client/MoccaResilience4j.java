@@ -68,7 +68,7 @@ import java.util.function.Predicate;
  */
 public final class MoccaResilience4j extends MoccaResiliency {
 
-    private MoccaResilience4j(final FeignDecorators decorators) {
+    private MoccaResilience4j(final MoccaFeignDecorators decorators) {
         super(Resilience4jFeign.builder(decorators));
     }
 
@@ -84,7 +84,7 @@ public final class MoccaResilience4j extends MoccaResiliency {
         }
 
         public MoccaResilience4j build() {
-            return new MoccaResilience4j(feignBuilder.build());
+            return new MoccaResilience4j(new MoccaFeignDecorators(feignBuilder.build()));
         }
 
         /**
