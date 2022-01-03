@@ -27,7 +27,7 @@ class MoccaExceptionHandler<T, R> {
                 return (RuntimeException) cause;
             }
         }
-        return new MoccaException("An exception has happened when invoking the client target", throwable);
+        return new MoccaException("The invocation of a client method has resulted in an exception: ", throwable);
     }
 
 }
