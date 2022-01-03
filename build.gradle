@@ -152,6 +152,7 @@ ext.lib = [
         slf4j_api: 'org.slf4j:slf4j-api:1.7.25',
         javax_servlet: 'javax.servlet:javax.servlet-api:4.0.1',
         jaxrs2: 'javax.ws.rs:javax.ws.rs-api:2.1.1',
+        validation_api: 'javax.validation:validation-api:2.0.1.Final',
 
         // Open Feign
         feign_core: 'io.github.openfeign:feign-core:' + feign_version,
