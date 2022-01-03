@@ -11,7 +11,10 @@ import java.util.Set;
  *
  * @author facarvalho
  */
-class MoccaExceptionHandler<T, R> {
+final class MoccaExceptionHandler {
+
+    private MoccaExceptionHandler() {
+    }
 
     private static final Set<Class<? extends Throwable>> acceptableExceptions = new HashSet<>();
 
@@ -23,7 +26,7 @@ class MoccaExceptionHandler<T, R> {
     static RuntimeException handleException(Throwable throwable) {
         if (throwable instanceof FeignException) {
             Throwable cause = throwable.getCause();
-            if (acceptableExceptions.contains(cause.getClass()) && cause instanceof RuntimeException) {
+            if (acceptableExceptions.contains(cause.getClass())) {
                 return (RuntimeException) cause;
             }
         }
