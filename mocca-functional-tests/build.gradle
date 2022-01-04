@@ -52,7 +52,7 @@ dependencies {
                    lib.validation_api
 
     runtimeOnly lib.hibernate_validator,
-            lib.jakarta_el
+                lib.jakarta_el
 
     testImplementation project(':mocca-client'),
                        project(':mocca-okhttp'),

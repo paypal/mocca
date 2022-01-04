@@ -16,11 +16,11 @@ import java.lang.reflect.Method;
  * @author facarvalho, crankydillo@gmail.com
  * @author facarvalho
  */
-class MoccaFeignDecorators implements FeignDecorator {
+class MoccaResilience4jFeignDecorators implements FeignDecorator {
 
     private FeignDecorators feignDecorators;
 
-    MoccaFeignDecorators(FeignDecorators feignDecorators) {
+    MoccaResilience4jFeignDecorators(FeignDecorators feignDecorators) {
         this.feignDecorators = feignDecorators;
     }
 
