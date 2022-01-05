@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * Mocca JAX-RS 2 client. In order to use a JAX-RS 2 client with Mocca, create a new instance of this class and pass it
  * to Mocca builder.
  * <br>
- * See {@link com.paypal.mocca.client.MoccaClient.Builder.SyncBuilder#client(MoccaHttpClient)} for further information
+ * See {@link com.paypal.mocca.client.MoccaClient.Builder.SyncBuilder#client(WithoutRequestTimeouts)} for further information
  * and code example.
  * <br>
  * Instances of this class are technically supposed to support concepts like setting the read and connect timeouts per
@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
  * {@link Client}.
  */
 final public class MoccaJaxrsClient extends MoccaHttpClient.WithoutRequestTimeouts {
-    private static Logger log = LoggerFactory.getLogger(MoccaJaxrsClient.class);
 
     /**
      * Create a Mocca JAX-RS 2 client using the supplied {@link Client}.
@@ -36,8 +35,6 @@ final public class MoccaJaxrsClient extends MoccaHttpClient.WithoutRequestTimeou
      */
     public MoccaJaxrsClient(final Client client) {
         super(new JAXRSClient(new StubbornClientBuilder(client)));
-        log.info("Mocca implementation _may_ attempt to set read timeout and connect timeout per request.  " +
-            "However, those are ignored.  They should be established in the supplied javax.ws.rs.Client.");
     }
 
     private static class StubbornClientBuilder extends ClientBuilder {

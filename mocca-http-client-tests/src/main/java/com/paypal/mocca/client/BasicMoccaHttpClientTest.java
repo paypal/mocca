@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 /**
@@ -53,8 +54,20 @@ abstract class BasicMoccaHttpClientTest {
     abstract MoccaHttpClient create();
 
     abstract static class WithRequestTimeouts extends BasicMoccaHttpClientTest {
+
         @Override
         abstract MoccaHttpClient.WithRequestTimeouts create();
+
+        /**
+         * In read timeout scenarios that feign manages, it is expected that the underlying
+         * client's timeout exception is conveyed as the first cause.  Each underlying client
+         * can have a different class for that and that is what we will assert on.  This defaults
+         * to {@link SocketTimeoutException} class, but underlying clients can customize that via
+         * an override.
+         */
+        protected Class<?> expectedTimeoutExceptionCause() {
+            return SocketTimeoutException.class;
+        }
 
         @Test(
             description = "GraphQL call respects Mocca-builder specified HTTP read timeout (i.e. per request timeout)."
@@ -72,8 +85,10 @@ abstract class BasicMoccaHttpClientTest {
                 sampleClient.greeting(readTimeout.multipliedBy(2).toMillis());
                 fail("Expected some form of timeout exception to be thrown.");
             } catch (final RetryableException e) {
-                // TODO this needs the same treatment as WithoutRequestTimeouts
-                assertEquals(e.getCause().getClass(), SocketTimeoutException.class);
+                // TODO how does feign know that a request timeout scenario means you can safely
+                // retry the request?  If the server has received any of the request, I don't think
+                // that's valid.  Consider writing up a feign bug.
+                assertEquals(e.getCause().getClass(), expectedTimeoutExceptionCause());
             }
         }
     }

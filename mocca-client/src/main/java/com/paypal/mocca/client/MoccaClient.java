@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 /**
  * Applications are supposed to create an interface, extending this one, to define their GraphQL client API. Each
@@ -94,7 +93,7 @@ public interface MoccaClient {
 
         /**
          * Provides a builder to create a Mocca sync client. If an HTTP client is not set in the builder, a {@link
-         * MoccaDefaultHttpClient} will be used. See {@link Builder.SyncBuilder#client(MoccaHttpClient)} for further
+         * MoccaDefaultHttpClient} will be used. See {@link Builder.SyncBuilder#client} for further
          * information.
          * <br>
          * See an example below of how to configure a sync Mocca client using OkHttp as HTTP client.
@@ -252,18 +251,15 @@ public interface MoccaClient {
             }
 
             // Marker, not technically required..
-            class WithoutRequestTimeouts extends Base {}
+            public class WithoutRequestTimeouts extends Base {}
 
             public abstract class Base extends Builder.BaseBuilder<Builder.SyncBuilder.Base> {
                 private MoccaResiliency resiliency;
 
-                public Base() {
+                Base() {
                     super(serverBaseUrl);
                 }
 
-                protected Optional<Request.Options> options() {
-                    return Optional.empty();
-                }
 
                 /**
                  * Adds a {@link MoccaResiliency} feature to be configured in this client builder.
@@ -313,7 +309,7 @@ public interface MoccaClient {
         /**
          * A {@link MoccaClient} builder for asynchronous clients.
          * <br>
-         * See an example below of how to configure a async Mocca client using Apache HTTP client 5 as HTTP client.
+         * See an example below of how to configure an async Mocca client using Apache HTTP client 5 as HTTP client.
          * <br>
          * <pre><code>
          * MoccaAsyncApache5Client asyncHttpClient = new MoccaAsyncApache5Client();
@@ -424,16 +420,14 @@ public interface MoccaClient {
             @Override
             public <C extends MoccaClient> C build(final Class<C> apiType) {
                 final AsyncClient<?> feignAsyncClient = moccaAsyncHttpClient != null ? moccaAsyncHttpClient.getFeignAsyncClient() : null;
-                return new Builder.AsyncBuilder.ClientSpecificBuilder<>(feignAsyncClient, graphQLUrlString).build(apiType);
+                return new Builder.AsyncBuilder.ClientSpecificBuilder<>(feignAsyncClient).build(apiType);
             }
 
             private class ClientSpecificBuilder<CC> {
                 private final AsyncClient<CC> asyncClient;
-                private final String serverUrl;
 
-                ClientSpecificBuilder(final AsyncClient<CC> asyncClient, final String serverUrl) {
+                ClientSpecificBuilder(final AsyncClient<CC> asyncClient) {
                     this.asyncClient = asyncClient;
-                    this.serverUrl = Arguments.requireNonNull(serverUrl);
                 }
 
                 public <C extends MoccaClient> C build(final Class<C> apiType) {
@@ -456,12 +450,38 @@ public interface MoccaClient {
             }
         }
 
+        abstract static class WithRequestTimeouts<B extends WithRequestTimeouts<B>> extends BaseBuilder<B> {
+            private Optional<Request.Options> options = Optional.empty();
+            protected WithRequestTimeouts(String serverBaseUrl) {
+                super(serverBaseUrl);
+            }
+
+            public WithRequestTimeouts<B> options(
+                final Duration connectTimeout,
+                final Duration readTimeout,
+                final boolean followRedirects
+            ) {
+                this.options = Optional.of(new Request.Options(
+                    connectTimeout.toMillis(), TimeUnit.MILLISECONDS,
+                    readTimeout.toMillis(), TimeUnit.MILLISECONDS,
+                    followRedirects
+                ));
+                return this;
+            }
+
+            @Override
+            protected Optional<Request.Options> options() {
+                return this.options;
+            }
+
+        }
+
         abstract static class BaseBuilder<B extends Builder.BaseBuilder<B>> {
 
             protected final String graphQLUrlString;
             protected final Set<MoccaCapability> capabilities = new HashSet<>();
 
-            public BaseBuilder(final String serverBaseUrl) {
+            protected BaseBuilder(final String serverBaseUrl) {
                 // Setting GraphQL URL String
                 Arguments.requireNonNull(serverBaseUrl);
                 if (serverBaseUrl.endsWith("/")) {
@@ -469,6 +489,10 @@ public interface MoccaClient {
                 } else {
                     graphQLUrlString = serverBaseUrl + "/graphql";
                 }
+            }
+
+            protected Optional<Request.Options> options() {
+                return Optional.empty();
             }
 
             /**
