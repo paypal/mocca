@@ -23,14 +23,16 @@ final class MoccaExceptionHandler {
         acceptableExceptions.add(ConstraintViolationException.class);
     }
 
-    static RuntimeException handleException(Throwable throwable) {
+    static Throwable handleException(Throwable throwable) {
         if (throwable instanceof FeignException) {
             Throwable cause = throwable.getCause();
             if (acceptableExceptions.contains(cause.getClass())) {
-                return (RuntimeException) cause;
+                return cause;
             }
+        } else if (throwable instanceof RuntimeException) {
+            return new MoccaException("The invocation of a client method has resulted in an exception: ", throwable);
         }
-        return new MoccaException("The invocation of a client method has resulted in an exception: ", throwable);
+        return throwable;
     }
 
 }
