@@ -12,7 +12,7 @@ public class MoccaException extends RuntimeException {
         super(message);
     }
 
-    public MoccaException(String message, Exception cause) {
+    public MoccaException(String message, Throwable cause) {
         super(message, cause);
     }
 

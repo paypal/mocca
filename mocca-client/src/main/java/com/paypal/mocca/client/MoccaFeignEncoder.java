@@ -99,9 +99,7 @@ class MoccaFeignEncoder implements Encoder {
         Set<ConstraintViolation<Object>> violationSet = validator.forExecutables().validateParameters(client, method, parameters);
 
         if (violationSet.size() > 0) {
-            throw new EncodeException("Constraint violations found in one or more request parameters",
-                    new ConstraintViolationException(violationSet)
-            );
+            throw new ConstraintViolationException(violationSet);
         }
     }
 

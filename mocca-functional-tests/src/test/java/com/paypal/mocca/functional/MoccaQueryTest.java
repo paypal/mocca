@@ -16,6 +16,7 @@ import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.testng.annotations.Test;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -128,6 +129,15 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
 
         circuitBreaker.transitionToClosedState();
         checkResults(getBooks.get());
+    }
+
+    @Test(expectedExceptions = ConstraintViolationException.class, expectedExceptionsMessageRegExp = "addAuthor\\.arg0: must not be null")
+    public void testResilientBeanValidationQuery() {
+        MoccaClient.Builder
+                .sync(getBaseUri().toString())
+                .resiliency(new MoccaResilience4j.Builder().build())
+                .build(BooksAppClient.class)
+                .addAuthor(null);
     }
 
     private void checkResults(List<Book> books) {

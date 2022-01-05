@@ -316,8 +316,9 @@ In the example above, when calling `addAuthor`, Mocca will not include the list 
 For a slightly more complicated example, let's say you wanted to add a book along with the book's author but don't want to include the list
 of books written by the author. You would use the `ignore` property like this:
 
-```java
+``` java
 public class Author {
+    
     String name;
     Book[] books;
     
@@ -329,6 +330,7 @@ public class Author {
 @Mutation
 int addBook(@Var(value = "book", ignore = "author.books") Book book);
 ```
+
 In this case the `books` field in the `author` sub-object would be omitted.
 
 ### 4.5 Specifying GraphQL selection set
@@ -787,7 +789,7 @@ AsyncBooksAppClient asyncClient = MoccaClient.Builder
 
 ## 8. Request validation
 
-Mocca supports validation of request parameters using a standard bean validation 2.0 implementation like hibernate.
+Mocca supports validation of request parameters using a standard Bean Validation 2.0 implementation like Hibernate.
 Please refer to [this site](https://beanvalidation.org/2.0-jsr380/) for information on bean validation. 
 
 **Important Note:** Mocca supports Bean Validation 2.0, not Jakarta Bean Validation 2.0 which has repackaged the api 
@@ -804,21 +806,29 @@ Bean validation is not required, so if you omit these runtime dependencies, Mocc
 ``` Groovy
 // Adding Bean Validation in Gradle
 dependencies {
-    implementation 'org.hibernate.validator:hibernate-validator:6.1.7.Final', 'org.glassfish:jakarta.el:3.0.3'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+    runtimeOnly 'org.hibernate.validator:hibernate-validator:6.1.7.Final', 'org.glassfish:jakarta.el:3.0.3'
 }
 ```
 
 ``` XML
 <!-- Adding Bean validation in Maven -->
 <dependency>
+    <groupId>javax.validation</groupId>
+    <artifactId>validation-api</artifactId>
+    <version>2.0.1.Final</version>
+</dependency>
+<dependency>
     <groupId>org.hibernate.validator</groupId>
     <artifactId>hibernate-validator</artifactId>
     <version>6.1.7.Final</version>
+    <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>org.glassfish</groupId>
     <artifactId>javax.el</artifactId>
     <version>3.0.3</version>
+    <scope>runtime</scope>
 </dependency>
 ```
 Note that Mocca will transitively include the validation api artifact: `jakarta.validation:jakarta.validation-api:2.0.2`
@@ -830,6 +840,7 @@ Let's take the following example of a Mocca client that includes validation.
 ``` java
 
 public class Author {
+
     @NotNull
     String name;
     
@@ -843,6 +854,7 @@ public class Author {
 }
 
 public interface BooksAppClient extends MoccaClient {
+
     /**
      * Adds an author and returns its id
      */
@@ -852,24 +864,19 @@ public interface BooksAppClient extends MoccaClient {
 }    
 ```
 If validation is enabled by the inclusion of an implementation of the bean validation api on the classpath, then
-a `feign.codec.EncodeException` will be thrown if any of the following conditions are true:
+a `javax.validation.ConstraintViolationException` will be thrown if any of the following conditions are true:
 * the `author` object provided to the method is `null`
 * the `name` field in the `Author` object is `null`
 * the `books` array field in the `Author` object is empty
 
-If the validation of a method call fails, then the cause of the `EncodeException` will be an exception of type
-[`javax.validation.ConstraintViolationException`](https://docs.oracle.com/javaee/7/api/javax/validation/ConstraintViolationException.html)
- that will contain a set of `ConstraintViolation` objects. Here's an example of how to process validation exceptions
+If the validation of a method call fails, then the [`javax.validation.ConstraintViolationException`](https://docs.oracle.com/javaee/7/api/javax/validation/ConstraintViolationException.html) exception
+ will contain a set of `ConstraintViolation` objects. Here's an example of how to process validation exceptions
 
-```java
+``` java
     try {
         Author author = new Author("James Joyce", new Book[] {})
         client.addAuthor(author);
-    } catch (EncodeException e) {
-        if (e.getCause() != null && e.getCause() instanceof ConstraintViolationException)  {
-            for (ConstraintViolation violation: ((ConstraintViolationException) e.getCause()).getConstraintViolations()) {
-                System.out.println(violation.getMessage());
-            }
-        }
+    } catch (ConstraintViolationException e) {
+        e.getConstraintViolations().stream().map(v -> v.getMessage()).forEach(System.out::println);
     }
 ```

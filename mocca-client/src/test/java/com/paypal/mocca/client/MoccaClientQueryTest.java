@@ -12,7 +12,6 @@ import com.paypal.mocca.client.sample.SuperComplexResponseType.SuperComplexRespo
 import com.paypal.mocca.client.sample.SuperComplexSampleType;
 import com.paypal.mocca.client.sample.SuperComplexSampleType.SuperComplexField;
 import com.paypal.mocca.client.sample.ValidatedRequestDTO;
-import feign.codec.DecodeException;
 import feign.codec.EncodeException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -64,27 +63,16 @@ public class MoccaClientQueryTest {
     public void queryInvalidRequest() {
         try {
             client.getOneValidSample(new ValidatedRequestDTO(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz"));
-            fail("should throw a validation exception");
-        } catch (EncodeException e) {
-            assertTrue(e.getCause() != null);
-            assertEquals(e.getMessage(), "Constraint violations found in one or more request parameters");
-            assertTrue(e.getCause().getClass().equals(ConstraintViolationException.class));
-            assertTrue(e.getCause().getMessage().contains( "getOneValidSample.arg0.bar: length must be between 0 and 5"));
-            assertTrue(e.getCause().getMessage().contains( "getOneValidSample.arg0.foo: must not be null"));
+            fail("Should have thrown a validation exception");
+        } catch (ConstraintViolationException e) {
+            assertTrue(e.getMessage().contains( "getOneValidSample.arg0.bar: length must be between 0 and 5"));
+            assertTrue(e.getMessage().contains( "getOneValidSample.arg0.foo: must not be null"));
         }
     }
 
-    @Test
+    @Test(expectedExceptions = ConstraintViolationException.class, expectedExceptionsMessageRegExp = "getOneSampleNotNull.arg0: must not be null")
     public void queryNotNullViolation() {
-        try {
-            client.getOneSampleNotNull(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz");
-            fail("should throw a validation exception");
-        } catch (EncodeException e) {
-            assertTrue(e.getCause() != null);
-            assertEquals(e.getMessage(), "Constraint violations found in one or more request parameters");
-            assertTrue(e.getCause().getClass().equals(ConstraintViolationException.class));
-            assertEquals(e.getCause().getMessage(), "getOneSampleNotNull.arg0: must not be null");
-        }
+        client.getOneSampleNotNull(null, "zazzzzzzzzzzzzzzzzzzzzzzzzzz");
     }
 
     @Test
@@ -201,7 +189,7 @@ public class MoccaClientQueryTest {
         assertEquals(superComplexResponse.getOptionalField().get(), "love");
     }
 
-    @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
+    @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
     public void queryErrorTest() {
         client.getOneSample("zoo", "car");
     }
@@ -240,7 +228,7 @@ public class MoccaClientQueryTest {
         assertEquals(sampleResponseDTOS.size(), 0);
     }
 
-    @Test(expectedExceptions = DecodeException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
+    @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
     public void queryListErrorTest() {
         client.getSamplesList("zoo", "car");
     }
@@ -293,13 +281,13 @@ public class MoccaClientQueryTest {
         };
     }
 
-    @Test(expectedExceptions = EncodeException.class, expectedExceptionsMessageRegExp = "Invalid GraphQL operation method noMoccaAnnotations, make sure all its parameters are annotated with one Mocca annotation")
+    @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "Invalid GraphQL operation method noMoccaAnnotations, make sure all its parameters are annotated with one Mocca annotation")
     public void noMoccaAnnotationsTest() {
         InvalidClient invalidClient = MoccaClient.Builder.sync("localhost").build(InvalidClient.class);
         invalidClient.noMoccaAnnotations("boo", "far");
     }
 
-    @Test(expectedExceptions = EncodeException.class, expectedExceptionsMessageRegExp = "Invalid GraphQL operation method moreThanOneMoccaAnnotation, make sure all its parameters are annotated with one Mocca annotation")
+    @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "Invalid GraphQL operation method moreThanOneMoccaAnnotation, make sure all its parameters are annotated with one Mocca annotation")
     public void moreThanOneMoccaAnnotationTest() {
         InvalidClient invalidClient = MoccaClient.Builder.sync("localhost").build(InvalidClient.class);
         invalidClient.moreThanOneMoccaAnnotation("boo", "far");
@@ -310,8 +298,8 @@ public class MoccaClientQueryTest {
         try {
             client.getResponseWithCycle();
             fail("A Mocca exception was supposed to have been thrown!");
-        } catch (EncodeException e) {
-            assertEquals(e.getCause().getCause().getCause().getMessage(),
+        } catch (MoccaException e) {
+            assertEquals(e.getCause().getCause().getMessage(),
                     "Selection set cannot be specified as there is a cycle in the return type caused by class com.paypal.mocca.client.sample.CyclePojo");
         }
     }

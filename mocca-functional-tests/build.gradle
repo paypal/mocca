@@ -48,7 +48,11 @@ dependencies {
                    lib.jersey_media_json_jackson,
                    lib.jackson_provider,
                    lib.logback,
-                   lib.jetty_server
+                   lib.jetty_server,
+                   lib.validation_api
+
+    runtimeOnly lib.hibernate_validator,
+                lib.jakarta_el
 
     testImplementation project(':mocca-client'),
                        project(':mocca-okhttp'),
