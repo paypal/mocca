@@ -8,6 +8,7 @@ import javax.validation.ConstraintViolationException;
 import java.util.Collections;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class MoccaExceptionHandlerTest {
 
@@ -34,13 +35,25 @@ public class MoccaExceptionHandlerTest {
     @Test
     public void feignExceptionNoCauseTest() {
         FeignException feignException = new EncodeException("encode exception wihout mocca");
-        assertEquals(MoccaExceptionHandler.handleException(feignException), feignException);
+        Throwable throwable = MoccaExceptionHandler.handleException(feignException);
+        assertTrue(throwable instanceof MoccaException);
+        assertEquals(throwable.getCause(), feignException);
     }
 
     @Test
     public void feignExceptionWithCauseTest() {
         FeignException feignException = new EncodeException("encode exception", new RuntimeException("foo"));
-        assertEquals(MoccaExceptionHandler.handleException(feignException), feignException);
+        Throwable throwable = MoccaExceptionHandler.handleException(feignException);
+        assertTrue(throwable instanceof MoccaException);
+        assertEquals(throwable.getCause(), feignException);
+    }
+
+    @Test
+    public void nonFeignRuntimeExceptionNoCauseTest() {
+        RuntimeException runtimeException = new RuntimeException("runtime exception");
+        Throwable throwable = MoccaExceptionHandler.handleException(runtimeException);
+        assertTrue(throwable instanceof MoccaException);
+        assertEquals(throwable.getCause(), runtimeException);
     }
 
 }
