@@ -26,7 +26,7 @@ final class MoccaExceptionHandler {
     static Throwable handleException(Throwable throwable) {
         if (throwable instanceof FeignException) {
             Throwable cause = throwable.getCause();
-            if (acceptableExceptions.contains(cause.getClass())) {
+            if (cause != null && acceptableExceptions.contains(cause.getClass())) {
                 return cause;
             }
         } else if (throwable instanceof RuntimeException) {
