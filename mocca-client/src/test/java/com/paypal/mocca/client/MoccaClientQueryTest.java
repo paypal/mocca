@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -134,12 +136,13 @@ public class MoccaClientQueryTest {
     @Test
     public void queryComplexDataTest() {
         List<String> stringList = Arrays.asList("blue", "yellow", "guacamole");
+        Set<String> stringSet = new HashSet<>(Arrays.asList("purple", "orange", "hummus"));
         SuperComplexField innerComplexField = new SuperComplexField(1, "one", false, stringList, null, null);
         SuperComplexField complexField = new SuperComplexField(1, "one", false, stringList, innerComplexField, Collections.singletonList(innerComplexField));
         List<SuperComplexField> complexList = Collections.singletonList(complexField);
         OffsetDateTime dateTime = OffsetDateTime.parse("2021-08-17T18:12:22.470076-03:00");
 
-        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true, complexField, complexList, stringList);
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true, complexField, complexList, stringList, stringSet);
         superComplexSampleType.setDateTime(dateTime);
 
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
@@ -149,6 +152,7 @@ public class MoccaClientQueryTest {
         assertEquals(superComplexResponse.getStringVar(), "seven");
         assertTrue(superComplexResponse.isBooleanVar());
         assertEquals(superComplexResponse.getStringListVar(), stringList);
+        assertEquals(superComplexResponse.getStringSetVar(), stringSet);
         assertEquals(superComplexResponse.getDateTime().toInstant(), dateTime.toInstant());
 
         SuperComplexResponseField expectedComplexField = new SuperComplexResponseField()
@@ -173,7 +177,7 @@ public class MoccaClientQueryTest {
         assertEquals(result.get().getBar(), "far");
 
         // Testing optional used inside the return type and the request variable POJO
-        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(1, "one", true, null, null, null);
+        SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(1, "one", true, null, null, null, null);
         superComplexSampleType.setOptionalField("love");
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
@@ -184,6 +188,7 @@ public class MoccaClientQueryTest {
         assertNull(superComplexResponse.getComplexField());
         assertNull(superComplexResponse.getComplexListVar());
         assertNull(superComplexResponse.getStringListVar());
+        assertNull(superComplexResponse.getStringSetVar());
         assertNull(superComplexResponse.getDateTime());
         assertTrue(superComplexResponse.getOptionalField().isPresent());
         assertEquals(superComplexResponse.getOptionalField().get(), "love");

@@ -3,6 +3,7 @@ package com.paypal.mocca.client.sample;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringJoiner;
 
 public class SuperComplexSampleType {
@@ -122,18 +123,20 @@ public class SuperComplexSampleType {
     private SuperComplexField complexField;
     private List<SuperComplexField> complexListVar;
     private List<String> stringListVar;
+    private Set<String> stringSetVar;
     private OffsetDateTime dateTime;
     private String optionalField;
 
     public SuperComplexSampleType(int intVar, String stringVar, boolean booleanVar, SuperComplexField complexField,
-                                  List<SuperComplexField> complexListVar,
-                                  List<String> stringListVar) {
+                                  List<SuperComplexField> complexListVar, List<String> stringListVar,
+                                  Set<String> stringSetVar) {
         this.intVar = intVar;
         this.stringVar = stringVar;
         this.booleanVar = booleanVar;
         this.complexField = complexField;
         this.complexListVar = complexListVar;
         this.stringListVar = stringListVar;
+        this.stringSetVar = stringSetVar;
     }
 
     public int getIntVar() {
@@ -186,6 +189,14 @@ public class SuperComplexSampleType {
 
     public void setStringListVar(List<String> stringListVar) {
         this.stringListVar = stringListVar;
+    }
+
+    public Set<String> getStringSetVar() {
+        return stringSetVar;
+    }
+
+    public void setStringSetVar(Set<String> stringSetVar) {
+        this.stringSetVar = stringSetVar;
     }
 
     public OffsetDateTime getDateTime() {

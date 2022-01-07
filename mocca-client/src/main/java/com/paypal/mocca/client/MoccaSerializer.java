@@ -462,13 +462,13 @@ class MoccaSerializer {
                     .filter(pd -> !pd.getReadMethod().getReturnType().equals(Class.class))
                     .filter(pd -> !ignoreFields.contains(pd.getName()))
                     // Parameterized types should not be treated as Java Beans and
-                    // shouldn't be serialized. The exception though is Lists
-                    // and Optionals, which should have their parameter types
+                    // shouldn't be serialized. The exception though is Lists,
+                    // Sets and Optionals, which should have their parameter types
                     // processed instead.
                     .filter(pd -> {
                         Type type = pd.getReadMethod().getGenericReturnType();
                         if (!isParameterizedType(type)) return true;
-                        return isParameterizedType(type, List.class, Optional.class);
+                        return isParameterizedType(type, List.class, Set.class, Optional.class);
                     })
                     .map(pd -> new Tuple<>(pd.getName(), pd.getReadMethod().getGenericReturnType()))
                     .map(e -> {

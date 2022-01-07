@@ -175,7 +175,7 @@ public class MoccaSerializerTest {
                         Arrays.asList(new String[] {"cat", "dog", "monkey"}), null, null);
         List<SuperComplexSampleType.SuperComplexField> listOfComplexSampleTypes = new ArrayList<>();
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
-                superComplexField, listOfComplexSampleTypes, null);
+                superComplexField, listOfComplexSampleTypes, null, null);
 
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class, newVar("sampleRequest")));
@@ -187,7 +187,7 @@ public class MoccaSerializerTest {
     @Test
     public void simpleWithListStringRequestTest() throws IOException {
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
-                null, null, Arrays.asList(new String[] {"cat", "dog", "monkey"}));
+                null, null, Arrays.asList(new String[] {"cat", "dog", "monkey"}), null);
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class, newVar("sampleRequest")));
         requestTest(variables, SampleResponseDTO.class, "getOneComplexSample", OperationType.Query,
@@ -201,7 +201,7 @@ public class MoccaSerializerTest {
                         Arrays.asList(new String[] {"cat", "dog", "monkey"}), null, null);
         List<SuperComplexSampleType.SuperComplexField> listOfComplexSampleTypes = new ArrayList<>();
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
-                superComplexField, listOfComplexSampleTypes, null);
+                superComplexField, listOfComplexSampleTypes, null, null);
 
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
@@ -223,7 +223,7 @@ public class MoccaSerializerTest {
         listOfComplexSampleTypes.add(superComplexField1);
         listOfComplexSampleTypes.add(superComplexField2);
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
-                null, listOfComplexSampleTypes, null);
+                null, listOfComplexSampleTypes, null, null);
 
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
@@ -243,7 +243,7 @@ public class MoccaSerializerTest {
                         Arrays.asList(new String[] {"bat", "frog", "money"}), null, null);
         superComplexField1.setInnerComplexVar(superComplexField2);
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
-                superComplexField1, null , null);
+                superComplexField1, null , null, null);
 
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
@@ -271,7 +271,7 @@ public class MoccaSerializerTest {
         superComplexField1.setInnerComplexListVar(listOfComplexSampleTypes);
 
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true,
-                superComplexField1, null , null);
+                superComplexField1, null , null, null);
 
         List<MoccaSerializer.Variable> variables = Collections.singletonList(
                 new MoccaSerializer.Variable( superComplexSampleType, SuperComplexSampleType.class,
