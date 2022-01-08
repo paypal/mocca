@@ -1,6 +1,17 @@
 
 # Release notes
 
+## 0.0.5
+
+#### Release date
+TBD
+
+#### New features and enhancements
+TBD
+
+#### Bug fixes
+TBD
+
 ## 0.0.4
 
 #### Release date
