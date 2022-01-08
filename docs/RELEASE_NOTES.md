@@ -4,13 +4,15 @@
 ## 0.0.4
 
 #### Release date
-TBD
+January 8th, 2021
 
 #### New features and enhancements
-TBD
+1. [Add support for Set data type inside POJOs used in the SelectionSet](https://github.com/paypal/mocca/issues/55)
+1. [Upgrade key libraries to their latest available versions](https://github.com/paypal/mocca/issues/56)
 
 #### Bug fixes
-TBD
+1. [Mocca should unwrap user facing exceptions from Feign exceptions and hide Feign exceptions](https://github.com/paypal/mocca/issues/40)
+1. [Fix typo in mocca-resilience4j module name](https://github.com/paypal/mocca/issues/54)
 
 ## 0.0.3
 
