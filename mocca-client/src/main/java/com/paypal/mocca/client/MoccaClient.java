@@ -237,6 +237,9 @@ public interface MoccaClient {
                     .encoder(encoder)
                     .decoder(new MoccaFeignDecoder());
 
+                if (resiliency == null) {
+                    builder.invocationHandlerFactory(new MoccaFeignInvocationHandlerFactory());
+                }
                 if (moccaHttpClient != null) {
                     builder = builder.client(moccaHttpClient.getFeignClient());
                 }
@@ -382,7 +385,8 @@ public interface MoccaClient {
                     AsyncFeign.AsyncBuilder<CC> builder = AsyncFeign.<CC>asyncBuilder()
                         .contract(new MoccaFeignContract())
                         .encoder(encoder)
-                        .decoder(new MoccaFeignDecoder());
+                        .decoder(new MoccaFeignDecoder())
+                        .invocationHandlerFactory(new MoccaFeignInvocationHandlerFactory());
                     if (asyncClient != null) {
                         builder = builder.client(asyncClient);
                     }

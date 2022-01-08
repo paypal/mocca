@@ -3,6 +3,7 @@ package com.paypal.mocca.client.sample;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class SuperComplexResponseType {
 
@@ -78,6 +79,7 @@ public class SuperComplexResponseType {
     private SuperComplexResponseField complexField;
     private List<SuperComplexResponseField> complexListVar;
     private List<String> stringListVar;
+    private Set<String> stringSetVar;
     private OffsetDateTime dateTime;
     private String optionalField;
 
@@ -131,6 +133,14 @@ public class SuperComplexResponseType {
 
     public void setStringListVar(List<String> stringListVar) {
         this.stringListVar = stringListVar;
+    }
+
+    public Set<String> getStringSetVar() {
+        return stringSetVar;
+    }
+
+    public void setStringSetVar(Set<String> stringSetVar) {
+        this.stringSetVar = stringSetVar;
     }
 
     public OffsetDateTime getDateTime() {
