@@ -196,7 +196,7 @@ ext.lib = [
         jackson_annotations: 'com.fasterxml.jackson.core:jackson-annotations:' + jackson_version,
         jackson_databind: 'com.fasterxml.jackson.core:jackson-databind:' + jackson_version,
         jackson_datatype_jsr301: 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:' + jackson_version,
-        jackson_modules_java8: 'com.fasterxml.jackson.module:jackson-modules-java8:' + jackson_version,
+        jackson_modules_java8: 'com.fasterxml.jackson.module:jackson-modules-java8:' + jackson_version + '@pom',
         jackson_provider: 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:' + jackson_version,
 
         // Resilience
