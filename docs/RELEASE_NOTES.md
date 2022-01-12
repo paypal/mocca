@@ -4,13 +4,13 @@
 ## 0.0.5
 
 #### Release date
-TBD
+January 12th, 2021
 
 #### New features and enhancements
-TBD
+None
 
 #### Bug fixes
-TBD
+1. [Dependency jackson-modules-java8 should be marked as pom](https://github.com/paypal/mocca/issues/59)
 
 ## 0.0.4
 
