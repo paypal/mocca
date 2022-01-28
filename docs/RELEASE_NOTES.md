@@ -1,10 +1,21 @@
 
 # Release notes
 
+## 0.0.6
+
+#### Release date
+January 28th, 2022
+
+#### New features and enhancements
+TBD
+
+#### Bug fixes
+1. [Fix classpath issue caused by conflicting versions of OkHttp](https://github.com/paypal/mocca/issues/61)
+
 ## 0.0.5
 
 #### Release date
-January 12th, 2021
+January 12th, 2022
 
 #### New features and enhancements
 None
