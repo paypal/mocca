@@ -137,6 +137,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
     public void testResilientBeanValidationQuery() {
         MoccaClient.Builder
                 .sync(getBaseUri().toString())
+                .defaultClient()
                 .resiliency(new MoccaResilience4j.Builder().build())
                 .build(BooksAppClient.class)
                 .addAuthor(null);

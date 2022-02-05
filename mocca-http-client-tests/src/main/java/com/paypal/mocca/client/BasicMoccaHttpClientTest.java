@@ -78,11 +78,12 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
             try {
                 sampleClient.greeting(readTimeout.multipliedBy(2).toMillis());
                 fail("Expected some form of timeout exception to be thrown.");
-            } catch (final RetryableException e) {
+            } catch (final MoccaException e) {
                 // TODO how does feign know that a request timeout scenario means you can safely
                 // retry the request?  If the server has received any of the request, I don't think
                 // that's valid.  Consider writing up a feign bug.
-                assertEquals(e.getCause().getClass(), expectedTimeoutExceptionCause());
+                assertEquals(e.getCause().getClass(), RetryableException.class);
+                assertEquals(e.getCause().getCause().getClass(), expectedTimeoutExceptionCause());
             }
         }
     }
