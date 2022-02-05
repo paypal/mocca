@@ -3,54 +3,43 @@ package com.paypal.mocca.client;
 import com.paypal.mocca.client.annotation.Query;
 import com.paypal.mocca.client.annotation.RequestHeader;
 import com.paypal.mocca.client.annotation.RequestHeaderParam;
-import feign.RetryableException;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import feign.AsyncClient;
 import org.testng.annotations.Test;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 /**
- * Verifies that a supplied {@link MoccaHttpClient} works for
- * some basic GraphQL call.  The general idea being that we're
- * just testing the basic HTTP parts function correctly (e.g.
- * POST requests).
- * <p></p>
- * Unfortunately, there seems to be a Gradle or TestNG bug where
- * if a class contains no tests but extends one that does, then
- * Gradle build will not execute the test. Annotating the concrete
- * class with `@Test` appears to 'solve' the problem.
+ * Similar to {@link BasicMoccaHttpClientTest} but for {@link MoccaAsyncHttpClient}.
  */
-abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
+abstract class BasicMoccaAsyncHttpClientTest extends WithGraphQLServer {
+    // Some copying done to keep 'complexity' down in test.
+
+    // And this is what happens when you copy:)
     // TODO solve the gradlew problem described above.  Some links:
     // https://discuss.gradle.org/t/testng-tests-that-inherit-from-a-base-class-but-do-not-add-new-test-methods-are-not-detected/1259
     // https://stackoverflow.com/questions/64087969/testng-cannot-find-test-methods-with-inheritance
 
-    private BasicMoccaHttpClientTest() {
+    static final String GRAPHQL_GREETING = "Hello!";
+    static final String RESPONSE_DELAY_HEADER = "ResponseDelay";
+
+    private BasicMoccaAsyncHttpClientTest() {
     }
 
-    abstract MoccaHttpClient create();
+    abstract <C> MoccaAsyncHttpClient<C> create();
 
-    abstract static class WithRequestTimeouts extends BasicMoccaHttpClientTest {
+    abstract static class WithRequestTimeouts extends BasicMoccaAsyncHttpClientTest {
 
         @Override
-        abstract MoccaHttpClient.WithRequestTimeouts create();
+        abstract <C> MoccaAsyncHttpClient.WithRequestTimeouts<C> create();
 
         /**
          * In read timeout scenarios that feign manages, it is expected that the underlying
@@ -66,44 +55,42 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
         @Test(
             description = "GraphQL call respects Mocca-builder specified HTTP read timeout (i.e. per request timeout)."
         )
-        void testReadTimeout() {
+        void testReadTimeout() throws ExecutionException, InterruptedException, TimeoutException {
             final boolean followRedirects = false;
             final Duration connectTimeout = Duration.ofSeconds(5);
             final Duration readTimeout    = Duration.ofMillis(100);
 
-            final SampleDataClient sampleClient = syncBuilder()
+            final SampleDataClient sampleClient = asyncBuilder()
                 .client(create())
                 .options(connectTimeout, readTimeout, followRedirects)
                 .build(SampleDataClient.class);
             try {
-                sampleClient.greeting(readTimeout.multipliedBy(2).toMillis());
+                sampleClient.greeting(readTimeout.multipliedBy(10000).toMillis())
+                    .get(5, TimeUnit.SECONDS);
                 fail("Expected some form of timeout exception to be thrown.");
-            } catch (final RetryableException e) {
-                // TODO how does feign know that a request timeout scenario means you can safely
-                // retry the request?  If the server has received any of the request, I don't think
-                // that's valid.  Consider writing up a feign bug.
-                assertEquals(e.getCause().getClass(), expectedTimeoutExceptionCause());
+            } catch (final ExecutionException ee) {
+                assertEquals(ee.getCause().getClass(), expectedTimeoutExceptionCause());
             }
         }
     }
 
-    abstract static class WithoutRequestTimeouts extends BasicMoccaHttpClientTest {
+    abstract static class WithoutRequestTimeouts extends BasicMoccaAsyncHttpClientTest {
         @Override
-        abstract MoccaHttpClient.WithoutRequestTimeouts create();
+        abstract <C> MoccaAsyncHttpClient.WithoutRequestTimeouts<C> create();
 
         /**
          * @param readTimeout The maximum time to wait while waiting to read <i>a</i>
          *                    byte from the HTTP response.
          * @return
          */
-        abstract TimeoutCollateral create(final Duration readTimeout);
+        abstract <C> TimeoutCollateral<C> create(final Duration readTimeout);
 
         @Test(
             description = "GraphQL call respects HTTP read timeout."
         )
         void testReadTimeout() {
             final Duration readTimeout = Duration.ofMillis(100);
-            final TimeoutCollateral timeoutCollateral = create(readTimeout);
+            final TimeoutCollateral<?> timeoutCollateral = create(readTimeout);
             final SampleDataClient sampleClient = createClient(timeoutCollateral.client);
             try {
                 sampleClient.greeting(readTimeout.multipliedBy(2).toMillis());
@@ -116,11 +103,11 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
         /**
          * Data we need to test HTTP timeout scenarios (e.g. max time between reading bytes).
          */
-        static class TimeoutCollateral {
+        static class TimeoutCollateral<C> {
             /**
              * Client that will be used to make the request.
              */
-            final MoccaHttpClient client;
+            final MoccaAsyncHttpClient<C> client;
 
             /**
              * Each implementation is responsible for determining if the thrown exception
@@ -128,7 +115,7 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
              */
             final Consumer<Exception> exceptionAsserter;
 
-            TimeoutCollateral(final MoccaHttpClient client,
+            TimeoutCollateral(final MoccaAsyncHttpClient<C> client,
                               final Consumer<Exception> exceptionAsserter) {
                 this.client = client;
                 this.exceptionAsserter = exceptionAsserter;
@@ -136,10 +123,9 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
         }
     }
 
-
     @Test(description = "Basic GraphQL call")
-    void testBasic() {
-        final String greeting = createClient().greeting();
+    void testBasic() throws Exception {
+        final String greeting = createClient().greeting().get(5, TimeUnit.SECONDS);
         assertEquals(greeting, GRAPHQL_GREETING);
     }
 
@@ -147,24 +133,30 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
         return createClient(create());
     }
 
-    protected SampleDataClient createClient(final MoccaHttpClient httpClient) {
+    protected <C> SampleDataClient createClient(final MoccaAsyncHttpClient<C> httpClient) {
         // This is a little bit hacky, but the general idea is the tests that leverage
         // this function are not concerned with setting timeouts.
-        final MoccaHttpClient.WithoutRequestTimeouts clientWithoutTimeouts =
-            new MoccaHttpClient.WithoutRequestTimeouts(httpClient.getFeignClient()) {};
+        class MyClient extends MoccaAsyncHttpClient.WithoutRequestTimeouts<C> {
+            public MyClient(AsyncClient<C> feignClient) {
+                super(feignClient);
+            }
+        }
 
-        return syncBuilder()
+        final MoccaAsyncHttpClient.WithoutRequestTimeouts<?> clientWithoutTimeouts =
+            new MyClient(httpClient.getFeignAsyncClient());
+
+        return asyncBuilder()
                 .client(clientWithoutTimeouts)
                 .build(SampleDataClient.class);
     }
 
-    protected MoccaClient.Builder.SyncBuilder syncBuilder() {
-        return MoccaClient.Builder.sync(graphqlServer.getURI().toASCIIString());
+    protected MoccaClient.Builder.AsyncBuilder asyncBuilder() {
+        return MoccaClient.Builder.async(graphqlServer.getURI().toASCIIString());
     }
 
     public interface SampleDataClient extends MoccaClient {
         @Query
-        String greeting();
+        CompletableFuture<String> greeting();
 
         /**
          * A delayed greeting.
@@ -173,6 +165,6 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
          */
         @Query
         @RequestHeader(RESPONSE_DELAY_HEADER + ": {delay}")
-        String greeting(@RequestHeaderParam("delay") long delayInMs);
+        CompletableFuture<String> greeting(@RequestHeaderParam("delay") long delayInMs);
     }
 }

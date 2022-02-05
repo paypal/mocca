@@ -59,7 +59,7 @@ public class MoccaClientBuilderTest {
 
         final BadExecService badExecService = new BadExecService();
         final MoccaHttpClient moccaJavaHttpClient = new MoccaDefaultHttpClient();
-        final MoccaExecutorHttpClient executorHttpClient = new MoccaExecutorHttpClient(moccaJavaHttpClient, badExecService);
+        final MoccaExecutorHttpClient<?> executorHttpClient = new MoccaExecutorHttpClient<>(moccaJavaHttpClient, badExecService);
 
         try {
             MoccaClient.Builder.async("http://localhost:8080")

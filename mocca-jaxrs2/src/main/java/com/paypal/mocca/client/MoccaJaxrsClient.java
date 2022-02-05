@@ -38,7 +38,7 @@ final public class MoccaJaxrsClient extends MoccaHttpClient.WithoutRequestTimeou
     }
 
     private static class StubbornClientBuilder extends ClientBuilder {
-        private static Logger log = LoggerFactory.getLogger(StubbornClientBuilder.class);
+        private static final Logger log = LoggerFactory.getLogger(StubbornClientBuilder.class);
         private static final String USAGE_ERR_MSG = "Only #build can be called.";
 
         private final Client client;
