@@ -25,10 +25,9 @@ import java.util.concurrent.ExecutorService;
  * }
  * </pre>
  *
- * @param <C> an optional context
  * @author fabiocarvalho777@gmail.com
  */
-public final class MoccaExecutorHttpClient<C> extends MoccaAsyncHttpClient.WithRequestTimeouts<C> {
+public final class MoccaExecutorHttpClient extends MoccaAsyncHttpClient.WithRequestTimeouts {
 
     /**
      * A Mocca async HTTP client based on a Mocca sync HTTP client

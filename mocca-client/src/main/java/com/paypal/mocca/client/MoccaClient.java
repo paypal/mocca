@@ -319,7 +319,7 @@ public interface MoccaClient {
          * Notice this builder is not thread-safe.
          */
         public static class AsyncBuilder {
-            private MoccaAsyncHttpClient<?> moccaAsyncHttpClient;
+            private MoccaAsyncHttpClient moccaAsyncHttpClient;
             private String serverBaseUrl;
 
             public AsyncBuilder(String serverBaseUrl) {
@@ -405,15 +405,14 @@ public interface MoccaClient {
              * </code></pre>
              *
              * @param moccaAsyncHttpClient Mocca HTTP asynchronous client that supports Mocca-specified timeouts.
-             * @param <CC> An optional context
              * @return a builder that supports Mocca-based timeouts.
              */
 
-            public <CC> Builder.AsyncBuilder.WithRequestTimeouts<CC> client(
-                final MoccaAsyncHttpClient.WithRequestTimeouts<CC> moccaAsyncHttpClient
+            public Builder.AsyncBuilder.WithRequestTimeouts client(
+                final MoccaAsyncHttpClient.WithRequestTimeouts moccaAsyncHttpClient
             ) {
                 this.moccaAsyncHttpClient = Arguments.requireNonNull(moccaAsyncHttpClient);
-                return this.new WithRequestTimeouts<>();
+                return this.new WithRequestTimeouts();
             }
 
             /**
@@ -421,33 +420,31 @@ public interface MoccaClient {
              * Mocca-specified timeouts.  See {@link MoccaAsyncHttpClient.WithoutRequestTimeouts} for more information.
              *
              * @param moccaAsyncHttpClient Mocca HTTP asynchronous client that does not support Mocca-specified timeouts.
-             * @param <CC> An optional context
              * @return a builder that does not support Mocca-specified timeouts.
              */
-            public <CC> Builder.AsyncBuilder.WithoutRequestTimeouts<CC> client(
-                final MoccaAsyncHttpClient.WithoutRequestTimeouts<CC> moccaAsyncHttpClient
+            public Builder.AsyncBuilder.WithoutRequestTimeouts client(
+                final MoccaAsyncHttpClient.WithoutRequestTimeouts moccaAsyncHttpClient
             ) {
                 this.moccaAsyncHttpClient = Arguments.requireNonNull(moccaAsyncHttpClient);
-                return this.new WithoutRequestTimeouts<>();
+                return this.new WithoutRequestTimeouts();
             }
 
             /**
              * Use the default HTTP asynchronous client provided by Mocca.
              *
-             * @param <CC> An optional context
              * @return a builder that supports Mocca-specified timeouts.
              */
-            public <CC> Builder.AsyncBuilder.WithRequestTimeouts<CC> defaultClient() {
-                return this.new WithRequestTimeouts<>();
+            public Builder.AsyncBuilder.WithRequestTimeouts defaultClient() {
+                return this.new WithRequestTimeouts();
             }
 
-            public Builder.AsyncBuilder client(final MoccaAsyncHttpClient<?> moccaAsyncHttpClient) {
+            public Builder.AsyncBuilder client(final MoccaAsyncHttpClient moccaAsyncHttpClient) {
                 this.moccaAsyncHttpClient = Arguments.requireNonNull(moccaAsyncHttpClient);
                 return this;
             }
 
-            public class WithRequestTimeouts<CC> extends AsyncBuilder.Base<CC, AsyncBuilder.WithRequestTimeouts<CC>> {
-                public WithRequestTimeouts<CC> options(
+            public class WithRequestTimeouts extends AsyncBuilder.Base<AsyncBuilder.WithRequestTimeouts> {
+                public WithRequestTimeouts options(
                     final Duration connectTimeout,
                     final Duration readTimeout,
                     final boolean followRedirects
@@ -458,11 +455,11 @@ public interface MoccaClient {
             }
 
             // Marker, not technically required..
-            public class WithoutRequestTimeouts<CC>
-                extends AsyncBuilder.Base<CC, AsyncBuilder.WithRequestTimeouts<CC>> {}
+            public class WithoutRequestTimeouts
+                extends AsyncBuilder.Base<AsyncBuilder.WithRequestTimeouts> {}
 
 
-            abstract class Base<CC, B extends AsyncBuilder.Base<CC, B>> extends Builder.BaseBuilder<B> {
+            abstract class Base<B extends AsyncBuilder.Base<B>> extends Builder.BaseBuilder<B> {
                 protected final OptionsBuilder optionsBuilder = new OptionsBuilder();
 
                 Base() {

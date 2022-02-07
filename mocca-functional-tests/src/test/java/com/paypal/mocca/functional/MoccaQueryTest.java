@@ -71,7 +71,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
     @Test
     public void testBasicQueryExecutor() throws ExecutionException, InterruptedException {
         ExecutorService executorService = Executors.newCachedThreadPool();
-        MoccaExecutorHttpClient<OkHttpClient> executorClient = new MoccaExecutorHttpClient<>(new MoccaOkHttpClient(), executorService);
+        MoccaExecutorHttpClient executorClient = new MoccaExecutorHttpClient(new MoccaOkHttpClient(), executorService);
 
         AsyncBooksAppClient asyncClient = MoccaClient.Builder
                 .async(getBaseUri().toString())

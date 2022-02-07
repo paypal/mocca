@@ -34,12 +34,12 @@ abstract class BasicMoccaAsyncHttpClientTest extends WithGraphQLServer {
     private BasicMoccaAsyncHttpClientTest() {
     }
 
-    abstract <C> MoccaAsyncHttpClient<C> create();
+    abstract MoccaAsyncHttpClient create();
 
     abstract static class WithRequestTimeouts extends BasicMoccaAsyncHttpClientTest {
 
         @Override
-        abstract <C> MoccaAsyncHttpClient.WithRequestTimeouts<C> create();
+        abstract MoccaAsyncHttpClient.WithRequestTimeouts create();
 
         /**
          * In read timeout scenarios that feign manages, it is expected that the underlying
@@ -76,7 +76,7 @@ abstract class BasicMoccaAsyncHttpClientTest extends WithGraphQLServer {
 
     abstract static class WithoutRequestTimeouts extends BasicMoccaAsyncHttpClientTest {
         @Override
-        abstract <C> MoccaAsyncHttpClient.WithoutRequestTimeouts<C> create();
+        abstract MoccaAsyncHttpClient.WithoutRequestTimeouts create();
 
         /**
          * @param readTimeout The maximum time to wait while waiting to read <i>a</i>
@@ -107,7 +107,7 @@ abstract class BasicMoccaAsyncHttpClientTest extends WithGraphQLServer {
             /**
              * Client that will be used to make the request.
              */
-            final MoccaAsyncHttpClient<C> client;
+            final MoccaAsyncHttpClient client;
 
             /**
              * Each implementation is responsible for determining if the thrown exception
@@ -115,7 +115,7 @@ abstract class BasicMoccaAsyncHttpClientTest extends WithGraphQLServer {
              */
             final Consumer<Exception> exceptionAsserter;
 
-            TimeoutCollateral(final MoccaAsyncHttpClient<C> client,
+            TimeoutCollateral(final MoccaAsyncHttpClient client,
                               final Consumer<Exception> exceptionAsserter) {
                 this.client = client;
                 this.exceptionAsserter = exceptionAsserter;
@@ -133,16 +133,16 @@ abstract class BasicMoccaAsyncHttpClientTest extends WithGraphQLServer {
         return createClient(create());
     }
 
-    protected <C> SampleDataClient createClient(final MoccaAsyncHttpClient<C> httpClient) {
+    protected SampleDataClient createClient(final MoccaAsyncHttpClient httpClient) {
         // This is a little bit hacky, but the general idea is the tests that leverage
         // this function are not concerned with setting timeouts.
-        class MyClient extends MoccaAsyncHttpClient.WithoutRequestTimeouts<C> {
-            public MyClient(AsyncClient<C> feignClient) {
+        class MyClient extends MoccaAsyncHttpClient.WithoutRequestTimeouts {
+            public MyClient(AsyncClient<?> feignClient) {
                 super(feignClient);
             }
         }
 
-        final MoccaAsyncHttpClient.WithoutRequestTimeouts<?> clientWithoutTimeouts =
+        final MoccaAsyncHttpClient.WithoutRequestTimeouts clientWithoutTimeouts =
             new MyClient(httpClient.getFeignAsyncClient());
 
         return asyncBuilder()

@@ -13,7 +13,7 @@ import org.apache.hc.client5.http.protocol.HttpClientContext;
  *
  * @author fabiocarvalho777@gmail.com
  */
-final public class MoccaAsyncApache5Client extends MoccaAsyncHttpClient.WithRequestTimeouts<HttpClientContext> {
+final public class MoccaAsyncApache5Client extends MoccaAsyncHttpClient.WithRequestTimeouts {
 
     /**
      * Creates a new Mocca Async Apache 5 HTTP client using
