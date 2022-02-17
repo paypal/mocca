@@ -107,6 +107,7 @@ public interface BooksAppClient extends MoccaClient {
 // Building a new Mocca client
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
+    .defaultClient()
     .build(BooksAppClient.class);
 
 // Getting a book by id
@@ -170,6 +171,7 @@ This interface then is used by the application to define a variable whose instan
 ``` java
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
+    .defaultClient()
     .build(BooksAppClient.class);
 ```
 
@@ -267,6 +269,7 @@ Below it is shown how an application would use this operation. Notice `raw` prop
 ``` java
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
+    .defaultClient()
     .build(BooksAppClient.class);
 
 Author author = client.addAuthor("name: \"Carlos Drummond de Andrade\", books: [{title: \"Alguma poesia\"}, {title: \"A rosa do povo\"}]");
@@ -291,6 +294,7 @@ And this is how an application could use this operation:
 ``` java
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
+    .defaultClient()
     .build(BooksAppClient.class);
 
 Book recommendedBook = client.getBookRecommendation();
@@ -497,6 +501,7 @@ The code block below shows how to create a Mocca client with the minimum require
 ``` java
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
+    .defaultClient()
     .build(BooksAppClient.class);
 ```
 
@@ -508,9 +513,16 @@ The actual client instance is then created by calling the `build` method, which 
 
 ### 6.2 Choosing the HTTP client
 
-Mocca uses behind the scenes an HTTP client to make the GraphQL calls. By default, JDK `java.net.HttpURLConnection` is used as HTTP client, and no additional dependency is required to use it.
+Mocca uses behind the scenes an HTTP client to make the GraphQL calls. By default, JDK `java.net.HttpURLConnection` is used as HTTP client, and no additional dependency is required to use it. To use Mocca default HTTP client `defaultClient` has to be called when building the client, as seen below.
 
-However, if preferred, a custom HTTP client can be specified by adding an extra Mocca dependency and setting the HTTP client when creating the Mocca client builder (using method `client`), as seen below:
+``` java
+BooksAppClient client = MoccaClient.Builder
+    .sync("http://localhost:8080/booksapp")
+    .defaultClient()
+    .build(BooksAppClient.class);
+```
+
+However, if preferred, a custom HTTP client can be specified by adding an extra Mocca dependency and setting the HTTP client when creating the Mocca client builder (using method `client`, instead of `defaultClient`), as seen below:
 
 ``` java
 BooksAppClient client = MoccaClient.Builder
@@ -534,8 +546,20 @@ The table above includes only synchronous clients, and the code samples in this 
 
 All Mocca classes mentioned in the table above work as a wrapper containing a default instance of the HTTP client. If the application needs the HTTP client to be configured in a certain manner, there are two ways to achieve that:
 
-1. Mocca client builder could be used to do so, providing a common API regardless of the type of HTTP client used.
-1. A custom instance of the HTTP client could be provided as a constructor parameter to the Mocca HTTP client wrapper.
+1. Mocca client builder could be used to do so, providing a common API regardless of the type of HTTP client used. All currently supported Mocca HTTP clients allow this type of configuration, except the *JAX-RS 2 client*.
+1. A custom instance of the HTTP client (already configured as desired) could be provided as a constructor parameter to the Mocca HTTP client wrapper. This is currently the only way to customize the HTTP client configuration when using a *JAX-RS 2 client*.
+
+In the example below, Mocca client builder API (via method `options`) is used to configure the client connection and read timeout, and whether it should follow redirects or not.
+
+``` java
+BooksAppClient client = MoccaClient.Builder
+    .sync("http://localhost:8080/booksapp")
+    .client(new MoccaOkHttpClient())
+    .options(1000, 1000, false)
+    .build(BooksAppClient.class);
+```
+
+In the example below, an OkHttp client instance is used to configure the client read timeout.
 
 ``` java
 okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
@@ -545,6 +569,19 @@ okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
 BooksAppClient client = MoccaClient.Builder
     .sync("localhost:8080/booksapp")
     .client(new MoccaOkHttpClient(okHttpClient))
+    .build(BooksAppClient.class);
+```
+
+Finally, in this example a JAX-RS client instance is used to configure the client read timeout.
+
+``` java
+Client jaxrsClient = ClientBuilder.newBuilder()
+    .readTimeout(readTimeout.toMillis(), TimeUnit.MILLISECONDS)
+    .build();
+
+BooksAppClient client = MoccaClient.Builder
+    .sync("localhost:8080/booksapp")
+    .client(new MoccaJaxrsClient(jaxrsClient))
     .build(BooksAppClient.class);
 ```
 
@@ -615,6 +652,7 @@ SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     
 BooksAppClient micrometerEnabledClient = MoccaClient.Builder
     .sync("localhost:8080/booksapp")
+    .defaultClient()
     .addCapability(new MoccaMicrometerCapability(meterRegistry))
     .build(BooksAppClient.class);
 ```
@@ -639,6 +677,7 @@ MoccaResilience4j moccaResilience = new MoccaResilience4j.Builder()
 
 BooksAppClient client = MoccaClient.Builder
     .sync("localhost:8080/booksapp")
+    .defaultClient()
     .resiliency(moccaResilience)
     .build(BooksAppClient.class);
 ```
