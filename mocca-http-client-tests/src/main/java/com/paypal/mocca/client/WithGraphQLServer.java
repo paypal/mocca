@@ -1,5 +1,6 @@
 package com.paypal.mocca.client;
 
+import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -33,6 +34,16 @@ class WithGraphQLServer {
         final Servlet greetingServlet = new HttpServlet() {
             @Override
             protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+                // TODO Do better with this.  Does that mean we run a full fledged graphql server?
+                // Probably.  I mean who says 'Content-Encoding' can't some day be UTF-8..
+                final String contentType = req.getHeader(HttpHeader.CONTENT_TYPE.asString());
+                if (!"application/json".equalsIgnoreCase(contentType)) {
+                    throw new RuntimeException("Content-Type must be application/json, was " + contentType);
+                }
+                final String contentEncoding = req.getHeader(HttpHeader.CONTENT_ENCODING.asString());
+                if ("UTF-8".equalsIgnoreCase(contentEncoding)) {
+                    throw new RuntimeException("Content-Encoding cannot be UTF-8");
+                }
                 Optional.ofNullable(req.getHeader(RESPONSE_DELAY_HEADER))
                     .map(Long::parseLong)
                     .ifPresent(delay -> {

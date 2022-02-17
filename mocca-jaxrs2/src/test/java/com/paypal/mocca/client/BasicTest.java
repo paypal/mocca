@@ -26,7 +26,11 @@ public class BasicTest extends BasicMoccaHttpClientTest.WithoutRequestTimeouts {
         );
         return new TimeoutCollateral(
             client,
-            e -> assertEquals(e.getCause().getClass(), SocketTimeoutException.class)
+            e -> assertEquals(
+                e.getCause().getClass(),
+                SocketTimeoutException.class,
+                "Unexpected exception, " + e.getCause().getClass() + ".  Message: " + e.getCause().getMessage()
+            )
         );
     }
 
