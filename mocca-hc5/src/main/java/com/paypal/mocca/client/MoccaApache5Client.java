@@ -8,11 +8,12 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
  * Mocca Apache 5 HTTP client. In order to use a Apache 5 HTTP client with Mocca,
  * create a new instance of this class and pass it to Mocca builder.
  * <br>
- * See {@link com.paypal.mocca.client.MoccaClient.Builder.SyncBuilder#client(MoccaHttpClient)} for further information and code example.
+ * See {@link com.paypal.mocca.client.MoccaClient.Builder.SyncBuilder#client(WithRequestTimeouts)} 
+ * for further information and code example.
  *
  * @author fabiocarvalho777@gmail.com
  */
-final public class MoccaApache5Client extends MoccaHttpClient {
+final public class MoccaApache5Client extends MoccaHttpClient.WithRequestTimeouts {
 
     /**
      * Creates a new Mocca Apache 5 HTTP client using

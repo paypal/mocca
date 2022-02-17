@@ -8,7 +8,7 @@ package com.paypal.mocca.client;
  *
  * @author fabiocarvalho777@gmail.com
  */
-final public class MoccaOkHttpClient extends MoccaHttpClient {
+final public class MoccaOkHttpClient extends MoccaHttpClient.WithRequestTimeouts {
 
     /**
      * Creates a new Mocca OkHttp client using

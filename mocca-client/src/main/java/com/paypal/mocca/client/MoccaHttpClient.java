@@ -2,6 +2,8 @@ package com.paypal.mocca.client;
 
 import feign.Client;
 
+import java.time.Duration;
+
 /**
  * An abstract class representing a synchronous HTTP client supported by Mocca. Subclasses are supposed
  * to work as wrappers to HTTP clients, based on composition, and must adhere to
@@ -20,9 +22,30 @@ abstract class MoccaHttpClient {
 
     private final Client feignClient;
 
-    protected MoccaHttpClient(Client feignClient) {
+    // private + extensions = pseudo sealed case class in Java 8 and below.  Modeled after Optional.
+    private MoccaHttpClient(Client feignClient) {
         this.feignClient =
             Arguments.requireNonNull(feignClient, "Feign client cannot be null");
+    }
+
+    /**
+     * This is a marker interface that signals to {@link MoccaClient.Builder.SyncBuilder#client(WithRequestTimeouts)}
+     * that the supplied {@link Client} can be used with Mocca-specified timeouts, {@link MoccaClient.Builder.SyncBuilder.WithRequestTimeouts#options(Duration, Duration, boolean)}.
+     */
+    abstract static class WithRequestTimeouts extends MoccaHttpClient {
+        public WithRequestTimeouts(Client feignClient) {
+            super(feignClient);
+        }
+    }
+    /**
+     * This is a marker interface that signals to {@link MoccaClient.Builder.SyncBuilder#client(WithoutRequestTimeouts)}
+     * that the supplied {@link Client} cannot be used with Mocca-specified timeouts.  Timeouts should be
+     * handled by the supplied client.
+     */
+    abstract static class WithoutRequestTimeouts extends MoccaHttpClient {
+        public WithoutRequestTimeouts(Client feignClient) {
+            super(feignClient);
+        }
     }
 
     /**

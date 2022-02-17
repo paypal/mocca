@@ -47,6 +47,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
         final SimpleMeterRegistry reg = new SimpleMeterRegistry();
         final BooksAppClient micrometerEnabledClient =
             MoccaClient.Builder.sync(getBaseUri().toString())
+                .defaultClient()
                 .addCapability(new MoccaMicrometerCapability(reg))
                 .build(BooksAppClient.class);
 
@@ -70,7 +71,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
     @Test
     public void testBasicQueryExecutor() throws ExecutionException, InterruptedException {
         ExecutorService executorService = Executors.newCachedThreadPool();
-        MoccaExecutorHttpClient<OkHttpClient> executorClient = new MoccaExecutorHttpClient<>(new MoccaOkHttpClient(), executorService);
+        MoccaExecutorHttpClient executorClient = new MoccaExecutorHttpClient(new MoccaOkHttpClient(), executorService);
 
         AsyncBooksAppClient asyncClient = MoccaClient.Builder
                 .async(getBaseUri().toString())
@@ -110,6 +111,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
         final BooksAppClient client =
             MoccaClient.Builder
                 .sync(getBaseUri().toString())
+                .defaultClient()
                 .resiliency(
                     new MoccaResilience4j.Builder()
                         .circuitBreaker(circuitBreaker)
@@ -135,6 +137,7 @@ public class MoccaQueryTest extends AbstractFunctionalTests {
     public void testResilientBeanValidationQuery() {
         MoccaClient.Builder
                 .sync(getBaseUri().toString())
+                .defaultClient()
                 .resiliency(new MoccaResilience4j.Builder().build())
                 .build(BooksAppClient.class)
                 .addAuthor(null);

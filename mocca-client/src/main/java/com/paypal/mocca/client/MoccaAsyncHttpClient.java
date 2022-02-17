@@ -2,6 +2,8 @@ package com.paypal.mocca.client;
 
 import feign.AsyncClient;
 
+import java.time.Duration;
+
 /**
  * An abstract class representing an asynchronous HTTP client supported by Mocca. Subclasses are supposed
  * to work as wrappers to asynchronous HTTP clients, based on composition, and must adhere to
@@ -14,16 +16,36 @@ import feign.AsyncClient;
  *     <li>Define the generics parameter using the asynchronous HTTP client type</li>
  * </ol>
  *
- * @param <T> the asynchronous HTTP client type
  * @author fabiocarvalho777@gmail.com
  */
-abstract class MoccaAsyncHttpClient<T> {
+abstract class MoccaAsyncHttpClient {
 
-    private final AsyncClient<T> feignAsyncClient;
+    private final AsyncClient<?> feignAsyncClient;
 
-    protected MoccaAsyncHttpClient(AsyncClient<T> feignAsyncClient) {
+    private MoccaAsyncHttpClient(final AsyncClient<?> feignAsyncClient) {
         this.feignAsyncClient =
             Arguments.requireNonNull(feignAsyncClient, "Feign async client cannot be null");
+    }
+
+    /**
+     * This is a marker interface that signals to {@link MoccaClient.Builder.AsyncBuilder#client(WithRequestTimeouts)}
+     * that the supplied {@link AsyncClient} can be used with Mocca-specified timeouts, {@link MoccaClient.Builder.AsyncBuilder.WithRequestTimeouts#options(Duration, Duration, boolean)}.
+     */
+    abstract static class WithRequestTimeouts extends MoccaAsyncHttpClient {
+        public WithRequestTimeouts(final AsyncClient<?> feignClient) {
+            super(feignClient);
+        }
+    }
+
+    /**
+     * This is a marker interface that signals to {@link MoccaClient.Builder.AsyncBuilder#client(WithoutRequestTimeouts)}
+     * that the supplied {@link AsyncClient} cannot be used with Mocca-specified timeouts.  Timeouts should be
+     * handled by the supplied client.
+     */
+    abstract static class WithoutRequestTimeouts extends MoccaAsyncHttpClient {
+        public WithoutRequestTimeouts(final AsyncClient<?> feignClient) {
+            super(feignClient);
+        }
     }
 
     /**
@@ -33,7 +55,7 @@ abstract class MoccaAsyncHttpClient<T> {
      * @return a Feign client containing the asynchronous HTTP client specified in the subclass,
      * to be used in a Mocca builder when creating a Mocca client
      */
-    AsyncClient<T> getFeignAsyncClient() {
+    AsyncClient<?> getFeignAsyncClient() {
         return feignAsyncClient;
     }
 

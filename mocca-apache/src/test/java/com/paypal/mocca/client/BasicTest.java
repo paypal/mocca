@@ -4,8 +4,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.testng.annotations.Test;
 
 @Test
-public class BasicTest extends BasicMoccaHttpClientTest {
-    public BasicTest() {
-        super(new MoccaApacheClient(HttpClientBuilder.create().build()));
+public class BasicTest extends BasicMoccaHttpClientTest.WithRequestTimeouts {
+
+    @Override
+    MoccaHttpClient.WithRequestTimeouts create() {
+        return new MoccaApacheClient(HttpClientBuilder.create().build());
     }
 }

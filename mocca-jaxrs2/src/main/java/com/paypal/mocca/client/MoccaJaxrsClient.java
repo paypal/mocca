@@ -19,15 +19,14 @@ import java.util.concurrent.TimeUnit;
  * Mocca JAX-RS 2 client. In order to use a JAX-RS 2 client with Mocca, create a new instance of this class and pass it
  * to Mocca builder.
  * <br>
- * See {@link com.paypal.mocca.client.MoccaClient.Builder.SyncBuilder#client(MoccaHttpClient)} for further information
+ * See {@link com.paypal.mocca.client.MoccaClient.Builder.SyncBuilder#client(WithoutRequestTimeouts)} for further information
  * and code example.
  * <br>
  * Instances of this class are technically supposed to support concepts like setting the read and connect timeouts per
  * request.  However, those are ignored.  The only timeouts that are used are what's established in the supplied
  * {@link Client}.
  */
-final public class MoccaJaxrsClient extends MoccaHttpClient {
-    private static Logger log = LoggerFactory.getLogger(MoccaJaxrsClient.class);
+final public class MoccaJaxrsClient extends MoccaHttpClient.WithoutRequestTimeouts {
 
     /**
      * Create a Mocca JAX-RS 2 client using the supplied {@link Client}.
@@ -36,12 +35,10 @@ final public class MoccaJaxrsClient extends MoccaHttpClient {
      */
     public MoccaJaxrsClient(final Client client) {
         super(new JAXRSClient(new StubbornClientBuilder(client)));
-        log.debug("Users of this may attempt to set read timeout and connect timeout per request. " +
-            "However, those are ignored. They should be established in the supplied javax.ws.rs.Client.");
     }
 
     private static class StubbornClientBuilder extends ClientBuilder {
-        private static Logger log = LoggerFactory.getLogger(StubbornClientBuilder.class);
+        private static final Logger log = LoggerFactory.getLogger(StubbornClientBuilder.class);
         private static final String USAGE_ERR_MSG = "Only #build can be called.";
 
         private final Client client;
@@ -53,6 +50,16 @@ final public class MoccaJaxrsClient extends MoccaHttpClient {
         @Override
         public Client build() {
             return client;
+        }
+
+        @Override
+        public ClientBuilder connectTimeout(long timeout, TimeUnit unit) {
+            return this;
+        }
+
+        @Override
+        public ClientBuilder readTimeout(long timeout, TimeUnit unit) {
+            return this;
         }
 
         @Override
@@ -94,16 +101,6 @@ final public class MoccaJaxrsClient extends MoccaHttpClient {
         @Override
         public ClientBuilder scheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
             log.warn(USAGE_ERR_MSG);
-            return this;
-        }
-
-        @Override
-        public ClientBuilder connectTimeout(long timeout, TimeUnit unit) {
-            return this;
-        }
-
-        @Override
-        public ClientBuilder readTimeout(long timeout, TimeUnit unit) {
             return this;
         }
 

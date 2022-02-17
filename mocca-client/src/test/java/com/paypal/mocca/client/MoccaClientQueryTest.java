@@ -44,7 +44,9 @@ public class MoccaClientQueryTest {
     @BeforeClass
     private void setup() throws IOException {
         serverBaseUrl = WireMockProvider.startServer();
-        client = MoccaClient.Builder.sync(serverBaseUrl).build(SampleClient.class);
+        client = MoccaClient.Builder.sync(serverBaseUrl)
+            .defaultClient()
+            .build(SampleClient.class);
     }
 
     @AfterClass
@@ -248,7 +250,8 @@ public class MoccaClientQueryTest {
 
     @Test
     public void queryAsyncTest() throws Exception {
-        final AsyncSampleClient asyncClient = MoccaClient.Builder.async(serverBaseUrl).build(AsyncSampleClient.class);
+        final AsyncSampleClient asyncClient =
+            MoccaClient.Builder.async(serverBaseUrl).defaultClient().build(AsyncSampleClient.class);
         final SampleResponseDTO result = asyncClient.getOneSample("boo", "far").get(5, TimeUnit.SECONDS);
         assertEquals(result.getFoo(), "boo");
         assertEquals(result.getBar(), "far");
@@ -288,13 +291,17 @@ public class MoccaClientQueryTest {
 
     @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "Invalid GraphQL operation method noMoccaAnnotations, make sure all its parameters are annotated with one Mocca annotation")
     public void noMoccaAnnotationsTest() {
-        InvalidClient invalidClient = MoccaClient.Builder.sync("localhost").build(InvalidClient.class);
+        InvalidClient invalidClient = MoccaClient.Builder.sync("localhost")
+            .defaultClient()
+            .build(InvalidClient.class);
         invalidClient.noMoccaAnnotations("boo", "far");
     }
 
     @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "Invalid GraphQL operation method moreThanOneMoccaAnnotation, make sure all its parameters are annotated with one Mocca annotation")
     public void moreThanOneMoccaAnnotationTest() {
-        InvalidClient invalidClient = MoccaClient.Builder.sync("localhost").build(InvalidClient.class);
+        InvalidClient invalidClient = MoccaClient.Builder.sync("localhost")
+            .defaultClient()
+            .build(InvalidClient.class);
         invalidClient.moreThanOneMoccaAnnotation("boo", "far");
     }
 
