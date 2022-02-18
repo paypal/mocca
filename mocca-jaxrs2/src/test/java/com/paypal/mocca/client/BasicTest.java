@@ -2,7 +2,6 @@ package com.paypal.mocca.client;
 
 import org.testng.annotations.Test;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientBuilder;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
@@ -12,6 +11,7 @@ import static org.testng.Assert.assertEquals;
 
 @Test
 public class BasicTest extends BasicMoccaHttpClientTest.WithoutRequestTimeouts {
+
     @Override
     MoccaHttpClient.WithoutRequestTimeouts create() {
         return new MoccaJaxrsClient(ClientBuilder.newClient());
