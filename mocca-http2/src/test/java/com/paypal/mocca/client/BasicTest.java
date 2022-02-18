@@ -6,7 +6,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpTimeoutException;
 
 @Test
-public class BasicTest extends BasicMoccaHttpClientTest.WithRequestTimeouts<HttpClient> {
+public class BasicTest extends BasicMoccaHttpClientTest.WithRequestTimeouts {
 
     @Override
     protected Class<?> expectedTimeoutExceptionCause() {
@@ -17,10 +17,4 @@ public class BasicTest extends BasicMoccaHttpClientTest.WithRequestTimeouts<Http
     MoccaHttpClient.WithRequestTimeouts create() {
         return new MoccaHttp2Client(HttpClient.newBuilder().build());
     }
-
-    @Override
-    MoccaHttpClient.WithRequestTimeouts create(HttpClient httpClient) {
-        return new MoccaHttp2Client(httpClient);
-    }
-
 }

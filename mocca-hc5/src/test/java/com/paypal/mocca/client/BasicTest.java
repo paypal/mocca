@@ -8,16 +8,11 @@ import org.testng.annotations.Test;
 import java.util.concurrent.TimeUnit;
 
 @Test
-public class BasicTest extends BasicMoccaHttpClientTest.WithRequestTimeouts<CloseableHttpClient> {
+public class BasicTest extends BasicMoccaHttpClientTest.WithRequestTimeouts {
 
     @Override
     MoccaHttpClient.WithRequestTimeouts create() {
         return new MoccaApache5Client(HttpClientBuilder.create().build());
-    }
-
-    @Override
-    MoccaHttpClient.WithRequestTimeouts create(CloseableHttpClient httpClient) {
-        return new MoccaApache5Client(httpClient);
     }
 
     @Test(

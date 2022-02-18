@@ -34,15 +34,10 @@ abstract class BasicMoccaHttpClientTest<T> extends WithGraphQLServer {
 
     abstract MoccaHttpClient create();
 
-    abstract MoccaHttpClient create(T httpClient);
-
-    abstract static class WithRequestTimeouts<T> extends BasicMoccaHttpClientTest<T> {
+    abstract static class WithRequestTimeouts extends BasicMoccaHttpClientTest {
 
         @Override
         abstract MoccaHttpClient.WithRequestTimeouts create();
-
-        @Override
-        abstract MoccaHttpClient.WithRequestTimeouts create(T httpClient);
 
         /**
          * In read timeout scenarios that feign manages, it is expected that the underlying
@@ -93,13 +88,10 @@ abstract class BasicMoccaHttpClientTest<T> extends WithGraphQLServer {
 
     }
 
-    abstract static class WithoutRequestTimeouts<T> extends BasicMoccaHttpClientTest<T> {
+    abstract static class WithoutRequestTimeouts extends BasicMoccaHttpClientTest {
 
         @Override
         abstract MoccaHttpClient.WithoutRequestTimeouts create();
-
-        @Override
-        abstract MoccaHttpClient.WithoutRequestTimeouts create(T httpClient);
 
         /**
          * @param readTimeout The maximum time to wait while waiting to read <i>a</i>
