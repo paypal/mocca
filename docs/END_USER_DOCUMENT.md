@@ -547,7 +547,7 @@ The table above includes only synchronous clients, and the code samples in this 
 All Mocca classes mentioned in the table above work as a wrapper containing a default instance of the HTTP client. If the application needs the HTTP client to be configured in a certain manner, there are two ways to achieve that:
 
 1. Mocca client builder could be used to do so, providing a common API regardless of the type of HTTP client used. All currently supported Mocca HTTP clients allow this type of configuration, except the *JAX-RS 2 client*.
-1. A custom instance of the HTTP client (already configured as desired) could be provided as a constructor parameter to the Mocca HTTP client wrapper. This is currently the only way to customize the HTTP client configuration when using a *JAX-RS 2 client*.
+1. A custom instance of the HTTP client (already configured as desired) could be provided as a constructor parameter to the Mocca HTTP client wrapper. The only Mocca supported HTTP client that is allowed to be configured in this manner is the *JAX-RS 2 client*.
 
 In the example below, Mocca client builder API (via method `options`) is used to configure the client connection and read timeout, and whether it should follow redirects or not.
 
@@ -555,6 +555,7 @@ In the example below, Mocca client builder API (via method `options`) is used to
 Duration connectTimeout = Duration.ofSeconds(1);
 Duration readTImeout = Duration.ofSeconds(1);
 boolean followRedirects = false;
+
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
     .client(new MoccaOkHttpClient())
@@ -562,20 +563,7 @@ BooksAppClient client = MoccaClient.Builder
     .build(BooksAppClient.class);
 ```
 
-In the example below, an OkHttp client instance is used to configure the client read timeout.
-
-``` java
-okhttp3.OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
-    .readTimeout(2, TimeUnit.SECONDS)
-    .build();
-
-BooksAppClient client = MoccaClient.Builder
-    .sync("localhost:8080/booksapp")
-    .client(new MoccaOkHttpClient(okHttpClient))
-    .build(BooksAppClient.class);
-```
-
-Finally, in this example a JAX-RS client instance is used to configure the client read timeout.
+In this example a JAX-RS client instance is used to configure the client read timeout.
 
 ``` java
 Client jaxrsClient = ClientBuilder.newBuilder()

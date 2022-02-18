@@ -4,23 +4,10 @@ import com.paypal.mocca.client.annotation.Query;
 import com.paypal.mocca.client.annotation.RequestHeader;
 import com.paypal.mocca.client.annotation.RequestHeaderParam;
 import feign.RetryableException;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.testng.Assert.assertEquals;
@@ -37,7 +24,7 @@ import static org.testng.Assert.fail;
  * Gradle build will not execute the test. Annotating the concrete
  * class with `@Test` appears to 'solve' the problem.
  */
-abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
+abstract class BasicMoccaHttpClientTest<T> extends WithGraphQLServer {
     // TODO solve the gradlew problem described above.  Some links:
     // https://discuss.gradle.org/t/testng-tests-that-inherit-from-a-base-class-but-do-not-add-new-test-methods-are-not-detected/1259
     // https://stackoverflow.com/questions/64087969/testng-cannot-find-test-methods-with-inheritance
@@ -47,10 +34,15 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
 
     abstract MoccaHttpClient create();
 
-    abstract static class WithRequestTimeouts extends BasicMoccaHttpClientTest {
+    abstract MoccaHttpClient create(T httpClient);
+
+    abstract static class WithRequestTimeouts<T> extends BasicMoccaHttpClientTest<T> {
 
         @Override
         abstract MoccaHttpClient.WithRequestTimeouts create();
+
+        @Override
+        abstract MoccaHttpClient.WithRequestTimeouts create(T httpClient);
 
         /**
          * In read timeout scenarios that feign manages, it is expected that the underlying
@@ -86,11 +78,44 @@ abstract class BasicMoccaHttpClientTest extends WithGraphQLServer {
                 assertEquals(e.getCause().getCause().getClass(), expectedTimeoutExceptionCause());
             }
         }
+
+        protected static final int testClientInstanceReadTimeout_CLIENT_READ_TIMEOUT = 5000;
+
+        /**
+         * This will perform a test where the GraphQL call respects client instance specified HTTP read timeout (i.e. per request timeout).
+         * The provided client is intentionally set with a read time out (testClientInstanceReadTimeout_CLIENT_READ_TIMEOUT) bigger
+         * than the one set directly with Mocca builder API to show and assert that that will be ignored and overridden by Feign.
+         */
+        protected void testClientInstanceReadTimeout(MoccaHttpClient.WithRequestTimeouts client) {
+            final boolean followRedirects = false;
+            final Duration connectTimeout = Duration.ofSeconds(1);
+            final Duration readTimeout    = Duration.ofMillis(50);
+
+            final SampleDataClient sampleClient = syncBuilder()
+                    .client(client)
+                    .options(connectTimeout, readTimeout, followRedirects)
+                    .build(SampleDataClient.class);
+            try {
+                sampleClient.greeting(1000);
+                fail("Expected some form of timeout exception to be thrown.");
+            } catch (final MoccaException e) {
+                // TODO how does feign know that a request timeout scenario means you can safely
+                // retry the request?  If the server has received any of the request, I don't think
+                // that's valid.  Consider writing up a feign bug.
+                assertEquals(e.getCause().getClass(), RetryableException.class);
+                assertEquals(e.getCause().getCause().getClass(), expectedTimeoutExceptionCause());
+            }
+        }
+
     }
 
-    abstract static class WithoutRequestTimeouts extends BasicMoccaHttpClientTest {
+    abstract static class WithoutRequestTimeouts<T> extends BasicMoccaHttpClientTest<T> {
+
         @Override
         abstract MoccaHttpClient.WithoutRequestTimeouts create();
+
+        @Override
+        abstract MoccaHttpClient.WithoutRequestTimeouts create(T httpClient);
 
         /**
          * @param readTimeout The maximum time to wait while waiting to read <i>a</i>
