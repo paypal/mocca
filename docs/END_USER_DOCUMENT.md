@@ -552,10 +552,13 @@ All Mocca classes mentioned in the table above work as a wrapper containing a de
 In the example below, Mocca client builder API (via method `options`) is used to configure the client connection and read timeout, and whether it should follow redirects or not.
 
 ``` java
+Duration connectTimeout = Duration.ofSeconds(1);
+Duration readTImeout = Duration.ofSeconds(1);
+boolean followRedirects = false;
 BooksAppClient client = MoccaClient.Builder
     .sync("http://localhost:8080/booksapp")
     .client(new MoccaOkHttpClient())
-    .options(1000, 1000, false)
+    .options(connectTimeout, readTimeout, followRedirects)
     .build(BooksAppClient.class);
 ```
 
