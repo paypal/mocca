@@ -59,44 +59,28 @@ abstract class BasicMoccaHttpClientTest<T> extends WithGraphQLServer {
             description = "GraphQL call respects Mocca-builder specified HTTP read timeout (i.e. per request timeout)."
         )
         void testReadTimeout() {
-            final boolean followRedirects = false;
-            final Duration connectTimeout = Duration.ofSeconds(5);
-            final Duration readTimeout    = Duration.ofMillis(100);
-
-            final SampleDataClient sampleClient = syncBuilder()
-                .client(create())
-                .options(connectTimeout, readTimeout, followRedirects)
-                .build(SampleDataClient.class);
-            try {
-                sampleClient.greeting(readTimeout.multipliedBy(2).toMillis());
-                fail("Expected some form of timeout exception to be thrown.");
-            } catch (final MoccaException e) {
-                // TODO how does feign know that a request timeout scenario means you can safely
-                // retry the request?  If the server has received any of the request, I don't think
-                // that's valid.  Consider writing up a feign bug.
-                assertEquals(e.getCause().getClass(), RetryableException.class);
-                assertEquals(e.getCause().getCause().getClass(), expectedTimeoutExceptionCause());
-            }
+            testClientInstanceReadTimeout(create());
         }
 
         protected static final int testClientInstanceReadTimeout_CLIENT_READ_TIMEOUT = 5000;
 
         /**
-         * This will perform a test where the GraphQL call respects client instance specified HTTP read timeout (i.e. per request timeout).
+         * This will perform a test where the GraphQL call respects Mocca builder specified HTTP read timeout.
          * The provided client is intentionally set with a read time out (testClientInstanceReadTimeout_CLIENT_READ_TIMEOUT) bigger
          * than the one set directly with Mocca builder API to show and assert that that will be ignored and overridden by Feign.
          */
         protected void testClientInstanceReadTimeout(MoccaHttpClient.WithRequestTimeouts client) {
             final boolean followRedirects = false;
             final Duration connectTimeout = Duration.ofSeconds(1);
-            final Duration readTimeout    = Duration.ofMillis(50);
+            final Duration readTimeout = Duration.ofMillis(100);
+            final Duration greetingsDelayTimeout = Duration.ofMillis(200);
 
             final SampleDataClient sampleClient = syncBuilder()
                     .client(client)
                     .options(connectTimeout, readTimeout, followRedirects)
                     .build(SampleDataClient.class);
             try {
-                sampleClient.greeting(1000);
+                sampleClient.greeting(greetingsDelayTimeout.toMillis());
                 fail("Expected some form of timeout exception to be thrown.");
             } catch (final MoccaException e) {
                 // TODO how does feign know that a request timeout scenario means you can safely
