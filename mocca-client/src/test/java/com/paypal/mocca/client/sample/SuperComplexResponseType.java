@@ -1,9 +1,11 @@
 package com.paypal.mocca.client.sample;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public class SuperComplexResponseType {
 
@@ -82,6 +84,8 @@ public class SuperComplexResponseType {
     private Set<String> stringSetVar;
     private OffsetDateTime dateTime;
     private String optionalField;
+    private Duration duration;
+    private UUID uuid;
 
     public int getIntVar() {
         return intVar;
@@ -158,6 +162,24 @@ public class SuperComplexResponseType {
 
     public SuperComplexResponseType setOptionalField(String optionalField) {
         this.optionalField = optionalField;
+        return this;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public SuperComplexResponseType setDuration(Duration duration) {
+        this.duration = duration;
+        return this;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public SuperComplexResponseType setUuid(UUID uuid) {
+        this.uuid = uuid;
         return this;
     }
 

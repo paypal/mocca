@@ -3,11 +3,13 @@ package com.paypal.mocca.client.sample;
 import com.paypal.mocca.client.MoccaClient;
 import com.paypal.mocca.client.annotation.*;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequestHeader("classheader: classvalue")
 public interface SampleClient extends MoccaClient {
@@ -91,6 +93,12 @@ public interface SampleClient extends MoccaClient {
 
     @Query
     OffsetDateTime getDateTime(@Var("dateTimeToReturn") OffsetDateTime dateTimeToReturn);
+
+    @Query
+    Duration getDuration(@Var("durationToReturn") Duration durationToReturn);
+
+    @Query
+    UUID getUuid(@Var("uuidToReturn") UUID uuidToReturn);
 
     @Query
     SuperComplexResponseType getSuperComplexStuff(@Var("superComplexSampleType") SuperComplexSampleType superComplexSampleType);
