@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -207,6 +209,8 @@ class MoccaSerializer {
     static {
         NON_POJO_TYPES.add(Optional.class);
         NON_POJO_TYPES.add(OffsetDateTime.class);
+        NON_POJO_TYPES.add(Duration.class);
+        NON_POJO_TYPES.add(UUID.class);
         NON_POJO_TYPES.add(Character.class);
         NON_POJO_TYPES.add(String.class);
         NON_POJO_TYPES.add(Boolean.class);
@@ -235,7 +239,7 @@ class MoccaSerializer {
      */
     private String writeRequestVariable(String name, Object value, Type type) {
         final String prefix = name == null ? "" : name + ": ";
-        return type == String.class || type == Character.class || type == OffsetDateTime.class || type.getTypeName().equals("char") ?
+        return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class || type == UUID.class || type.getTypeName().equals("char") ?
                 prefix + "\\\"" + value.toString() + "\\\"" :
                 prefix + value.toString();
     }
@@ -320,7 +324,7 @@ class MoccaSerializer {
             String stringObject = (String) object;
             stringObject = stringObject.replaceAll("\"", "\\\\\\\\\\\\\"");
             return "\\\"" + stringObject + "\\\"";
-        } else if (object instanceof OffsetDateTime) {
+        } else if (object instanceof OffsetDateTime || object instanceof Duration || object instanceof UUID) {
                 return "\\\"" + object + "\\\"";
         } else if (object instanceof Number || object instanceof Boolean) {
             return String.valueOf(object);

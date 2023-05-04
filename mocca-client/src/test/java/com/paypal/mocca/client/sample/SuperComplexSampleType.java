@@ -1,10 +1,12 @@
 package com.paypal.mocca.client.sample;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 public class SuperComplexSampleType {
 
@@ -126,6 +128,8 @@ public class SuperComplexSampleType {
     private Set<String> stringSetVar;
     private OffsetDateTime dateTime;
     private String optionalField;
+    private Duration duration;
+    private UUID uuid;
 
     public SuperComplexSampleType(int intVar, String stringVar, boolean booleanVar, SuperComplexField complexField,
                                   List<SuperComplexField> complexListVar, List<String> stringListVar,
@@ -217,6 +221,24 @@ public class SuperComplexSampleType {
         return this;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public SuperComplexSampleType setDuration(Duration duration) {
+        this.duration = duration;
+        return this;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public SuperComplexSampleType setUuid(UUID uuid) {
+        this.uuid = uuid;
+        return this;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", SuperComplexSampleType.class.getSimpleName() + "[", "]")
@@ -228,6 +250,8 @@ public class SuperComplexSampleType {
                 .add("stringListVar=" + stringListVar)
                 .add("dateTime=" + dateTime)
                 .add("optionalField='" + optionalField + "'")
+                .add("duration=" + duration)
+                .add("uuid=" + uuid)
                 .toString();
     }
 
