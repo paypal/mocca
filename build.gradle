@@ -9,7 +9,7 @@ Set testModules = [
 subprojects {
 
     group = 'com.paypal.mocca'
-    version = '0.0.7-SNAPSHOT'
+    version = '0.0.7'
 
     apply plugin: 'java-library'
     apply plugin: 'pmd'

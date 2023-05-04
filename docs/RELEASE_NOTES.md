@@ -4,13 +4,13 @@
 ## 0.0.7
 
 #### Release date
-TBD
+May 4th, 2023
 
 #### New features and enhancements
-TBD
+1. [Add support for Duration and UUID as part of request and response parameters and types](https://github.com/paypal/mocca/issues/68)
 
 #### Bug fixes
-TBD
+None
 
 ## 0.0.6
 
