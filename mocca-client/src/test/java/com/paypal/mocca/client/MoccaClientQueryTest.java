@@ -12,7 +12,6 @@ import com.paypal.mocca.client.sample.SuperComplexResponseType.SuperComplexRespo
 import com.paypal.mocca.client.sample.SuperComplexSampleType;
 import com.paypal.mocca.client.sample.SuperComplexSampleType.SuperComplexField;
 import com.paypal.mocca.client.sample.ValidatedRequestDTO;
-import feign.codec.EncodeException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -20,6 +19,7 @@ import org.testng.annotations.Test;
 
 import javax.validation.ConstraintViolationException;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,14 +27,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.fail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 public class MoccaClientQueryTest {
 
@@ -134,6 +135,22 @@ public class MoccaClientQueryTest {
     }
 
     @Test
+    public void queryDurationTest() {
+        Duration expectedDuration = Duration.ofHours(7);
+        Duration actualDuration = client.getDuration(expectedDuration);
+        assertNotNull(actualDuration);
+        assertEquals(actualDuration, expectedDuration);
+    }
+
+    @Test
+    public void queryUUIDTest() {
+        UUID expectedUUID = UUID.fromString("789c07ba-54bc-47e6-84ba-165e1a68cb37");
+        UUID actualUUID = client.getUuid(expectedUUID);
+        assertNotNull(actualUUID);
+        assertEquals(actualUUID, expectedUUID);
+    }
+
+    @Test
     public void queryComplexDataTest() {
         List<String> stringList = Arrays.asList("blue", "yellow", "guacamole");
         Set<String> stringSet = new HashSet<>(Arrays.asList("purple", "orange", "hummus"));
@@ -144,6 +161,8 @@ public class MoccaClientQueryTest {
 
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(7, "seven", true, complexField, complexList, stringList, stringSet);
         superComplexSampleType.setDateTime(dateTime);
+        superComplexSampleType.setDuration(Duration.ofHours(3));
+        superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
 
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
@@ -154,6 +173,8 @@ public class MoccaClientQueryTest {
         assertEquals(superComplexResponse.getStringListVar(), stringList);
         assertEquals(superComplexResponse.getStringSetVar(), stringSet);
         assertEquals(superComplexResponse.getDateTime().toInstant(), dateTime.toInstant());
+        assertEquals(superComplexResponse.getDuration(), Duration.ofHours(3));
+        assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
 
         SuperComplexResponseField expectedComplexField = new SuperComplexResponseField()
                 .setInnerBooleanVar(complexField.isInnerBooleanVar())
@@ -180,6 +201,8 @@ public class MoccaClientQueryTest {
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(1, "one", true, null, null, null, null);
         superComplexSampleType.setOptionalField("love");
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
+        superComplexSampleType.setDuration(Duration.ofHours(3));
+        superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
 
         assertNotNull(superComplexResponse);
         assertEquals(superComplexResponse.getIntVar(), 1);
@@ -192,6 +215,8 @@ public class MoccaClientQueryTest {
         assertNull(superComplexResponse.getDateTime());
         assertTrue(superComplexResponse.getOptionalField().isPresent());
         assertEquals(superComplexResponse.getOptionalField().get(), "love");
+        assertEquals(superComplexResponse.getDuration(), Duration.ofHours(3));
+        assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
     }
 
     @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
