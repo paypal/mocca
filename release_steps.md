@@ -30,12 +30,12 @@ This document explains how to release a new Mocca version.
 1. Manual sonatype release
    1. Go to [Nexus Repository Manager](https://oss.sonatype.org/#welcome)
    1. Go to `Staging Repositories`
-   1. Make it sure it has all modules and all of them have jars, javadoc and sources, all signed
+   1. Make sure it has all modules and all of them have jars, javadoc and sources, all signed
    1. Close the Mocca staging repository
    1. Release the Mocca staging repository
    1. Wait a couple of hours and make sure new artifacts version show at http://search.maven.org/#search|ga|1|g:com.paypal.mocca
 1. Working from master branch
    1. Set the new SNAPSHOT version in `build.gradle`
    1. Run `./gradlew clean build` and make sure it succeeds
-   1. Commit `Preparing for version <next new version>`
+   1. Commit `Setting version to <SNAPSHOT version>`
    1. Push your changes (`git push upstream master`)
