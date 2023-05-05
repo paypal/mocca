@@ -23,7 +23,7 @@ jobs:
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+        uses: gradle/gradle-build-action@v2.4.2
         with:
           arguments: build
 
@@ -39,7 +39,7 @@ jobs:
       # the publishing section of your build.gradle
       # Secrets are managed by GitHub (see https://docs.github.com/en/actions/security-guides/encrypted-secrets)
       - name: Publish to Sonatype Nexus
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+        uses: gradle/gradle-build-action@v2.4.2
         with:
           arguments: publish
         env:
