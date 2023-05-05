@@ -2,7 +2,6 @@ package com.paypal.mocca.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import com.paypal.mocca.model.Author;
 import com.paypal.mocca.repository.AuthorRepository;
 import com.paypal.mocca.repository.BookRepository;
@@ -79,7 +78,7 @@ public final class GraphQLFactory {
         builder.dictionary(Author.class);
 
 
-        objectMapper.registerModule(new Jdk8Module()).registerModule(new KotlinModule());
+        objectMapper.registerModule(new Jdk8Module());
         PerFieldObjectMapperProvider perFieldObjectMapperProvider = fieldDefinition -> objectMapper;
         optionsBuilder.objectMapperProvider(perFieldObjectMapperProvider);
         final BookRepository bookRepository = new BookRepository();
