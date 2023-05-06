@@ -189,7 +189,7 @@ class MoccaFeignEncoder implements Encoder {
             // TODO We could make it configurable, leaving for the user to decide if null variables should
             // be omitted or just set with null value. For now we will just skip them.
             if (parameters[i] == null) {
-                logger.info("Skipping parameter at position {} as it is set to null", i);
+                logger.debug("Skipping parameter at position {} as it is set to null", i);
                 continue;
             }
 
