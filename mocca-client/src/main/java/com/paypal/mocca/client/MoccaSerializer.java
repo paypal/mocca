@@ -187,7 +187,9 @@ class MoccaSerializer {
                         value = variable.value;
                     }
 
-                    if (isPojo(type)) {
+                    if(isEnum(type)) {
+                        variableString = writeRequestVariable(variable.metadata.value(), value, type);
+                    } else if (isPojo(type)) {
                         List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
                         ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
                         writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), type, value, ignoreFields);
@@ -233,13 +235,19 @@ class MoccaSerializer {
         return !clazz.isPrimitive();
     }
 
+
+    private static boolean isEnum(Type type) {
+        return Enum.class.isAssignableFrom((Class<?>) type);
+    }
+
     /*
      * Returns a String containing the specification of a GraphQL variable name and its value,
      * as it is supposed to be written in the request payload
      */
     private String writeRequestVariable(String name, Object value, Type type) {
         final String prefix = name == null ? "" : name + ": ";
-        return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class || type == UUID.class || type.getTypeName().equals("char") ?
+        return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class
+                || type == UUID.class || type.getTypeName().equals("char") || Enum.class.isAssignableFrom((Class<?>) type) ?
                 prefix + "\\\"" + value.toString() + "\\\"" :
                 prefix + value.toString();
     }
@@ -447,6 +455,11 @@ class MoccaSerializer {
             final Type cfResponseType = getInnerType(responseType, CompletableFuture.class).orElse(responseType);
             final Type listResponseType = getInnerType(cfResponseType, List.class).orElse(cfResponseType);
             final Type rawResponseType = getInnerType(listResponseType, Optional.class).orElse(listResponseType);
+
+            if(isEnum(rawResponseType)){
+                // A selection set should not exist if the return type is a Enum.
+                return;
+            }
 
             if (!isPojo(rawResponseType)) {
                 // Nothing to be done here.

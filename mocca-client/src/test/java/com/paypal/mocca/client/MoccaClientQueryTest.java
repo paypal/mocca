@@ -151,6 +151,13 @@ public class MoccaClientQueryTest {
     }
 
     @Test
+    public void queryEnumTest() {
+        SampleEnum expectedSampleEnum = SampleEnum.Sample1;
+        SampleEnum actualSampleEnum = client.addEnum(SampleEnum.Sample1);
+        assertEquals(actualSampleEnum, expectedSampleEnum);
+    }
+
+    @Test
     public void queryComplexDataTest() {
         List<String> stringList = Arrays.asList("blue", "yellow", "guacamole");
         Set<String> stringSet = new HashSet<>(Arrays.asList("purple", "orange", "hummus"));

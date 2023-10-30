@@ -1,6 +1,7 @@
 package com.paypal.mocca.client.sample;
 
 import com.paypal.mocca.client.MoccaClient;
+import com.paypal.mocca.client.SampleEnum;
 import com.paypal.mocca.client.annotation.*;
 
 import java.time.Duration;
@@ -108,5 +109,8 @@ public interface SampleClient extends MoccaClient {
 
     @Query
     CyclePojo getResponseWithCycle();
+
+    @Query
+    SampleEnum addEnum(@Var("sampleEnum") SampleEnum sampleEnum);
 
 }

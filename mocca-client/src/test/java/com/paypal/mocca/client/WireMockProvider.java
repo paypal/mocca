@@ -171,6 +171,9 @@ class WireMockProvider {
         final String EXPECTED_NULL_PARAMETER_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"zoo\\\", bar: \\\"\\\") {bar foo}}\"}";
         final String NULL_PARAMETER_RESULT = "{\"data\": {\"addSample\": {\"foo\": \"zoo\",\"bar\": \"\"}}}";
 
+        final String EXPECTED_ENUM_REQUEST = "{\"query\":\"query{addEnum(sampleEnum: \\\"Sample1\\\")}\"}";
+        final String ACTUAL_ENUM_RESPONSE = "{\"data\": {\"addEnum\": \"Sample1\"}}";
+
         addGraphQlStub(EXPECTED_GOOD_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_DTO_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
@@ -180,6 +183,7 @@ class WireMockProvider {
         addGraphQlStub(EXPECTED_NULL_PARAMETER_REQUEST, NULL_PARAMETER_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_REQUEST, ERROR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_LIST_REQUEST, ERROR_LIST_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_ENUM_REQUEST,ACTUAL_ENUM_RESPONSE,DEFAULT_HEADERS);
     }
 
     private static void configureQueryWithHeaderStubs() {
