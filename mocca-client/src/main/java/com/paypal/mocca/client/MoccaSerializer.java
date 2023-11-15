@@ -246,7 +246,7 @@ class MoccaSerializer {
      */
     private String writeRequestVariable(String name, Object value, Type type) {
         final String prefix = name == null ? "" : name + ": ";
-        if(Enum.class.isAssignableFrom((Class<?>) type)) {
+        if(isEnum(type)) {
            return prefix + value.toString();
         } else  {
             return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class
