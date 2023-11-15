@@ -456,7 +456,7 @@ class MoccaSerializer {
             final Type listResponseType = getInnerType(cfResponseType, List.class).orElse(cfResponseType);
             final Type rawResponseType = getInnerType(listResponseType, Optional.class).orElse(listResponseType);
 
-            if(isEnum(rawResponseType)){
+            if    (isEnum(rawResponseType)) {
                 // A selection set should not exist if the return type is a Enum.
                 return;
             }
