@@ -246,10 +246,14 @@ class MoccaSerializer {
      */
     private String writeRequestVariable(String name, Object value, Type type) {
         final String prefix = name == null ? "" : name + ": ";
-        return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class
-                || type == UUID.class || type.getTypeName().equals("char") || Enum.class.isAssignableFrom((Class<?>) type) ?
-                prefix + "\\\"" + value.toString() + "\\\"" :
-                prefix + value.toString();
+        if(Enum.class.isAssignableFrom((Class<?>) type)) {
+           return prefix + value.toString();
+        } else  {
+            return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class
+                    || type == UUID.class || type.getTypeName().equals("char") ?
+                    prefix + "\\\"" + value.toString() + "\\\"" :
+                    prefix + value.toString();
+        }
     }
 
     /*
