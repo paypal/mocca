@@ -187,7 +187,7 @@ class MoccaSerializer {
                         value = variable.value;
                     }
 
-                    if(isEnum(type)) {
+                    if (isEnum(type)) {
                         variableString = writeRequestVariable(variable.metadata.value(), value, type);
                     } else if (isPojo(type)) {
                         List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
@@ -246,9 +246,9 @@ class MoccaSerializer {
      */
     private String writeRequestVariable(String name, Object value, Type type) {
         final String prefix = name == null ? "" : name + ": ";
-        if(isEnum(type)) {
-           return prefix + value.toString();
-        } else  {
+        if (isEnum(type)) {
+            return prefix + value.toString();
+        } else {
             return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class
                     || type == UUID.class || type.getTypeName().equals("char") ?
                     prefix + "\\\"" + value.toString() + "\\\"" :
@@ -460,7 +460,7 @@ class MoccaSerializer {
             final Type listResponseType = getInnerType(cfResponseType, List.class).orElse(cfResponseType);
             final Type rawResponseType = getInnerType(listResponseType, Optional.class).orElse(listResponseType);
 
-            if    (isEnum(rawResponseType)) {
+            if (isEnum(rawResponseType)) {
                 // A selection set should not exist if the return type is a Enum.
                 return;
             }
