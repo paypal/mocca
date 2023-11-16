@@ -87,8 +87,8 @@ class WireMockProvider {
         final String EXPECTED_COMPLEX_DATA_REQUEST = "{ \"query\" : \"query{getSuperComplexStuff(superComplexSampleType: {booleanVar: true, complexField: {innerBooleanVar: false, innerComplexListVar: [{innerBooleanVar: false, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}], innerComplexVar: {innerBooleanVar: false, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}, complexListVar: [{innerBooleanVar: false, innerComplexListVar: [{innerBooleanVar: false, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}], innerComplexVar: {innerBooleanVar: false, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}, innerIntVar: 1, innerStringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], innerStringVar: \\\"one\\\"}], dateTime: \\\"2021-08-17T18:12:22.470076-03:00\\\", duration: \\\"PT3H\\\", intVar: 7, stringListVar: [\\\"blue\\\", \\\"yellow\\\", \\\"guacamole\\\"], stringSetVar: [\\\"orange\\\", \\\"hummus\\\", \\\"purple\\\"], stringVar: \\\"seven\\\", uuid: \\\"229c07ba-04bc-49a6-13bc-165e1a54cb33\\\"}) {booleanVar complexField {innerBooleanVar innerIntVar innerStringListVar innerStringVar} complexListVar {innerBooleanVar innerIntVar innerStringListVar innerStringVar} dateTime duration intVar optionalField stringListVar stringSetVar stringVar uuid}}\" }";
         final String COMPLEX_DATA_RESULT = "{\"data\": {\"getSuperComplexStuff\": {\"booleanVar\": true, \"dateTime\": \"2021-08-17T18:12:22.470076-03:00\", \"intVar\": 7, \"stringVar\": \"seven\", \"stringListVar\": [\"blue\", \"yellow\", \"guacamole\"], \"stringSetVar\": [\"purple\", \"orange\", \"hummus\"], \"complexField\": {\"innerBooleanVar\": false, \"innerIntVar\": 1, \"innerStringVar\": \"one\", \"innerStringListVar\": [\"blue\", \"yellow\", \"guacamole\"]}, \"complexListVar\": [{\"innerBooleanVar\": false, \"innerIntVar\": 1, \"innerStringVar\": \"one\", \"innerStringListVar\": [\"blue\", \"yellow\", \"guacamole\"]}], \"duration\": \"PT3H\", \"uuid\": \"229c07ba-04bc-49a6-13bc-165e1a54cb33\" }}}";
 
-        final String EXPECTED_OPTIONAL_REQUEST = "{ \"query\" : \"query{getSuperComplexStuff(superComplexSampleType: {booleanVar: true, intVar: 1, optionalField: \\\"love\\\", stringVar: \\\"one\\\"}) {booleanVar complexField {innerBooleanVar innerIntVar innerStringListVar innerStringVar} complexListVar {innerBooleanVar innerIntVar innerStringListVar innerStringVar} dateTime duration intVar optionalField stringListVar stringSetVar stringVar uuid}}\" }";
-        final String OPTIONAL_RESULT = "{\"data\": {\"getSuperComplexStuff\": {\"booleanVar\": true, \"intVar\": 1, \"optionalField\": \"love\", \"stringVar\": \"one\", \"duration\": \"PT3H\", \"uuid\": \"229c07ba-04bc-49a6-13bc-165e1a54cb33\" }}}";
+        final String EXPECTED_OPTIONAL_REQUEST =       "{ \"query\" : \"query{getSuperComplexStuff(superComplexSampleType: {booleanVar: true, duration: \\\"PT3H\\\", intVar: 1, optionalField: \\\"love\\\",stringVar: \\\"one\\\", uuid:\\\"229c07ba-04bc-49a6-13bc-165e1a54cb32\\\"}) {booleanVar complexField {innerBooleanVar innerIntVar innerStringListVar innerStringVar} complexListVar {innerBooleanVar innerIntVar innerStringListVar innerStringVar} dateTime duration intVar optionalField stringListVar stringSetVar stringVar uuid}}\" }";
+        final String OPTIONAL_RESULT = "{\"data\": {\"getSuperComplexStuff\": {\"booleanVar\": true, \"intVar\": 1, \"optionalField\": \"love\", \"stringVar\": \"one\", \"duration\": \"PT3H\", \"uuid\": \"229c07ba-04bc-49a6-13bc-165e1a54cb32\" }}}";
 
         final String EXPECTED_DTO_REQUEST = "{\"query\":\"query{getOneSample(sampleRequest: {bar: \\\"zaz\\\", foo: \\\"boom\\\"}) {bar foo}}\"}";
         final String DTO_RESULT = "{\"data\": {\"getOneSample\": {\"foo\": \"boo\",\"bar\": \"far\"}}}";
@@ -127,6 +127,9 @@ class WireMockProvider {
         final String EXPECTED_ERROR_LIST_REQUEST = "{\"query\":\"query{getSamplesList(foo: \\\"zoo\\\", bar: \\\"car\\\") {bar foo}}\"}";
         final String ERROR_LIST_RESULT = "{\"errors\": [{\"message\": \"Internal Server Error(s) while executing query\"}],\"data\": {\"getSamplesList\": null}}";
 
+        final String EXPECTED_ENUM_REQUEST = "{\"query\":\"query{addEnum(sampleEnum: Sample1)}\"}";
+        final String ENUM_RESPONSE = "{\"data\": {\"addEnum\": \"Sample1\"}}";
+
         addGraphQlStub(EXPECTED_GOOD_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NULL_VAR_REQUEST, NULL_VAR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_COMPLEX_DATA_REQUEST, COMPLEX_DATA_RESULT, DEFAULT_HEADERS);
@@ -144,6 +147,7 @@ class WireMockProvider {
         addGraphQlStub(EXPECTED_UUID_REQUEST, EXPECTED_UUID_REQUEST_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_REQUEST, ERROR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_LIST_REQUEST, ERROR_LIST_RESULT, DEFAULT_HEADERS);
+        addGraphQlStub(EXPECTED_ENUM_REQUEST,ENUM_RESPONSE,DEFAULT_HEADERS);
     }
 
     private static void configureMutationStubs() {
@@ -171,9 +175,6 @@ class WireMockProvider {
         final String EXPECTED_NULL_PARAMETER_REQUEST = "{\"query\":\"mutation{addSample(foo: \\\"zoo\\\", bar: \\\"\\\") {bar foo}}\"}";
         final String NULL_PARAMETER_RESULT = "{\"data\": {\"addSample\": {\"foo\": \"zoo\",\"bar\": \"\"}}}";
 
-        final String EXPECTED_ENUM_REQUEST = "{\"query\":\"query{addEnum(sampleEnum: Sample1)}\"}";
-        final String ENUM_RESPONSE = "{\"data\": {\"addEnum\": \"Sample1\"}}";
-
         addGraphQlStub(EXPECTED_GOOD_REQUEST, GOOD_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_DTO_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_NO_DATA_REQUEST, NO_DATA_RESULT, DEFAULT_HEADERS);
@@ -183,7 +184,7 @@ class WireMockProvider {
         addGraphQlStub(EXPECTED_NULL_PARAMETER_REQUEST, NULL_PARAMETER_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_REQUEST, ERROR_RESULT, DEFAULT_HEADERS);
         addGraphQlStub(EXPECTED_ERROR_LIST_REQUEST, ERROR_LIST_RESULT, DEFAULT_HEADERS);
-        addGraphQlStub(EXPECTED_ENUM_REQUEST,ENUM_RESPONSE,DEFAULT_HEADERS);
+
     }
 
     private static void configureQueryWithHeaderStubs() {

@@ -194,8 +194,7 @@ public class MoccaClientQueryTest {
     }
 
     @Test
-    public void queryOptionalTest() {
-
+    public void queryOptionalTestDTO(){
         // Testing optional explicitly used in the return type and request variable
         SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boom", "zaz");
         Optional<SampleResponseDTO> result = client.getOneSample(Optional.of(sampleRequestDTO));
@@ -203,13 +202,16 @@ public class MoccaClientQueryTest {
         assertTrue(result.isPresent());
         assertEquals(result.get().getFoo(), "boo");
         assertEquals(result.get().getBar(), "far");
+    }
 
+    @Test
+    public void queryOptionalTest() {
         // Testing optional used inside the return type and the request variable POJO
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(1, "one", true, null, null, null, null);
         superComplexSampleType.setOptionalField("love");
-        SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
         superComplexSampleType.setDuration(Duration.ofHours(3));
-        superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
+        superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb32"));
+        SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
         assertNotNull(superComplexResponse);
         assertEquals(superComplexResponse.getIntVar(), 1);
@@ -223,7 +225,7 @@ public class MoccaClientQueryTest {
         assertTrue(superComplexResponse.getOptionalField().isPresent());
         assertEquals(superComplexResponse.getOptionalField().get(), "love");
         assertEquals(superComplexResponse.getDuration(), Duration.ofHours(3));
-        assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
+        assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb32"));
     }
 
     @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
