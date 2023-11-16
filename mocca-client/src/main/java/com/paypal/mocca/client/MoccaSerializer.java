@@ -187,9 +187,7 @@ class MoccaSerializer {
                         value = variable.value;
                     }
 
-                    if (isEnum(type)) {
-                        variableString = writeRequestVariable(variable.metadata.value(), value, type);
-                    } else if (isPojo(type)) {
+                     if (isPojo(type)) {
                         List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
                         ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
                         writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), type, value, ignoreFields);
@@ -220,7 +218,7 @@ class MoccaSerializer {
 
     /*
      * Checks if the type is a POJO, which is anything different
-     * than a primitive, a primitive wrapper, or String.
+     * than a primitive, a primitive wrapper, Enum or String.
      * There are other special types that are not considered
      * POJOs, such as java.time.OffsetDateTime and java.util.Optional.
      *
@@ -231,11 +229,18 @@ class MoccaSerializer {
         if (NON_POJO_TYPES.contains(type)) return false;
         if (!(type instanceof Class)) return false;
         Class clazz = (Class) type;
+        if (isEnum(clazz)) return false;
         if (Number.class.isAssignableFrom(clazz)) return false;
         return !clazz.isPrimitive();
     }
 
 
+    /**
+     * Checks if the type is a Enum.
+     *
+     * @param type the type to be evaluated for Enum
+     * @return whether type is Enum or not
+     */
     private static boolean isEnum(Type type) {
         return Enum.class.isAssignableFrom((Class<?>) type);
     }
@@ -247,6 +252,7 @@ class MoccaSerializer {
     private String writeRequestVariable(String name, Object value, Type type) {
         final String prefix = name == null ? "" : name + ": ";
         if (isEnum(type)) {
+            // If type is Enum only add variable name and its enum value without quotations to satisfy the GraphQl validation
             return prefix + value.toString();
         } else {
             return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class
