@@ -211,7 +211,7 @@ public class MoccaClientQueryTest {
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(1, "one", true, null, null, null, null);
         superComplexSampleType.setOptionalField("love");
         superComplexSampleType.setDuration(Duration.ofHours(3));
-        superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb32"));
+        superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
         superComplexSampleType.setSampleEnum(SampleEnum.Sample2);
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
@@ -228,7 +228,7 @@ public class MoccaClientQueryTest {
         assertEquals(superComplexResponse.getOptionalField().get(), "love");
         assertEquals(superComplexResponse.getDuration(), Duration.ofHours(3));
         assertEquals(superComplexResponse.getSampleEnum(), SampleEnum.Sample2);
-        assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb32"));
+        assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
     }
 
     @Test(expectedExceptions = MoccaException.class, expectedExceptionsMessageRegExp = "(Internal Server Error\\(s\\) while executing query)")
