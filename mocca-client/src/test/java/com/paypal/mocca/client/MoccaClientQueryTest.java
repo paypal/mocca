@@ -206,7 +206,7 @@ public class MoccaClientQueryTest {
     }
 
     @Test
-    public void queryOptionalTest() {
+    public void queryOptionalComplexTest() {
         // Testing optional used inside the return type and the request variable POJO
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(1, "one", true, null, null, null, null);
         superComplexSampleType.setOptionalField("love");
