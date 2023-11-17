@@ -195,7 +195,7 @@ public class MoccaClientQueryTest {
     }
 
     @Test
-    public void queryOptionalTestDTO(){
+    public void queryOptionalSimpleTest() {
         // Testing optional explicitly used in the return type and request variable
         SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boom", "zaz");
         Optional<SampleResponseDTO> result = client.getOneSample(Optional.of(sampleRequestDTO));
