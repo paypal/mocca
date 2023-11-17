@@ -187,7 +187,7 @@ class MoccaSerializer {
                         value = variable.value;
                     }
 
-                     if (isPojo(type)) {
+                    if (isPojo(type)) {
                         List<String> ignoreFields = variable.metadata != null ? Arrays.asList(variable.metadata.ignore()) : Collections.emptyList();
                         ByteArrayOutputStream requestDtoOutputStream = new ByteArrayOutputStream();
                         writeRequestPojo(requestDtoOutputStream, variable.metadata.value(), type, value, ignoreFields);
