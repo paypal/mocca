@@ -355,7 +355,9 @@ class MoccaSerializer {
         } else if (object instanceof Optional) {
             Optional<?> optional = (Optional) object;
             return optional.map(v -> objectToString(v, name, ignoreFields)).orElse("null");
-        } else {
+        } else if (object instanceof Enum) {
+            return "\\\"" + object + "\\\"";
+        }else {
             ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
 
             writeRequestPojo(complexVariable, object.getClass(), object,

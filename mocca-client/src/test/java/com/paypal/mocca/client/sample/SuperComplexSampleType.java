@@ -1,5 +1,7 @@
 package com.paypal.mocca.client.sample;
 
+import com.paypal.mocca.client.SampleEnum;
+
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -130,6 +132,7 @@ public class SuperComplexSampleType {
     private String optionalField;
     private Duration duration;
     private UUID uuid;
+    private SampleEnum sampleEnum;
 
     public SuperComplexSampleType(int intVar, String stringVar, boolean booleanVar, SuperComplexField complexField,
                                   List<SuperComplexField> complexListVar, List<String> stringListVar,
@@ -239,6 +242,15 @@ public class SuperComplexSampleType {
         return this;
     }
 
+    public SampleEnum getSampleEnum() {
+        return sampleEnum;
+    }
+
+    public SuperComplexSampleType setSampleEnum(SampleEnum sampleEnum) {
+        this.sampleEnum = sampleEnum;
+        return this;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", SuperComplexSampleType.class.getSimpleName() + "[", "]")
@@ -252,6 +264,7 @@ public class SuperComplexSampleType {
                 .add("optionalField='" + optionalField + "'")
                 .add("duration=" + duration)
                 .add("uuid=" + uuid)
+                .add("sampleEnum=" + sampleEnum)
                 .toString();
     }
 

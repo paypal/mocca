@@ -170,7 +170,7 @@ public class MoccaClientQueryTest {
         superComplexSampleType.setDateTime(dateTime);
         superComplexSampleType.setDuration(Duration.ofHours(3));
         superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
-
+        superComplexSampleType.setSampleEnum(SampleEnum.Sample1);
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
         assertNotNull(superComplexResponse);
@@ -182,6 +182,7 @@ public class MoccaClientQueryTest {
         assertEquals(superComplexResponse.getDateTime().toInstant(), dateTime.toInstant());
         assertEquals(superComplexResponse.getDuration(), Duration.ofHours(3));
         assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
+        assertEquals(superComplexResponse.getSampleEnum(), SampleEnum.Sample1);
 
         SuperComplexResponseField expectedComplexField = new SuperComplexResponseField()
                 .setInnerBooleanVar(complexField.isInnerBooleanVar())
@@ -211,6 +212,7 @@ public class MoccaClientQueryTest {
         superComplexSampleType.setOptionalField("love");
         superComplexSampleType.setDuration(Duration.ofHours(3));
         superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb32"));
+        superComplexSampleType.setSampleEnum(SampleEnum.Sample2);
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
         assertNotNull(superComplexResponse);
@@ -225,6 +227,7 @@ public class MoccaClientQueryTest {
         assertTrue(superComplexResponse.getOptionalField().isPresent());
         assertEquals(superComplexResponse.getOptionalField().get(), "love");
         assertEquals(superComplexResponse.getDuration(), Duration.ofHours(3));
+        assertEquals(superComplexResponse.getSampleEnum(), SampleEnum.Sample2);
         assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb32"));
     }
 
