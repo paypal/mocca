@@ -17,8 +17,8 @@ This document explains how to release a new Mocca version.
    1. Run javadoc task to all non-test modules individually and make sure they all work
    1. Set the new version in `build.gradle`
    1. Run `./gradlew clean build` and make sure it succeeds
-   1. Make sure version is correct in end user document
-      1. If necessary, do a Search & Replace (there are many occurrences)
+   1. Set new version in end user document (`docs/END_USER_DOCUMENT.md` file)
+      1. Do a Search & Replace (there are many occurrences)
    1. Add new version in `docs/RELEASE_NOTES.md` file
    1. Commit `Setting version to x`
    1. Push your changes (`git push upstream master`)

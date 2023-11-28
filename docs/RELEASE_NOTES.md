@@ -1,6 +1,18 @@
 
 # Release notes
 
+## 0.0.8
+
+#### Release date
+Nov 28th, 2023
+
+#### New features and enhancements
+1. [Add support for enums as part of request and response parameters and types](https://github.com/paypal/mocca/issues/73)
+1. [Log improvement](https://github.com/paypal/mocca/commit/0f15adb7edb65862c8884142d6b20504d03ac843)
+
+#### Bug fixes
+1. [Jackson upgrade to version 2.14.2 to address CVEs](https://github.com/paypal/mocca/commit/dcb670a99e0fcf1aee6adee3435368793fed5c46)
+
 ## 0.0.7
 
 #### Release date
