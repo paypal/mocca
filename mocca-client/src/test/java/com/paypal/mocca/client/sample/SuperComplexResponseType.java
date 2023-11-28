@@ -1,5 +1,7 @@
 package com.paypal.mocca.client.sample;
 
+import com.paypal.mocca.client.SampleEnum;
+
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -86,6 +88,7 @@ public class SuperComplexResponseType {
     private String optionalField;
     private Duration duration;
     private UUID uuid;
+    private SampleEnum sampleEnum;
 
     public int getIntVar() {
         return intVar;
@@ -183,4 +186,12 @@ public class SuperComplexResponseType {
         return this;
     }
 
+    public SampleEnum getSampleEnum() {
+        return sampleEnum;
+    }
+
+    public SuperComplexResponseType setSampleEnum(SampleEnum sampleEnum) {
+        this.sampleEnum = sampleEnum;
+        return this;
+    }
 }

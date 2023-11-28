@@ -151,6 +151,13 @@ public class MoccaClientQueryTest {
     }
 
     @Test
+    public void queryEnumTest() {
+        SampleEnum expectedSampleEnum = SampleEnum.Sample1;
+        SampleEnum actualSampleEnum = client.addEnum(SampleEnum.Sample1);
+        assertEquals(actualSampleEnum, expectedSampleEnum);
+    }
+
+    @Test
     public void queryComplexDataTest() {
         List<String> stringList = Arrays.asList("blue", "yellow", "guacamole");
         Set<String> stringSet = new HashSet<>(Arrays.asList("purple", "orange", "hummus"));
@@ -163,7 +170,7 @@ public class MoccaClientQueryTest {
         superComplexSampleType.setDateTime(dateTime);
         superComplexSampleType.setDuration(Duration.ofHours(3));
         superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
-
+        superComplexSampleType.setSampleEnum(SampleEnum.Sample1);
         SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
         assertNotNull(superComplexResponse);
@@ -175,6 +182,7 @@ public class MoccaClientQueryTest {
         assertEquals(superComplexResponse.getDateTime().toInstant(), dateTime.toInstant());
         assertEquals(superComplexResponse.getDuration(), Duration.ofHours(3));
         assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
+        assertEquals(superComplexResponse.getSampleEnum(), SampleEnum.Sample1);
 
         SuperComplexResponseField expectedComplexField = new SuperComplexResponseField()
                 .setInnerBooleanVar(complexField.isInnerBooleanVar())
@@ -187,8 +195,7 @@ public class MoccaClientQueryTest {
     }
 
     @Test
-    public void queryOptionalTest() {
-
+    public void queryOptionalSimpleTest() {
         // Testing optional explicitly used in the return type and request variable
         SampleRequestDTO sampleRequestDTO = new SampleRequestDTO("boom", "zaz");
         Optional<SampleResponseDTO> result = client.getOneSample(Optional.of(sampleRequestDTO));
@@ -196,13 +203,17 @@ public class MoccaClientQueryTest {
         assertTrue(result.isPresent());
         assertEquals(result.get().getFoo(), "boo");
         assertEquals(result.get().getBar(), "far");
+    }
 
+    @Test
+    public void queryOptionalComplexTest() {
         // Testing optional used inside the return type and the request variable POJO
         SuperComplexSampleType superComplexSampleType = new SuperComplexSampleType(1, "one", true, null, null, null, null);
         superComplexSampleType.setOptionalField("love");
-        SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
         superComplexSampleType.setDuration(Duration.ofHours(3));
         superComplexSampleType.setUuid(UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
+        superComplexSampleType.setSampleEnum(SampleEnum.Sample2);
+        SuperComplexResponseType superComplexResponse = client.getSuperComplexStuff(superComplexSampleType);
 
         assertNotNull(superComplexResponse);
         assertEquals(superComplexResponse.getIntVar(), 1);
@@ -216,6 +227,7 @@ public class MoccaClientQueryTest {
         assertTrue(superComplexResponse.getOptionalField().isPresent());
         assertEquals(superComplexResponse.getOptionalField().get(), "love");
         assertEquals(superComplexResponse.getDuration(), Duration.ofHours(3));
+        assertEquals(superComplexResponse.getSampleEnum(), SampleEnum.Sample2);
         assertEquals(superComplexResponse.getUuid(), UUID.fromString("229c07ba-04bc-49a6-13bc-165e1a54cb33"));
     }
 

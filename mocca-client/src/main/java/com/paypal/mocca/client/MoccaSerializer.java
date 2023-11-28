@@ -218,7 +218,7 @@ class MoccaSerializer {
 
     /*
      * Checks if the type is a POJO, which is anything different
-     * than a primitive, a primitive wrapper, or String.
+     * than a primitive, a primitive wrapper, Enum or String.
      * There are other special types that are not considered
      * POJOs, such as java.time.OffsetDateTime and java.util.Optional.
      *
@@ -229,8 +229,20 @@ class MoccaSerializer {
         if (NON_POJO_TYPES.contains(type)) return false;
         if (!(type instanceof Class)) return false;
         Class clazz = (Class) type;
+        if (isEnum(clazz)) return false;
         if (Number.class.isAssignableFrom(clazz)) return false;
         return !clazz.isPrimitive();
+    }
+
+
+    /**
+     * Checks if the type is a Enum.
+     *
+     * @param type the type to be evaluated for Enum
+     * @return whether type is Enum or not
+     */
+    private static boolean isEnum(Type type) {
+        return Enum.class.isAssignableFrom((Class<?>) type);
     }
 
     /*
@@ -239,9 +251,15 @@ class MoccaSerializer {
      */
     private String writeRequestVariable(String name, Object value, Type type) {
         final String prefix = name == null ? "" : name + ": ";
-        return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class || type == UUID.class || type.getTypeName().equals("char") ?
-                prefix + "\\\"" + value.toString() + "\\\"" :
-                prefix + value.toString();
+        if (isEnum(type)) {
+            // If type is Enum only add variable name and its enum value without quotations to satisfy the GraphQl validation
+            return prefix + value.toString();
+        } else {
+            return type == String.class || type == Character.class || type == OffsetDateTime.class || type == Duration.class
+                    || type == UUID.class || type.getTypeName().equals("char") ?
+                    prefix + "\\\"" + value.toString() + "\\\"" :
+                    prefix + value.toString();
+        }
     }
 
     /*
@@ -324,7 +342,7 @@ class MoccaSerializer {
             String stringObject = (String) object;
             stringObject = stringObject.replaceAll("\"", "\\\\\\\\\\\\\"");
             return "\\\"" + stringObject + "\\\"";
-        } else if (object instanceof OffsetDateTime || object instanceof Duration || object instanceof UUID) {
+        } else if (object instanceof OffsetDateTime || object instanceof Duration || object instanceof UUID || object instanceof Enum) {
                 return "\\\"" + object + "\\\"";
         } else if (object instanceof Number || object instanceof Boolean) {
             return String.valueOf(object);
@@ -447,6 +465,11 @@ class MoccaSerializer {
             final Type cfResponseType = getInnerType(responseType, CompletableFuture.class).orElse(responseType);
             final Type listResponseType = getInnerType(cfResponseType, List.class).orElse(cfResponseType);
             final Type rawResponseType = getInnerType(listResponseType, Optional.class).orElse(listResponseType);
+
+            if (isEnum(rawResponseType)) {
+                // A selection set should not exist if the return type is a Enum.
+                return;
+            }
 
             if (!isPojo(rawResponseType)) {
                 // Nothing to be done here.
