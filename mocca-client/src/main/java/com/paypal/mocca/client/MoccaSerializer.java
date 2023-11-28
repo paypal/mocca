@@ -342,7 +342,7 @@ class MoccaSerializer {
             String stringObject = (String) object;
             stringObject = stringObject.replaceAll("\"", "\\\\\\\\\\\\\"");
             return "\\\"" + stringObject + "\\\"";
-        } else if (object instanceof OffsetDateTime || object instanceof Duration || object instanceof UUID) {
+        } else if (object instanceof OffsetDateTime || object instanceof Duration || object instanceof UUID || object instanceof Enum) {
                 return "\\\"" + object + "\\\"";
         } else if (object instanceof Number || object instanceof Boolean) {
             return String.valueOf(object);
@@ -355,9 +355,7 @@ class MoccaSerializer {
         } else if (object instanceof Optional) {
             Optional<?> optional = (Optional) object;
             return optional.map(v -> objectToString(v, name, ignoreFields)).orElse("null");
-        } else if (object instanceof Enum) {
-            return "\\\"" + object + "\\\"";
-        }else {
+        } else {
             ByteArrayOutputStream complexVariable = new ByteArrayOutputStream();
 
             writeRequestPojo(complexVariable, object.getClass(), object,
